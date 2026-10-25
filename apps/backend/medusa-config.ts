@@ -8,9 +8,9 @@ export default defineConfig({
     redisUrl: process.env.REDIS_URL,
     databaseLogging: process.env.NODE_ENV === "development",
     http: {
-      storeCors: process.env.STORE_CORS || "http://localhost:3000,http://127.0.0.1:3000",
-      adminCors: process.env.ADMIN_CORS || "http://localhost:9000,http://127.0.0.1:9000,http://localhost:5173",
-      authCors: process.env.AUTH_CORS || "http://localhost:3000,http://localhost:9000,http://localhost:5173",
+      storeCors: process.env.STORE_CORS || "http://localhost:3000,http://127.0.0.1:3000,https://*.trycloudflare.com",
+      adminCors: process.env.ADMIN_CORS || "http://localhost:9000,http://127.0.0.1:9000,http://localhost:5173,https://*.trycloudflare.com",
+      authCors: process.env.AUTH_CORS || "http://localhost:3000,http://localhost:9000,http://localhost:5173,https://*.trycloudflare.com",
       jwtSecret: process.env.JWT_SECRET || "supersecret-jwt-key-minimum-32-chars-long",
       cookieSecret: process.env.COOKIE_SECRET || "supersecret-cookie-key-minimum-32-chars-long",
     },
