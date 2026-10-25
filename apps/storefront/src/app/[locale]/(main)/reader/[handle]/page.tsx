@@ -12,6 +12,9 @@ export async function generateStaticParams() {
   for (const locale of locales) {
     for (const book of books) {
       params.push({ locale, handle: book.handle })
+      if (book.id !== book.handle) {
+        params.push({ locale, handle: book.id })
+      }
     }
   }
 

@@ -38,6 +38,7 @@ Thumbs.db
 .idea/
 .vscode/
 *.swp
+scratch/
 *.swo
 
 # Stitch Large Exports
