@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Inter, IBM_Plex_Sans_Arabic, Noto_Serif } from "next/font/google"
+import { Inter, IBM_Plex_Sans_Arabic, Noto_Serif, Noto_Sans_Arabic } from "next/font/google"
 import "@/styles/globals.css"
 
 const inter = Inter({
@@ -12,6 +12,13 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   subsets: ["arabic"],
   weight: ["300", "400", "500", "600", "700"],
   variable: "--font-arabic",
+  display: "swap",
+})
+
+const notoSansArabic = Noto_Sans_Arabic({
+  subsets: ["arabic"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-noto-sans",
   display: "swap",
 })
 
@@ -34,7 +41,7 @@ export default function RootLayout({
 }) {
   return (
     <html
-      className={`${inter.variable} ${ibmPlexArabic.variable} ${notoSerif.variable} h-full antialiased dark`}
+      className={`${inter.variable} ${ibmPlexArabic.variable} ${notoSansArabic.variable} ${notoSerif.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <head>
@@ -45,7 +52,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#10131c] text-[#e0e2ef] font-sans">
+      <body className="min-h-full flex flex-col font-sans">
         {children}
       </body>
     </html>
