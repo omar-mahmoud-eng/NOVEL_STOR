@@ -105,29 +105,34 @@ export function Footer({
 
           {/* Catalog Columns */}
           <div>
-            <h4 className="font-bold text-sm text-foreground mb-4 flex items-center gap-1.5">
-              <Crown className="w-4 h-4 text-amber-500" />
-              <span>{isRtl ? "أقسام الروايات" : "Literary Shelves"}</span>
+            <h4 className="font-bold text-sm text-[#e0e2ef] mb-4 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[#e6c184] text-[18px]">travel_explore</span>
+              <span>{isRtl ? "أروقة StoryVerse" : "StoryVerse Realms"}</span>
             </h4>
-            <ul className="space-y-2.5 text-xs text-muted-foreground font-medium">
+            <ul className="space-y-2.5 text-xs text-[#d1c5b5] font-medium">
               <li>
-                <Link href={`/${locale}/books?age=kids_3_6`} className="hover:text-amber-500 transition-colors">
-                  {isRtl ? "👶 واحة براعم الأطفال (3 - 6 سنوات)" : "Early Childhood (3-6 yrs)"}
+                <Link href={`/${locale}/realms/little`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "🧸 واحة براعم الأطفال (3 - 6 سنوات)" : "Little Realm (3-6 yrs)"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/books?age=kids_7_12`} className="hover:text-amber-500 transition-colors">
-                  {isRtl ? "🧒 كوكب الاستكشاف والناشئة (7 - 12 سنة)" : "Young Explorers (7-12 yrs)"}
+                <Link href={`/${locale}/realms/kids`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "🧭 كوكب الاستكشاف والناشئة (7 - 12 سنة)" : "Kids Explorers (7-12 yrs)"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/books?age=teens_13_17`} className="hover:text-amber-500 transition-colors">
-                  {isRtl ? "🧑 صالون الغموض لليافعين (13 - 17 سنة)" : "Teens Mystery (13-17 yrs)"}
+                <Link href={`/${locale}/realms/teens`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "⚡ صالون مدار الغموض لليافعين (13 - 17 سنة)" : "Teens Mystery (13-17 yrs)"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/books?age=adults_18_plus`} className="hover:text-amber-500 transition-colors">
-                  {isRtl ? "🧑‍💼 ديوان الأدب والتاريخ (18+ سنة)" : "Classical Literature (18+)"}
+                <Link href={`/${locale}/books?age=adults_18_plus`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "🏛️ صالون الأدب والسينما (18+ سنة)" : "Originals Literature (18+)"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/family-hub`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "👨‍👩‍👧‍👦 مركز الأسرة والرقابة الأبوية" : "Family Hub & Controls"}
                 </Link>
               </li>
             </ul>
@@ -135,24 +140,39 @@ export function Footer({
 
           {/* Reader Club */}
           <div>
-            <h4 className="font-bold text-sm text-foreground mb-4 flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>{isRtl ? "نادي القراء وخدماتنا" : "VIP & Services"}</span>
+            <h4 className="font-bold text-sm text-[#e0e2ef] mb-4 flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[#e6c184] text-[18px]">auto_stories</span>
+              <span>{isRtl ? "المكتبات والتصنيفات" : "Libraries & Genres"}</span>
             </h4>
-            <ul className="space-y-2.5 text-xs text-muted-foreground font-medium">
+            <ul className="space-y-2.5 text-xs text-[#d1c5b5] font-medium">
               <li>
-                <Link href={`/${locale}/subscriptions`} className="hover:text-amber-500 transition-colors">
+                <Link href={`/${locale}/genres`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "أنواع الحكايات وروافد السرد" : "Story Genres & Themes"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/audiobooks`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "المكتبة الصوتية والإنتاجات الدرامية" : "Audiobook Studio Library"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/salons`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "الأندية الأدبية وصالونات الحوار الراشد" : "Literary Salons & Clubs"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/interactive`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "الروايات التفاعلية متعددة المسارات" : "Interactive Branching Fiction"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/subscriptions`} className="hover:text-[#e6c184] transition-colors">
                   {isRtl ? "باقات اشتراك VIP الشهرية والسنوية" : "VIP Membership Passes"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/library`} className="hover:text-amber-500 transition-colors">
-                  {isRtl ? "مشغل الروايات الصوتية والمكتبة" : "Audio Player & Library"}
-                </Link>
-              </li>
-              <li>
-                <Link href={`/${locale}/account`} className="hover:text-amber-500 transition-colors">
-                  {isRtl ? "لوحة إدارة حساب القارئ" : "Customer Portal"}
+                <Link href={`/${locale}/library`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "مكتبتي الرقمية وقارئ المخطوطات" : "My Shelf & Cloud Reader"}
                 </Link>
               </li>
             </ul>

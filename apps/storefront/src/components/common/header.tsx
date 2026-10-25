@@ -102,38 +102,38 @@ export function Header({
                     onClick={() => setRealmDropdownOpen(false)}
                     className="flex items-center justify-between px-3 py-2 rounded-lg bg-[#272a33] text-[#e6c184] text-xs font-bold"
                   >
-                    <span>Originals / المكتبة العامة (+18)</span>
+                    <span>Originals / صالون الأدب (+18)</span>
                     <Check className="w-3.5 h-3.5 text-[#e6c184]" />
                   </Link>
 
                   <Link
-                    href={`/${locale}/books?age=teens_13_17`}
+                    href={`/${locale}/realms/teens`}
                     onClick={() => setRealmDropdownOpen(false)}
                     className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
                   >
-                    Teens / عالم الناشئة (13-17)
+                    Teens / مدار الزجاج (13-17)
                   </Link>
 
                   <Link
-                    href={`/${locale}/books?age=kids_7_12`}
+                    href={`/${locale}/realms/kids`}
                     onClick={() => setRealmDropdownOpen(false)}
                     className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
                   >
-                    Kids / عالم الأطفال (7-12)
+                    Kids / حارس المنارة (7-12)
                   </Link>
 
                   <Link
-                    href={`/${locale}/books?age=kids_3_6`}
+                    href={`/${locale}/realms/little`}
                     onClick={() => setRealmDropdownOpen(false)}
                     className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
                   >
-                    Little / عالم الصغار (3-6)
+                    Little / واحة البراعم (3-6)
                   </Link>
 
                   <div className="my-1 bg-[#32343e] h-px" />
 
                   <Link
-                    href={`/${locale}/account`}
+                    href={`/${locale}/family-hub`}
                     onClick={() => setRealmDropdownOpen(false)}
                     className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
                   >
@@ -144,15 +144,27 @@ export function Header({
             </div>
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-6 text-xs font-bold">
+            <nav className="hidden lg:flex items-center gap-5 text-xs font-bold">
               <Link href={`/${locale}`} className="text-[#e6c184] hover:text-[#ffdeaa] transition-colors">
                 اكتشف
               </Link>
               <Link href={`/${locale}/books`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
-                الأنواع والكتالوج
+                الكتالوج الشامل
+              </Link>
+              <Link href={`/${locale}/genres`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                أنواع الحكايات
+              </Link>
+              <Link href={`/${locale}/audiobooks`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                المكتبة الصوتية
+              </Link>
+              <Link href={`/${locale}/salons`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                الأندية الأدبية
+              </Link>
+              <Link href={`/${locale}/interactive`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                سرد تفاعلي
               </Link>
               <Link href={`/${locale}/library`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
-                الصوتيات والقارئ
+                مكتبتي والقارئ
               </Link>
               <Link href={`/${locale}/subscriptions`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
                 باقات VIP
@@ -236,14 +248,70 @@ export function Header({
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
               >
-                الأنواع والكتالوج
+                الكتالوج الشامل
+              </Link>
+              <Link
+                href={`/${locale}/genres`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                أنواع الحكايات
+              </Link>
+              <Link
+                href={`/${locale}/audiobooks`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                المكتبة الصوتية
+              </Link>
+              <Link
+                href={`/${locale}/salons`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                الأندية الأدبية وصالونات الحوار
+              </Link>
+              <Link
+                href={`/${locale}/interactive`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                الروايات التفاعلية (مسارات متعددة)
+              </Link>
+              <Link
+                href={`/${locale}/realms/teens`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-purple-400 hover:bg-[#1c1f29]"
+              >
+                مدار اليافعين (13-17)
+              </Link>
+              <Link
+                href={`/${locale}/realms/kids`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-emerald-400 hover:bg-[#1c1f29]"
+              >
+                كوكب الأطفال (7-12)
+              </Link>
+              <Link
+                href={`/${locale}/realms/little`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-amber-300 hover:bg-[#1c1f29]"
+              >
+                واحة البراعم (3-6)
+              </Link>
+              <Link
+                href={`/${locale}/family-hub`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                مركز الأسرة والرقابة
               </Link>
               <Link
                 href={`/${locale}/library`}
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
               >
-                الصوتيات والقارئ
+                مكتبتي الرقمية
               </Link>
               <Link
                 href={`/${locale}/subscriptions`}

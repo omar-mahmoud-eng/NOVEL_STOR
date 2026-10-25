@@ -32,6 +32,9 @@ import {
   Layers,
   ChevronRight,
   ChevronLeft,
+  MessageSquare,
+  Bookmark,
+  GitBranch,
 } from "lucide-react"
 
 type PublishingHomeViewProps = {
@@ -225,7 +228,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-start">
           {/* Card 1: Little 3-6 */}
           <Link
-            href={`/${locale}/books?age=kids_3_6`}
+            href={`/${locale}/realms/little`}
             className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-[#e6c184] transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
           >
             <div className="flex items-center justify-between mb-4">
@@ -254,7 +257,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
 
           {/* Card 2: Kids 7-12 */}
           <Link
-            href={`/${locale}/books?age=kids_7_12`}
+            href={`/${locale}/realms/kids`}
             className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-emerald-400/80 transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
           >
             <div className="flex items-center justify-between mb-4">
@@ -283,7 +286,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
 
           {/* Card 3: Teens 13-17 */}
           <Link
-            href={`/${locale}/books?age=teens_13_17`}
+            href={`/${locale}/realms/teens`}
             className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-purple-400/80 transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
           >
             <div className="flex items-center justify-between mb-4">
@@ -312,7 +315,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
 
           {/* Card 4: Adults 18+ */}
           <Link
-            href={`/${locale}/books?age=adults_18_plus`}
+            href={`/${locale}/salons`}
             className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-[#e6c184] transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
           >
             <div className="flex items-center justify-between mb-4">
@@ -324,15 +327,15 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
               </span>
             </div>
             <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors">
-              {isRtl ? "ديوان الأدب (Originals)" : "StoryVerse Originals"}
+              {isRtl ? "ديوان الأدب (Originals & Salons)" : "StoryVerse Originals"}
             </h3>
             <p className="text-xs text-[#a5a7b7] mt-2 line-clamp-2 leading-relaxed">
               {isRtl
-                ? "ملحمة أطياف بغداد، أسرار بيت الحكمة، وسينما روائية متكاملة لصفوة القراء."
+                ? "ملحمة أطياف بغداد، صالونات الحوار، وسينما روائية متكاملة لصفوة القراء."
                 : "Literary epics, nocturnal cinema, archival manuscripts, and profound prose."}
             </p>
             <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-[#e6c184]">
-              <span>{isRtl ? "دخول الديوان" : "Enter Originals"}</span>
+              <span>{isRtl ? "دخول الصالونات" : "Enter Salons"}</span>
               <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
                 {isRtl ? "arrow_back" : "arrow_forward"}
               </span>
@@ -546,6 +549,388 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   </Link>
                 </Button>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          2.5 STITCH NOCTURNE SHELVES (From p01_base_1440)
+         ========================================================================= */}
+      
+      {/* Shelf 1: Editor's High Literature Choice */}
+      <section className="container mx-auto px-4 max-w-6xl">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-8 gap-3">
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-sm bg-[#e6c184]" />
+            <div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-black text-[#e0e2ef] tracking-wide">
+                {isRtl ? "اختيارات المحررين للأدب الرفيع" : "Editor's High Literature Picks"}
+              </h2>
+              <span className="text-xs text-[#a5a7b7]">
+                {isRtl ? "نصوص روائية وسردية منتخبة بعناية من كبار الأدباء" : "Carefully selected narrative texts"}
+              </span>
+            </div>
+          </div>
+          <Link
+            href={`/${locale}/books?age=adults_18_plus`}
+            className="group inline-flex items-center gap-1 text-xs font-bold text-[#e6c184] hover:text-[#ffdeaa] transition-colors"
+          >
+            <span>{isRtl ? "عرض الكتالوج الشامل (٨)" : "View All"}</span>
+            <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+              {isRtl ? "arrow_back" : "arrow_forward"}
+            </span>
+          </Link>
+        </div>
+
+        {/* 4-Column Grid from Stitch p01 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 text-start">
+          {/* Card 1 */}
+          <article className="group flex flex-col bg-[#1c1f29] rounded-2xl overflow-hidden hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-all duration-300 transform hover:-translate-y-1.5 shadow-lg">
+            <div className="relative w-full aspect-[3/4] bg-[#272a33] overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&q=80"
+                alt="مدينة بين صفحتين"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1c1f29] via-transparent to-transparent opacity-90" />
+              <div className="absolute top-3 right-3 flex flex-col gap-1 items-start">
+                <span className="px-2 py-0.5 rounded bg-[#93000a]/80 text-[#ffb4ab] text-[10px] font-bold shadow-sm">
+                  +١٨
+                </span>
+                <span className="px-2 py-0.5 rounded bg-[#10131c]/80 text-[#e6c184] text-[10px] font-bold backdrop-blur-md">
+                  نص + صوت
+                </span>
+              </div>
+              <div className="absolute bottom-3 right-3 left-3 flex items-center justify-between text-xs text-[#cdc6b8]">
+                <span>١٤ دقيقة قراءة</span>
+                <span className="text-[#e6c184]">أدب مدن</span>
+              </div>
+            </div>
+            <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+              <div>
+                <span className="text-[11px] text-[#e6c184] font-bold block mb-1">بقلم: د. غسان الكيلاني</span>
+                <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors">
+                  مدينة بين صفحتين
+                </h3>
+                <p className="text-xs text-[#a5a7b7] line-clamp-2 mt-1 leading-relaxed">
+                  تتبع رحلة وثائق مفقودة في أزقة المدن القديمة وما تركته الحرب في طيات المخطوطات الأندلسية.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#e6c184]">
+                <Link href={`/${locale}/reader/alhambra-code-andalusian-manuscript`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <span>اقرأ القصة</span>
+                  <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+                </Link>
+                <Link href={`/${locale}/player/alhambra-code-andalusian-manuscript`} className="hover:text-[#ffdeaa]">
+                  <Headphones className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </article>
+
+          {/* Card 2 */}
+          <article className="group flex flex-col bg-[#1c1f29] rounded-2xl overflow-hidden hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-all duration-300 transform hover:-translate-y-1.5 shadow-lg">
+            <div className="relative w-full aspect-[3/4] bg-[#272a33] overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=600&q=80"
+                alt="نافذة على المرفأ"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1c1f29] via-transparent to-transparent opacity-90" />
+              <div className="absolute top-3 right-3 flex flex-col gap-1 items-start">
+                <span className="px-2 py-0.5 rounded bg-[#272a33]/90 text-[#e6c184] text-[10px] font-bold">
+                  مكتملة
+                </span>
+              </div>
+              <div className="absolute bottom-3 right-3 left-3 flex items-center justify-between text-xs text-[#cdc6b8]">
+                <span>٢٠ دقيقة قراءة</span>
+                <span className="text-[#e6c184]">أدب ساحلي</span>
+              </div>
+            </div>
+            <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+              <div>
+                <span className="text-[11px] text-[#e6c184] font-bold block mb-1">رواية قصيرة</span>
+                <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors">
+                  نافذة على المرفأ
+                </h3>
+                <p className="text-xs text-[#a5a7b7] line-clamp-2 mt-1 leading-relaxed">
+                  حوارات ليلية بين حارس منارة متقاعد وباحث يبحث عن سفينة غارقة منذ عام ١٩٤٠ محملة بالسجلات.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#e6c184]">
+                <Link href={`/${locale}/interactive`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <span>سرد تفاعلي</span>
+                  <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+                </Link>
+                <Link href={`/${locale}/salons`} className="hover:text-[#ffdeaa]">
+                  <MessageSquare className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
+          </article>
+
+          {/* Card 3 */}
+          <article className="group flex flex-col bg-[#1c1f29] rounded-2xl overflow-hidden hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-all duration-300 transform hover:-translate-y-1.5 shadow-lg">
+            <div className="relative w-full aspect-[3/4] bg-[#272a33] overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=600&q=80"
+                alt="ساعات الرمل"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1c1f29] via-transparent to-transparent opacity-90" />
+              <div className="absolute top-3 right-3 flex flex-col gap-1 items-start">
+                <span className="px-2 py-0.5 rounded bg-[#272a33]/90 text-[#e6c184] text-[10px] font-bold">
+                  مكتملة
+                </span>
+              </div>
+              <div className="absolute bottom-3 right-3 left-3 flex items-center justify-between text-xs text-[#cdc6b8]">
+                <span>١١ دقيقة قراءة</span>
+                <span className="text-[#e6c184]">فلسفة وزمن</span>
+              </div>
+            </div>
+            <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+              <div>
+                <span className="text-[11px] text-[#e6c184] font-bold block mb-1">تأملات فلسفية</span>
+                <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors">
+                  ساعات الرمل
+                </h3>
+                <p className="text-xs text-[#a5a7b7] line-clamp-2 mt-1 leading-relaxed">
+                  تأمل عميق في فكرة الفقد والذاكرة التي تذوب مع مرور العقود في صحراء العزلة الممتدة.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#e6c184]">
+                <Link href={`/${locale}/books`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <span>اقرأ القصة</span>
+                  <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+                </Link>
+                <Bookmark className="w-4 h-4 text-[#9a8f81]" />
+              </div>
+            </div>
+          </article>
+
+          {/* Card 4 */}
+          <article className="group flex flex-col bg-[#1c1f29] rounded-2xl overflow-hidden hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-all duration-300 transform hover:-translate-y-1.5 shadow-lg">
+            <div className="relative w-full aspect-[3/4] bg-[#272a33] overflow-hidden">
+              <img
+                src="https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=600&q=80"
+                alt="ورثة البحر"
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#1c1f29] via-transparent to-transparent opacity-90" />
+              <div className="absolute top-3 right-3 flex flex-col gap-1 items-start">
+                <span className="px-2 py-0.5 rounded bg-[#e6c184]/20 text-[#e6c184] text-[10px] font-bold">
+                  متسلسلة
+                </span>
+              </div>
+              <div className="absolute bottom-3 right-3 left-3 flex items-center justify-between text-xs text-[#cdc6b8]">
+                <span>١٨ دقيقة قراءة</span>
+                <span className="text-[#e6c184]">ملحمة أسرية</span>
+              </div>
+            </div>
+            <div className="p-4 flex flex-col flex-1 justify-between gap-3">
+              <div>
+                <span className="text-[11px] text-[#e6c184] font-bold block mb-1">رواية ممتدة</span>
+                <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors">
+                  ورثة البحر
+                </h3>
+                <p className="text-xs text-[#a5a7b7] line-clamp-2 mt-1 leading-relaxed">
+                  صراع عائلي محتدم حول وصية تركت في قاع المحيط قبل قرن كامل تكشف أسرار النسب المحظورة.
+                </p>
+              </div>
+              <div className="pt-2 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#e6c184]">
+                <Link href={`/${locale}/books`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <span>اقرأ القصة</span>
+                  <span className="material-symbols-outlined text-[14px]">arrow_back</span>
+                </Link>
+                <Bookmark className="w-4 h-4 text-[#9a8f81]" />
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      {/* Shelf 2: Five-Minute Dense Flash Fiction (from Stitch p01) */}
+      <section className="container mx-auto px-4 max-w-6xl">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between mb-8 gap-3">
+          <div className="flex items-center gap-3">
+            <span className="w-2.5 h-2.5 rounded-sm bg-[#cdc6b8]" />
+            <div>
+              <h2 className="font-serif text-2xl sm:text-3xl font-black text-[#e0e2ef] tracking-wide">
+                {isRtl ? "قصص مكثفة في خمس دقائق" : "Five-Minute Flash Fiction"}
+              </h2>
+              <span className="text-xs text-[#a5a7b7]">
+                {isRtl ? "نصوص رشيقة وعميقة لقراءات خاطفة في أوقات الانتظار" : "Dense and poetic flash stories"}
+              </span>
+            </div>
+          </div>
+          <Link
+            href={`/${locale}/salons`}
+            className="group inline-flex items-center gap-1 text-xs font-bold text-[#e6c184] hover:text-[#ffdeaa] transition-colors"
+          >
+            <span>{isRtl ? "عرض الكل (١٢)" : "View All"}</span>
+            <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+              {isRtl ? "arrow_back" : "arrow_forward"}
+            </span>
+          </Link>
+        </div>
+
+        {/* 4 Horizontal Compact Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-start">
+          {/* Flash 1 */}
+          <article className="p-5 rounded-2xl bg-[#1c1f29] hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-colors flex flex-col justify-between gap-4 group shadow-md">
+            <div>
+              <div className="flex items-center justify-between text-xs text-[#a5a7b7] mb-2">
+                <span className="text-[#e6c184] font-bold">واقعية سحرية</span>
+                <span className="flex items-center gap-1 font-mono text-[11px]">
+                  <span className="material-symbols-outlined text-[13px]">schedule</span> ٥ دقائق
+                </span>
+              </div>
+              <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors mb-1.5">
+                شجرة الأسماء
+              </h3>
+              <p className="text-xs text-[#d1c5b5] line-clamp-3 leading-relaxed">
+                كلما نسي أهل القرية اسم راحل، نبتت ورقة جديدة في الشجرة المجاورة للسبيل تحمل حكايته الأولى ووصيته الأخيرة.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e6c184]">
+              <span>اقرأ الآن</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                arrow_back
+              </span>
+            </div>
+          </article>
+
+          {/* Flash 2 */}
+          <article className="p-5 rounded-2xl bg-[#1c1f29] hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-colors flex flex-col justify-between gap-4 group shadow-md">
+            <div>
+              <div className="flex items-center justify-between text-xs text-[#a5a7b7] mb-2">
+                <span className="text-[#e6c184] font-bold">نصوص وجدانية</span>
+                <span className="flex items-center gap-1 font-mono text-[11px]">
+                  <span className="material-symbols-outlined text-[13px]">schedule</span> ٤ دقائق
+                </span>
+              </div>
+              <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors mb-1.5">
+                مقهى عند الفجر
+              </h3>
+              <p className="text-xs text-[#d1c5b5] line-clamp-3 leading-relaxed">
+                فنجان قهوة بارد بين يدين مرتجفتين وصوت مذياع قديم يبث ترانيم الصباح لشخص يودع محطته الأخيرة بصمت.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e6c184]">
+              <span>اقرأ الآن</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                arrow_back
+              </span>
+            </div>
+          </article>
+
+          {/* Flash 3 */}
+          <article className="p-5 rounded-2xl bg-[#1c1f29] hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-colors flex flex-col justify-between gap-4 group shadow-md">
+            <div>
+              <div className="flex items-center justify-between text-xs text-[#a5a7b7] mb-2">
+                <span className="text-[#e6c184] font-bold">ومضات قصصية</span>
+                <span className="flex items-center gap-1 font-mono text-[11px]">
+                  <span className="material-symbols-outlined text-[13px]">schedule</span> ٥ دقائق
+                </span>
+              </div>
+              <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors mb-1.5">
+                الضوء الذي تأخر
+              </h3>
+              <p className="text-xs text-[#d1c5b5] line-clamp-3 leading-relaxed">
+                ظل يبحث عن الكبريت طوال الليل في عتمة الغرفة، وحين أشرقت الشمس اكتشف أنه كان يقف في ساحة مفتوحة بلا جدران.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e6c184]">
+              <span>اقرأ الآن</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                arrow_back
+              </span>
+            </div>
+          </article>
+
+          {/* Flash 4 */}
+          <article className="p-5 rounded-2xl bg-[#1c1f29] hover:bg-[#272a33] border border-[#4e463a]/30 hover:border-[#e6c184]/50 transition-colors flex flex-col justify-between gap-4 group shadow-md">
+            <div>
+              <div className="flex items-center justify-between text-xs text-[#a5a7b7] mb-2">
+                <span className="text-[#e6c184] font-bold">أدب مراسلات</span>
+                <span className="flex items-center gap-1 font-mono text-[11px]">
+                  <span className="material-symbols-outlined text-[13px]">schedule</span> ٦ دقائق
+                </span>
+              </div>
+              <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors mb-1.5">
+                مسافة بين رسالتين
+              </h3>
+              <p className="text-xs text-[#d1c5b5] line-clamp-3 leading-relaxed">
+                ثمانية كيلومترات استغرقت ثلاثين سنة حتى قطعتها رسالة اعتذار كانت تنتظر في درج ساعي بريد متقاعد.
+              </p>
+            </div>
+            <div className="pt-3 border-t border-[#4e463a]/30 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e6c184]">
+              <span>اقرأ الآن</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                arrow_back
+              </span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      {/* Interactive Branching Story & Family Hub Callout Bar */}
+      <section className="container mx-auto px-4 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Banner 1: Interactive Branching Fiction (P10) */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#1c1f29] via-[#272a33] to-[#10131c] border border-[#e6c184]/40 flex flex-col justify-between text-start shadow-xl">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded bg-[#e6c184]/20 text-[#e6c184] text-xs font-bold flex items-center gap-1">
+                  <GitBranch className="w-3.5 h-3.5" />
+                  <span>محرك السرد التفاعلي (P10)</span>
+                </span>
+                <span className="text-[10px] text-[#ffb4ab] bg-[#93000a]/20 px-2 py-0.5 rounded font-bold">+١٨ حصري</span>
+              </div>
+              <h3 className="font-serif text-xl sm:text-2xl font-black text-[#e0e2ef]">
+                اصنع مسارك الروائي الخاص
+              </h3>
+              <p className="text-xs text-[#d1c5b5] leading-relaxed">
+                أنت من يقرر مصير الأبطال في قصص متفرعة متعددة النهايات، مع إمكانية التراجع عن العقد وحفظ التقدم سحابياً.
+              </p>
+            </div>
+            <div className="pt-6 mt-4 border-t border-[#4e463a]/30 flex items-center justify-between">
+              <span className="text-xs text-[#a5a7b7]">٤ نهايات مختلفة بانتظارك</span>
+              <Button asChild className="rounded-xl font-bold text-xs bg-[#e6c184] text-[#422c00] hover:bg-[#ffdeaa]">
+                <Link href={`/${locale}/interactive`}>
+                  <span>ابدأ التجربة التفاعلية</span>
+                  <span className="material-symbols-outlined text-[16px] ms-1">arrow_back</span>
+                </Link>
+              </Button>
+            </div>
+          </div>
+
+          {/* Banner 2: Family Hub & Parental Shield (F01) */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-[#181b25] via-[#202430] to-[#181b25] border border-emerald-500/30 flex flex-col justify-between text-start shadow-xl">
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>مركز الأسرة والرقابة الأبوية (F01)</span>
+                </span>
+                <span className="text-[10px] text-emerald-300 font-mono">PIN مشفر</span>
+              </div>
+              <h3 className="font-serif text-xl sm:text-2xl font-black text-[#e0e2ef]">
+                بيئة قراءة آمنة وخالية من المشتتات
+              </h3>
+              <p className="text-xs text-[#d1c5b5] leading-relaxed">
+                أنشئ ملفات مخصصة لأطفالك مع حظر كامل لمحتوى البالغين (+18)، وتحديد أوقات القراءة الهادئة ومنع التتبع السلوكي.
+              </p>
+            </div>
+            <div className="pt-6 mt-4 border-t border-[#4e463a]/30 flex items-center justify-between">
+              <span className="text-xs text-[#a5a7b7]">عزل تام بين الحسابات</span>
+              <Button asChild variant="outline" className="rounded-xl font-bold text-xs border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/10">
+                <Link href={`/${locale}/family-hub`}>
+                  <span>إدارة حساب العائلة</span>
+                  <span className="material-symbols-outlined text-[16px] ms-1">arrow_back</span>
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
