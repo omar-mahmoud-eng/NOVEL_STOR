@@ -17,6 +17,14 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "**.googleusercontent.com",
+      },
+      {
+        protocol: "https",
         hostname: "**.digitaloceanspaces.com",
       },
       {
@@ -64,7 +72,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: "Cross-Origin-Resource-Policy",
-            value: "same-origin",
+            value: "cross-origin",
           },
           {
             key: "Content-Security-Policy",
@@ -72,10 +80,10 @@ const nextConfig: NextConfig = {
               "default-src 'self'",
               "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://fonts.googleapis.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "img-src 'self' data: blob: https://images.unsplash.com https://*.digitaloceanspaces.com https://*.amazonaws.com http://localhost:9000 http://127.0.0.1:9000",
+              "img-src 'self' data: blob: https://images.unsplash.com https://lh3.googleusercontent.com https://*.googleusercontent.com https://*.digitaloceanspaces.com https://*.amazonaws.com http://localhost:9000 http://127.0.0.1:9000",
               "font-src 'self' data: https://fonts.gstatic.com",
               "connect-src 'self' http://localhost:9000 http://127.0.0.1:9000 ws://localhost:3000 ws://127.0.0.1:3000",
-              "media-src 'self' blob: data: http://localhost:9000 http://127.0.0.1:9000",
+              "media-src 'self' blob: data: https://www.soundhelix.com http://localhost:9000 http://127.0.0.1:9000",
               "frame-ancestors 'none'",
               "form-action 'self'",
               "base-uri 'self'",
