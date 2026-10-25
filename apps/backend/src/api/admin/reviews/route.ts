@@ -1,5 +1,11 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
+
+const UpdateReviewSchema = z.object({
+  id: z.string().min(1, "Review id is required").max(100),
+  status: z.enum(["approved", "rejected", "pending"]),
+})
 
 export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
@@ -22,28 +28,32 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       summary: statsRes.rows[0],
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Reviews GET Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to fetch reviews." })
   }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
-  const { id, status } = req.body as any
 
-  if (!id || !status) {
-    return res.status(400).json({ message: "id and status are required" })
+  let validated
+  try {
+    validated = UpdateReviewSchema.parse(req.body)
+  } catch (err: any) {
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
   }
 
   try {
     const updateRes = await pool.query(
       `UPDATE product_reviews SET status = $1 WHERE id = $2 RETURNING *`,
-      [status, id]
+      [validated.status, validated.id]
     )
     if (updateRes.rowCount === 0) {
-      return res.status(404).json({ message: "Review not found" })
+      return res.status(404).json({ code: "NOT_FOUND", message: "Review not found" })
     }
     return res.status(200).json({ review: updateRes.rows[0] })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Reviews POST Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to update review status." })
   }
 }

@@ -4,6 +4,18 @@ import { locales, defaultLocale } from "@/lib/i18n"
 
 const PUBLIC_FILE = /\.(.*)$/
 
+function applySecurityHeaders(res: NextResponse): NextResponse {
+  res.headers.set("X-Frame-Options", "DENY")
+  res.headers.set("X-Content-Type-Options", "nosniff")
+  res.headers.set("X-XSS-Protection", "0")
+  res.headers.set("Referrer-Policy", "strict-origin-when-cross-origin")
+  res.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(self)")
+  res.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+  res.headers.set("Cross-Origin-Opener-Policy", "same-origin")
+  res.headers.set("Cross-Origin-Resource-Policy", "same-origin")
+  return res
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
@@ -13,7 +25,7 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/api") ||
     PUBLIC_FILE.test(pathname)
   ) {
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   // Check if pathname already starts with a supported locale
@@ -22,7 +34,7 @@ export function middleware(request: NextRequest) {
   )
 
   if (pathnameHasLocale) {
-    return NextResponse.next()
+    return applySecurityHeaders(NextResponse.next())
   }
 
   // Detect locale from cookie or Accept-Language header
@@ -38,11 +50,11 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // Redirect to localized path
+  // Redirect to localized path with security headers attached
   const redirectUrl = new URL(`/${targetLocale}${pathname.startsWith("/") ? "" : "/"}${pathname}`, request.url)
   redirectUrl.search = request.nextUrl.search
 
-  return NextResponse.redirect(redirectUrl)
+  return applySecurityHeaders(NextResponse.redirect(redirectUrl))
 }
 
 export const config = {

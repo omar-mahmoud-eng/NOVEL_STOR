@@ -1,5 +1,18 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
+
+const CreateArticleSchema = z.object({
+  title: z.string().min(2, "Title is required").max(200),
+  slug: z.string().min(2, "Slug is required").max(200).regex(/^[a-z0-9-]+$/, "Slug must contain only lowercase alphanumeric characters and hyphens"),
+  excerpt: z.string().max(1000).optional().default(""),
+  content: z.string().min(1, "Content is required").max(100000),
+  author_name: z.string().max(100).optional().default("هيئة التحرير"),
+  category: z.string().max(100).optional().default("مقالات عامة"),
+  cover_image: z.string().url().optional().default("https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=1200&q=80"),
+  meta_title: z.string().max(200).optional(),
+  meta_description: z.string().max(500).optional(),
+})
 
 export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
@@ -21,16 +34,19 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       summary: statsRes.rows[0],
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[CMS GET Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to fetch articles." })
   }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
-  const { title, slug, excerpt, content, author_name, category, cover_image, meta_title, meta_description } = req.body as any
 
-  if (!title || !slug) {
-    return res.status(400).json({ message: "title and slug are required" })
+  let validated
+  try {
+    validated = CreateArticleSchema.parse(req.body)
+  } catch (err: any) {
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
   }
 
   const id = `art_${Date.now()}`
@@ -41,19 +57,20 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
        RETURNING *`,
       [
         id,
-        title,
-        slug,
-        excerpt || "",
-        content || "",
-        author_name || "هيئة التحرير",
-        category || "مقالات عامة",
-        cover_image || "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=1200&q=80",
-        meta_title || title,
-        meta_description || excerpt || title,
+        validated.title,
+        validated.slug,
+        validated.excerpt,
+        validated.content,
+        validated.author_name,
+        validated.category,
+        validated.cover_image,
+        validated.meta_title || validated.title,
+        validated.meta_description || validated.excerpt || validated.title,
       ]
     )
     return res.status(201).json({ article: insertRes.rows[0] })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[CMS POST Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to create article." })
   }
 }

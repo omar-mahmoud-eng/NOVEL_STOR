@@ -57,13 +57,14 @@ class SlidingWindowRateLimiter {
 
 const authRateLimiter = new SlidingWindowRateLimiter(60000, 15) // 15 req/min for auth
 const checkoutRateLimiter = new SlidingWindowRateLimiter(60000, 20) // 20 req/min for checkout
+const storeGeneralRateLimiter = new SlidingWindowRateLimiter(60000, 150) // 150 req/min for public store API to prevent DoS
 
 /**
  * Production Security Headers Middleware
  * Protects against Clickjacking, MIME-sniffing, XSS, and Cross-Site leaks.
  */
 export const securityHeadersMiddleware = (
-  req: MedusaRequest,
+  _req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
 ) => {
@@ -73,16 +74,9 @@ export const securityHeadersMiddleware = (
   res.setHeader("X-XSS-Protection", "0")
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin")
   res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(self)")
-  
-  if (process.env.NODE_ENV === "production") {
-    res.setHeader(
-      "Strict-Transport-Security",
-      "max-age=31536000; includeSubDomains; preload"
-    )
-  }
-
-  // Cross-Origin Resource Policy
+  res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
   res.setHeader("Cross-Origin-Resource-Policy", "cross-origin")
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin")
 
   next()
 }
@@ -140,6 +134,32 @@ export const checkoutRateLimitMiddleware = (
 }
 
 /**
+ * Rate Limiting Middleware for General Store API
+ */
+export const storeGeneralRateLimitMiddleware = (
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) => {
+  const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || "127.0.0.1"
+  const result = storeGeneralRateLimiter.check(clientIp)
+
+  res.setHeader("X-RateLimit-Limit", "150")
+  res.setHeader("X-RateLimit-Remaining", result.remaining.toString())
+
+  if (!result.allowed) {
+    res.setHeader("Retry-After", result.retryAfterSec.toString())
+    return res.status(429).json({
+      code: "STORE_RATE_LIMIT_EXCEEDED",
+      message: "Too many store requests from this IP. Please slow down.",
+      retry_after_seconds: result.retryAfterSec,
+    })
+  }
+
+  next()
+}
+
+/**
  * Generic Zod Schema Validation Middleware Generator
  */
 export function validateRequestBody(schema: z.ZodSchema) {
@@ -170,7 +190,7 @@ export default defineMiddlewares({
   routes: [
     {
       matcher: "/store/*",
-      middlewares: [securityHeadersMiddleware],
+      middlewares: [securityHeadersMiddleware, storeGeneralRateLimitMiddleware],
     },
     {
       matcher: "/admin/*",
@@ -178,7 +198,7 @@ export default defineMiddlewares({
     },
     {
       matcher: "/auth/*",
-      middlewares: [authRateLimitMiddleware],
+      middlewares: [securityHeadersMiddleware, authRateLimitMiddleware],
     },
     {
       matcher: "/store/carts/*/complete",

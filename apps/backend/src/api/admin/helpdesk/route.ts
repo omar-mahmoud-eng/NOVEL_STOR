@@ -1,5 +1,13 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
+
+const CreateTicketMessageSchema = z.object({
+  ticket_id: z.string().min(1, "Ticket ID is required").max(100),
+  sender_name: z.string().max(100).optional().default("فريق الدعم الموحد"),
+  message: z.string().min(1, "Message is required").max(5000),
+  new_status: z.enum(["open", "in_progress", "resolved", "closed"]).optional(),
+})
 
 export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
@@ -31,16 +39,19 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       summary: statsRes.rows[0],
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Helpdesk GET Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to fetch support tickets." })
   }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
-  const { ticket_id, sender_name, message, new_status } = req.body as any
 
-  if (!ticket_id || !message) {
-    return res.status(400).json({ message: "ticket_id and message are required" })
+  let validated
+  try {
+    validated = CreateTicketMessageSchema.parse(req.body)
+  } catch (err: any) {
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
   }
 
   const msgId = `msg_${Date.now()}`
@@ -48,18 +59,19 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     await pool.query(
       `INSERT INTO ticket_messages (id, ticket_id, sender_type, sender_name, message)
        VALUES ($1, $2, 'agent', $3, $4)`,
-      [msgId, ticket_id, sender_name || "فريق الدعم الموحد", message]
+      [msgId, validated.ticket_id, validated.sender_name, validated.message]
     )
 
-    if (new_status) {
+    if (validated.new_status) {
       await pool.query(
         `UPDATE support_tickets SET status = $1, updated_at = NOW() WHERE id = $2`,
-        [new_status, ticket_id]
+        [validated.new_status, validated.ticket_id]
       )
     }
 
     return res.status(201).json({ success: true, message_id: msgId })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Helpdesk POST Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to post message." })
   }
 }

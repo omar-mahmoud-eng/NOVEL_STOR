@@ -1,5 +1,13 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
+
+const CreateCampaignSchema = z.object({
+  name: z.string().min(2, "Campaign name is required").max(150),
+  type: z.enum(["email", "sms", "whatsapp", "push", "discount"]),
+  audience_group: z.string().min(1).max(100),
+  scheduled_at: z.string().datetime().optional(),
+})
 
 export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
@@ -27,16 +35,19 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       summary: statsRes.rows[0],
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Marketing GET Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to fetch campaigns." })
   }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
-  const { name, type, audience_group, scheduled_at } = req.body as any
 
-  if (!name || !type || !audience_group) {
-    return res.status(400).json({ message: "name, type and audience_group are required" })
+  let validated
+  try {
+    validated = CreateCampaignSchema.parse(req.body)
+  } catch (err: any) {
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
   }
 
   const id = `camp_${Date.now()}`
@@ -45,10 +56,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       `INSERT INTO marketing_campaigns (id, name, type, status, audience_group, scheduled_at)
        VALUES ($1, $2, $3, 'scheduled', $4, $5)
        RETURNING *`,
-      [id, name, type, audience_group, scheduled_at || new Date()]
+      [id, validated.name, validated.type, validated.audience_group, validated.scheduled_at || new Date()]
     )
     return res.status(201).json({ campaign: insertRes.rows[0] })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Marketing POST Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to create campaign." })
   }
 }

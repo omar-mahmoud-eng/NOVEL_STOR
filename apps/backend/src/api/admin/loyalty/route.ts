@@ -1,5 +1,11 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
+
+const AdjustLoyaltyPointsSchema = z.object({
+  customer_id: z.string().min(1, "Customer ID is required").max(100),
+  points_delta: z.number().int().min(-100000).max(100000),
+})
 
 export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
@@ -25,16 +31,19 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       summary: statsRes.rows[0],
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Loyalty GET Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to fetch loyalty accounts." })
   }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
-  const { customer_id, points_delta } = req.body as any
 
-  if (!customer_id || typeof points_delta !== "number") {
-    return res.status(400).json({ message: "customer_id and points_delta are required" })
+  let validated
+  try {
+    validated = AdjustLoyaltyPointsSchema.parse(req.body)
+  } catch (err: any) {
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
   }
 
   try {
@@ -44,10 +53,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
            lifetime_points = CASE WHEN $1 > 0 THEN lifetime_points + $1 ELSE lifetime_points END
        WHERE customer_id = $2
        RETURNING *`,
-      [points_delta, customer_id]
+      [validated.points_delta, validated.customer_id]
     )
+    if (updateRes.rowCount === 0) {
+      return res.status(404).json({ code: "NOT_FOUND", message: "Loyalty account not found for customer." })
+    }
     return res.status(200).json({ account: updateRes.rows[0] })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Loyalty POST Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to adjust points." })
   }
 }

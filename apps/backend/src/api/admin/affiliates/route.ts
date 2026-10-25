@@ -1,5 +1,14 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
+
+const CreateAffiliateSchema = z.object({
+  name: z.string().min(2, "Name is required").max(100),
+  email: z.string().email("Invalid email format").max(150),
+  channel_name: z.string().max(100).optional().default("Direct Link"),
+  coupon_code: z.string().min(2, "Coupon code is required").max(30).regex(/^[A-Z0-9_-]+$/i, "Coupon code must be alphanumeric"),
+  commission_rate: z.number().min(0).max(100).default(15.0),
+})
 
 export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
@@ -28,16 +37,19 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       summary: statsRes.rows[0],
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Affiliates GET Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to fetch affiliates." })
   }
 }
 
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const pool = getDbPool()
-  const { name, email, channel_name, coupon_code, commission_rate } = req.body as any
 
-  if (!name || !email || !coupon_code) {
-    return res.status(400).json({ message: "name, email, and coupon_code are required" })
+  let validated
+  try {
+    validated = CreateAffiliateSchema.parse(req.body)
+  } catch (err: any) {
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
   }
 
   const id = `aff_${Date.now()}`
@@ -46,10 +58,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       `INSERT INTO affiliates (id, name, email, channel_name, coupon_code, commission_rate, status)
        VALUES ($1, $2, $3, $4, $5, $6, 'active')
        RETURNING *`,
-      [id, name, email, channel_name || "Direct Link", coupon_code, commission_rate || 15.0]
+      [id, validated.name, validated.email, validated.channel_name, validated.coupon_code, validated.commission_rate]
     )
     return res.status(201).json({ affiliate: insertRes.rows[0] })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    console.error("[Affiliates POST Error]", error)
+    return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to create affiliate." })
   }
 }
