@@ -1,0 +1,38 @@
+{
+  "name": "enterprise-medusa-nextjs-ecommerce",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Production-grade, zero-vulnerability Headless E-commerce platform with Medusa v2, Next.js 15, PostgreSQL, Redis, and RTL/LTR support",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
+  },
+  "keywords": [
+    "medusa-v2",
+    "nextjs-15",
+    "ecommerce",
+    "arabic-rtl",
+    "headless",
+    "postgresql",
+    "redis"
+  ],
+  "author": "Principal Full-Stack Architect",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1",
+    "ts-node": "^10.9.2"
+  }
+}

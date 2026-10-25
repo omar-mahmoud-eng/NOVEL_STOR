@@ -1,0 +1,40 @@
+{
+  "name": "@enterprise/backend",
+  "version": "1.0.0",
+  "description": "Enterprise Medusa v2 Headless E-commerce Backend & Admin Extensions",
+  "private": true,
+  "scripts": {
+    "dev": "medusa develop",
+    "build": "medusa build",
+    "start": "medusa start",
+    "db:migrate": "medusa db:migrate",
+    "db:seed": "medusa exec ./src/scripts/seed.ts",
+    "user:create": "medusa user"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1156.0",
+    "@aws-sdk/s3-request-presigner": "^3.1156.0",
+    "@medusajs/admin-sdk": "^2.5.1",
+    "@medusajs/framework": "^2.5.1",
+    "@medusajs/medusa": "^2.5.1",
+    "@medusajs/types": "^2.5.1",
+    "@medusajs/ui": "^4.0.7",
+    "dotenv": "^16.4.7",
+    "lucide-react": "^0.468.0",
+    "pg": "^8.13.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "@types/pg": "^8.11.10",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.2"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}
