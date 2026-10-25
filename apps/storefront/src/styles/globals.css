@@ -4,48 +4,50 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Google Stitch Literary Parchment Light Theme */
+    --background: 40 20% 98%; /* Warm Ivory Parchment */
+    --foreground: 224 30% 12%; /* Deep Obsidian Charcoal */
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 224 30% 12%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 221.2 83.2% 53.3%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 224 30% 12%;
+    --primary: 38 85% 48%; /* Sovereign Imperial Gold #D4AF37 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 40 15% 93%;
+    --secondary-foreground: 224 30% 15%;
+    --muted: 40 15% 93%;
+    --muted-foreground: 220 12% 46%;
+    --accent: 38 80% 94%;
+    --accent-foreground: 38 85% 30%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 221.2 83.2% 53.3%;
-    --radius: 0.75rem;
+    --border: 40 15% 88%;
+    --input: 40 15% 88%;
+    --ring: 38 85% 48%;
+    --radius: 0.85rem;
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    /* Google Stitch Deep Obsidian & Onyx Dark Theme */
+    --background: 224 28% 7%; /* Deep Midnight Onyx #0B0E14 */
+    --foreground: 40 15% 96%; /* Soft Warm Ivory White */
+    --card: 224 26% 10%; /* Elevated Dark Slate Surface */
+    --card-foreground: 40 15% 96%;
+    --popover: 224 26% 10%;
+    --popover-foreground: 40 15% 96%;
+    --primary: 42 94% 54%; /* Radiant Amber Gold */
+    --primary-foreground: 224 28% 7%;
+    --secondary: 224 24% 14%;
+    --secondary-foreground: 40 15% 96%;
+    --muted: 224 24% 14%;
+    --muted-foreground: 220 15% 65%;
+    --accent: 224 24% 15%;
+    --accent-foreground: 42 94% 54%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
+    --border: 224 22% 16%;
+    --input: 224 22% 16%;
+    --ring: 42 94% 54%;
   }
 
   * {
@@ -53,7 +55,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+    @apply bg-background text-foreground antialiased selection:bg-primary/25 selection:text-primary;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
@@ -67,3 +69,65 @@
     font-family: var(--font-inter), system-ui, -apple-system, sans-serif;
   }
 }
+
+/* =========================================================================
+   Google Stitch Design System Primitives & Micro-Visuals
+   ========================================================================= */
+
+/* Frosted glass container with subtle golden border illumination */
+.stitch-glass {
+  background: rgba(var(--background), 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+}
+
+/* Sovereign gold gradient background for high-priority CTA */
+.stitch-gold-gradient {
+  background: linear-gradient(135deg, #d4af37 0%, #f3c64f 50%, #b8860b 100%);
+  color: #1a160c;
+  box-shadow: 0 4px 20px -2px rgba(212, 175, 55, 0.35);
+}
+
+/* Luxurious card with hover elevation and golden rim lighting */
+.stitch-card {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(212, 175, 55, 0.12);
+}
+
+.stitch-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(212, 175, 55, 0.38);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.08), 0 0 24px -4px rgba(212, 175, 55, 0.18);
+}
+
+/* 3D Realistic Book Cover Shadow & Depth */
+.stitch-book-3d {
+  position: relative;
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+  box-shadow: 
+    -6px 8px 18px -4px rgba(0, 0, 0, 0.25),
+    -1px 2px 4px rgba(0, 0, 0, 0.15),
+    inset -2px 0 4px rgba(0, 0, 0, 0.2);
+}
+
+.stitch-book-3d:hover {
+  transform: translateY(-6px) rotateY(-3deg) scale(1.02);
+  box-shadow: 
+    -12px 18px 30px -6px rgba(0, 0, 0, 0.3),
+    -2px 4px 8px rgba(0, 0, 0, 0.2),
+    inset -3px 0 6px rgba(0, 0, 0, 0.25);
+}
+
+/* Audio waveform animated bars */
+@keyframes stitch-wave {
+  0%, 100% { height: 6px; }
+  50% { height: 26px; }
+}
+
+.stitch-bar-1 { animation: stitch-wave 0.8s ease-in-out infinite; }
+.stitch-bar-2 { animation: stitch-wave 1.1s ease-in-out infinite 0.2s; }
+.stitch-bar-3 { animation: stitch-wave 0.7s ease-in-out infinite 0.4s; }
+.stitch-bar-4 { animation: stitch-wave 1.3s ease-in-out infinite 0.1s; }
+.stitch-bar-5 { animation: stitch-wave 0.9s ease-in-out infinite 0.3s; }
+

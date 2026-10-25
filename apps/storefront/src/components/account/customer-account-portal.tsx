@@ -145,11 +145,18 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
   if (!customer) {
     return (
       <div className="container mx-auto px-4 py-12 max-w-2xl">
-        <div className="bg-card rounded-3xl border border-border p-6 sm:p-8 shadow-xl">
+        <div className="stitch-card bg-card rounded-3xl border border-amber-500/30 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+          {/* Subtle golden ambient glow */}
+          <div className="absolute top-0 end-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
           {/* Header */}
-          <div className="text-center mb-6">
-            <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3 shadow-inner">
+          <div className="text-center mb-6 relative z-10">
+            <div className="w-14 h-14 rounded-2xl stitch-gold-gradient text-white flex items-center justify-center mx-auto mb-3 shadow-md">
               <User className="w-7 h-7" />
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 mb-2">
+              <Sparkles className="w-3 h-3 text-amber-500" />
+              <span>Google Stitch Vibe Onboarding</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-foreground">
               {locale === "ar" ? "بوابة القراء والتوجيه الذكي" : "Smart Reader Portal & Onboarding"}
@@ -278,7 +285,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-xl h-12 text-sm font-bold gap-2 mt-2"
+                className="stitch-gold-gradient text-white border-0 w-full rounded-2xl h-12 text-sm font-black gap-2 mt-2 shadow-lg hover:shadow-xl transition-all"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -369,7 +376,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full rounded-xl h-12 text-sm font-bold gap-2 mt-2"
+                className="stitch-gold-gradient text-white border-0 w-full rounded-2xl h-12 text-sm font-black gap-2 mt-2 shadow-lg hover:shadow-xl transition-all"
               >
                 {isLoading ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -439,7 +446,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
     <div className="container mx-auto px-4 py-12 max-w-5xl space-y-8">
       {/* Age-Group Dedicated Realm Banner */}
       <div
-        className={`rounded-3xl p-6 sm:p-8 border shadow-sm relative overflow-hidden bg-gradient-to-r ${activeConfig.colorTheme.gradient} ${activeConfig.colorTheme.accentBorder}`}
+        className={`stitch-card rounded-3xl p-6 sm:p-8 border shadow-md relative overflow-hidden bg-gradient-to-r ${activeConfig.colorTheme.gradient} ${activeConfig.colorTheme.accentBorder}`}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2 max-w-2xl">
@@ -531,14 +538,14 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
       {/* Reader 3-Pillar Cards: VIP Pass, Digital Library, Reading Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Card 1: VIP Membership Pass */}
-        <div className="rounded-3xl p-6 bg-gradient-to-br from-purple-500/10 via-primary/5 to-background border border-purple-500/20 shadow-xs flex flex-col justify-between">
+        <div className="stitch-card rounded-3xl p-6 bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-background border border-amber-500/30 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
-              <span className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" />
+              <span className="text-xs font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-amber-500" />
                 <span>{locale === "ar" ? "عضوية القارئ والمستمع" : "VIP Pass"}</span>
               </span>
-              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-700 dark:text-purple-300">
+              <span className="text-[11px] font-black px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-200">
                 {customer.isVip ? (locale === "ar" ? "نشطة" : "Active") : (locale === "ar" ? "غير مفعلة" : "Inactive")}
               </span>
             </div>
@@ -552,8 +559,8 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
             </p>
           </div>
 
-          <div className="pt-4 mt-3 border-t border-purple-500/10">
-            <Button asChild size="sm" className="w-full rounded-xl text-xs font-bold">
+          <div className="pt-4 mt-3 border-t border-amber-500/20">
+            <Button asChild size="sm" className="stitch-gold-gradient text-white border-0 w-full rounded-xl text-xs font-bold shadow-xs">
               <Link href={`/${locale}/subscriptions`}>
                 {customer.isVip
                   ? (locale === "ar" ? "إدارة باقة VIP" : "Manage VIP Pass")
@@ -564,7 +571,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
         </div>
 
         {/* Card 2: Digital Library Shortcut */}
-        <div className="rounded-3xl p-6 bg-gradient-to-br from-emerald-500/10 via-primary/5 to-background border border-emerald-500/20 shadow-xs flex flex-col justify-between">
+        <div className="stitch-card rounded-3xl p-6 bg-gradient-to-br from-emerald-500/10 via-amber-500/5 to-background border border-emerald-500/20 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
@@ -595,7 +602,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
         </div>
 
         {/* Card 3: Switch Demo User Testing Bar */}
-        <div className="rounded-3xl p-6 bg-card border border-border shadow-xs flex flex-col justify-between">
+        <div className="stitch-card rounded-3xl p-6 bg-card border border-border/80 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">

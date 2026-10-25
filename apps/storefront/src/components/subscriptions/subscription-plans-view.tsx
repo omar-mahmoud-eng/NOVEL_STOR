@@ -155,14 +155,14 @@ export function SubscriptionPlansView({ locale }: SubscriptionPlansViewProps) {
           return (
             <div
               key={tier.id}
-              className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative ${
+              className={`rounded-3xl p-8 flex flex-col justify-between transition-all relative stitch-card ${
                 tier.popular
-                  ? "bg-card border-2 border-primary shadow-2xl scale-[1.02] ring-4 ring-primary/10"
-                  : "bg-card border border-border shadow-md hover:border-primary/50"
+                  ? "bg-card border-2 border-amber-500 shadow-2xl scale-[1.03] ring-4 ring-amber-500/15"
+                  : "bg-card border border-border shadow-md hover:border-amber-500/40"
               }`}
             >
               {tier.popular && (
-                <div className="absolute -top-4 start-1/2 -translate-x-1/2 bg-primary text-primary-foreground text-xs font-black px-4 py-1 rounded-full shadow-md">
+                <div className="absolute -top-4 start-1/2 -translate-x-1/2 stitch-gold-gradient text-slate-950 text-xs font-black px-5 py-1 rounded-full shadow-lg">
                   {locale === "ar" ? tier.tagAr : tier.tagEn}
                 </div>
               )}
@@ -206,9 +206,9 @@ export function SubscriptionPlansView({ locale }: SubscriptionPlansViewProps) {
                 <Button
                   onClick={() => handleSubscribe(tier.id)}
                   disabled={isCurrentLoading}
-                  className={`w-full rounded-2xl h-13 font-bold text-sm shadow-md ${
+                  className={`w-full rounded-2xl h-13 font-black text-sm shadow-md transition-all ${
                     tier.popular
-                      ? "bg-primary text-primary-foreground hover:bg-primary/90"
+                      ? "stitch-gold-gradient text-slate-950 hover:opacity-95 shadow-xl"
                       : "bg-foreground text-background hover:bg-foreground/90"
                   }`}
                 >

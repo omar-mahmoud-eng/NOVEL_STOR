@@ -12,6 +12,7 @@ import {
   RotateCcw,
   FastForward,
   Headphones,
+  Sparkles,
 } from "lucide-react"
 
 function formatTime(seconds: number): string {
@@ -59,30 +60,32 @@ export function FloatingAudioPlayer() {
 
   return (
     <div className="fixed bottom-0 inset-x-0 z-50 p-2 sm:p-4 pointer-events-none animate-in slide-in-from-bottom duration-300">
-      <div className="max-w-4xl mx-auto bg-card/95 backdrop-blur-md border border-border rounded-2xl shadow-2xl p-3 sm:p-4 pointer-events-auto flex flex-col gap-2">
+      <div className="stitch-glass max-w-4xl mx-auto rounded-3xl shadow-2xl p-3 sm:p-4 pointer-events-auto flex flex-col gap-2.5 border border-amber-500/30">
         {/* Progress Bar Header */}
-        <div className="w-full flex items-center gap-2">
-          <span className="text-[11px] font-mono text-muted-foreground w-10 text-end">
+        <div className="w-full flex items-center gap-2.5">
+          <span className="text-[11px] font-mono font-bold text-amber-600 dark:text-amber-400 w-11 text-end">
             {formatTime(currentTime)}
           </span>
-          <input
-            type="range"
-            min={0}
-            max={duration || 100}
-            value={currentTime}
-            onChange={handleSliderChange}
-            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-          />
-          <span className="text-[11px] font-mono text-muted-foreground w-10">
+          <div className="relative flex-1 flex items-center">
+            <input
+              type="range"
+              min={0}
+              max={duration || 100}
+              value={currentTime}
+              onChange={handleSliderChange}
+              className="w-full h-1.5 bg-muted/60 rounded-lg appearance-none cursor-pointer accent-amber-500 hover:h-2 transition-all"
+            />
+          </div>
+          <span className="text-[11px] font-mono text-muted-foreground w-11">
             {formatTime(duration)}
           </span>
         </div>
 
         {/* Player Controls Bar */}
         <div className="flex items-center justify-between gap-3">
-          {/* Track Info */}
+          {/* Track Info with 3D Thumbnail & Animated Waveform */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
-            <div className="relative w-12 h-12 rounded-xl overflow-hidden bg-muted border border-border shrink-0">
+            <div className="stitch-book-3d relative w-12 h-14 rounded-xl overflow-hidden bg-muted/40 border border-amber-500/30 shrink-0 shadow-md">
               {currentTrack.coverUrl ? (
                 <Image
                   src={currentTrack.coverUrl}
@@ -91,16 +94,25 @@ export function FloatingAudioPlayer() {
                   className="object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-primary">
-                  <Headphones className="w-6 h-6" />
+                <div className="w-full h-full flex items-center justify-center text-amber-500">
+                  <Headphones className="w-5 h-5" />
                 </div>
               )}
             </div>
 
             <div className="min-w-0">
-              <h4 className="text-xs sm:text-sm font-bold text-foreground truncate">
-                {currentTrack.title}
-              </h4>
+              <div className="flex items-center gap-1.5">
+                <h4 className="text-xs sm:text-sm font-black text-foreground truncate">
+                  {currentTrack.title}
+                </h4>
+                {isPlaying && (
+                  <div className="flex items-center gap-0.5 shrink-0">
+                    <span className="w-0.5 h-3 bg-amber-500 rounded-full stitch-bar-1" />
+                    <span className="w-0.5 h-4 bg-amber-500 rounded-full stitch-bar-2" />
+                    <span className="w-0.5 h-2.5 bg-amber-500 rounded-full stitch-bar-3" />
+                  </div>
+                )}
+              </div>
               <p className="text-[11px] text-muted-foreground truncate">
                 {currentTrack.narrator
                   ? `بصوت: ${currentTrack.narrator}`
@@ -114,7 +126,7 @@ export function FloatingAudioPlayer() {
             {/* Speed Toggle */}
             <button
               onClick={cycleSpeed}
-              className="px-2 py-1 rounded-md bg-muted text-[11px] font-bold text-foreground hover:bg-muted/80 transition-colors"
+              className="px-2.5 py-1 rounded-xl bg-card border border-border/80 text-[11px] font-bold text-foreground hover:border-amber-500/40 hover:text-amber-500 transition-colors shadow-2xs"
               title="سرعة التشغيل / Playback Speed"
             >
               {playbackRate}x
@@ -123,10 +135,10 @@ export function FloatingAudioPlayer() {
             {/* Sleep Timer */}
             <button
               onClick={cycleTimer}
-              className={`flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium transition-colors ${
+              className={`flex items-center gap-1 px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-colors shadow-2xs ${
                 sleepTimer
-                  ? "bg-primary text-primary-foreground font-bold"
-                  : "bg-muted text-muted-foreground hover:text-foreground"
+                  ? "stitch-gold-gradient text-white border-transparent"
+                  : "bg-card border-border/80 text-muted-foreground hover:text-foreground"
               }`}
               title="مؤقت النوم / Sleep Timer"
             >
@@ -134,10 +146,10 @@ export function FloatingAudioPlayer() {
               <span>{sleepTimer ? `${sleepTimer}m` : "مؤقت"}</span>
             </button>
 
-            {/* Play/Pause Button */}
+            {/* Play/Pause Button with Gold Gradient */}
             <button
               onClick={togglePlayPause}
-              className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-md hover:bg-primary/90 transition-transform active:scale-95"
+              className="stitch-gold-gradient w-10 h-10 rounded-full text-white flex items-center justify-center shadow-lg transition-transform active:scale-95 border border-white/20"
             >
               {isPlaying ? (
                 <Pause className="w-5 h-5 fill-current" />
@@ -149,7 +161,7 @@ export function FloatingAudioPlayer() {
             {/* Close */}
             <button
               onClick={closePlayer}
-              className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+              className="p-1.5 rounded-full text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
               title="إغلاق المشغل"
             >
               <X className="w-4 h-4" />

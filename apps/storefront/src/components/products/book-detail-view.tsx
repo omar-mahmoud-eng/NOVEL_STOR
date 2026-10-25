@@ -171,7 +171,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Left Column: Book Cover & Preview CTAs (5 cols) */}
         <div className="lg:col-span-5 flex flex-col items-center">
-          <div className="relative aspect-[2/3] w-full max-w-[380px] rounded-3xl overflow-hidden shadow-2xl border border-border group bg-muted">
+          <div className="relative aspect-[2/3] w-full max-w-[380px] rounded-3xl overflow-hidden stitch-book-3d border border-amber-500/30 group bg-muted">
             <Image
               src={book.coverUrl}
               alt={book.title}
@@ -311,18 +311,18 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
               <Button
                 onClick={handleAddToCart}
                 disabled={isAdding}
-                className="flex-1 rounded-2xl h-14 text-base font-bold gap-2 shadow-lg shadow-primary/20"
+                className="flex-1 rounded-2xl h-14 text-base font-black gap-2 stitch-gold-gradient text-slate-950 hover:opacity-95 shadow-xl transition-all"
               >
                 {isAdding ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin text-slate-950" />
                 ) : justAdded ? (
                   <>
-                    <Check className="w-5 h-5 stroke-[3]" />
+                    <Check className="w-5 h-5 stroke-[3] text-slate-950" />
                     <span>{locale === "ar" ? "تمت الإضافة للسلة!" : "Added to Cart!"}</span>
                   </>
                 ) : (
                   <>
-                    <ShoppingBag className="w-5 h-5" />
+                    <ShoppingBag className="w-5 h-5 text-slate-950" />
                     <span>
                       {locale === "ar"
                         ? `إضافة ${activeOption.nameAr} إلى السلة`
@@ -338,7 +338,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
                   await handleAddToCart()
                   router.push(`/${locale}/checkout`)
                 }}
-                className="rounded-2xl h-14 px-6 text-base font-bold border-primary/40 text-primary hover:bg-primary/5"
+                className="rounded-2xl h-14 px-6 text-base font-bold border-amber-500/40 text-amber-600 hover:bg-amber-500/10"
               >
                 <span>{locale === "ar" ? "شراء فوري" : "Buy Now"}</span>
               </Button>

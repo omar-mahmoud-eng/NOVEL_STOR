@@ -18,6 +18,9 @@ import {
   Sparkles,
   BookOpen,
   Headphones,
+  Crown,
+  Compass,
+  Feather,
 } from "lucide-react"
 
 export function Header({
@@ -53,66 +56,90 @@ export function Header({
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        {/* Top Notification Announcement Bar */}
-        <div className="bg-primary px-4 py-1.5 text-center text-xs font-medium text-primary-foreground flex items-center justify-center gap-2">
-          <Sparkles className="w-3.5 h-3.5" />
+      <header className="sticky top-0 z-40 w-full stitch-glass border-b border-amber-500/15 transition-all">
+        {/* Top Luxury Announcement Ribbon */}
+        <div className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 text-slate-950 px-4 py-1.5 text-center text-xs font-bold flex items-center justify-center gap-2 shadow-inner">
+          <Sparkles className="w-3.5 h-3.5 fill-current text-slate-950" />
           <span>
             {locale === "ar"
-              ? "منصة النشر المتعددة: روايات وكتب صوتية وإلكترونية لكافة الأعمار مع اشتراك VIP غير محدود"
-              : "Multi-Format Publishing: E-books, Audiobooks & VIP All-Access Subscription Passes"}
+              ? "دار النشر المعيارية: روايات فاخرة ورقية، كتب صوتية مشفرة، وتفعيل اشتراك VIP الشهري الفوري"
+              : "Sovereign Literary Platform: Deluxe Hardcover Novels, DRM-Protected Audiobooks & VIP Pass"}
+          </span>
+          <span className="hidden sm:inline-block bg-slate-950/15 text-slate-950 px-2 py-0.2 rounded-full text-[10px] font-black uppercase">
+            STITCH DESIGN
           </span>
         </div>
 
         {/* Main Header Bar */}
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-4">
+        <div className="container mx-auto px-4 h-18 flex items-center justify-between gap-4">
           {/* Mobile Menu Toggle & Brand */}
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-muted-foreground hover:text-foreground"
+              className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link href={`/${locale}`} className="flex items-center gap-2 font-bold text-lg tracking-tight">
-              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black">
-                <BookOpen className="w-5 h-5" />
+            <Link href={`/${locale}`} className="flex items-center gap-2.5 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950 flex items-center justify-center font-black shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
+                <Feather className="w-5 h-5" />
               </div>
-              <span className="hidden sm:inline-block font-extrabold text-foreground">
-                {locale === "ar" ? "دار الروايات والنشر" : "StoryPublish"}
-              </span>
+              <div className="flex flex-col">
+                <span className="font-black text-base sm:text-lg tracking-tight text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
+                  <span>{locale === "ar" ? "دار الروايات العالمية" : "Sovereign Stories"}</span>
+                  <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                </span>
+                <span className="hidden sm:inline-block text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">
+                  {locale === "ar" ? "منصة النشر والأدب الرقمي والسمعي" : "Multi-Format Publishing House"}
+                </span>
+              </div>
             </Link>
           </div>
 
-          {/* Search Bar (Desktop) */}
+          {/* Search Bar (Desktop) with Google Stitch Styling */}
           <form
             onSubmit={handleSearchSubmit}
-            className="hidden md:flex flex-1 max-w-sm items-center relative"
+            className="hidden md:flex flex-1 max-w-md items-center relative"
           >
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={locale === "ar" ? "ابحث عن رواية، كاتب، راوٍ صوتي..." : "Search stories, authors, narrators..."}
-              className="w-full h-9 px-4 ps-10 rounded-full border border-input bg-muted/50 text-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              placeholder={locale === "ar" ? "ابحث بالرواية، اسم المؤلف، الراوي الصوتي..." : "Search stories, authors, narrators..."}
+              className="w-full h-10 px-4 ps-10 pe-16 rounded-full border border-amber-500/25 bg-background/60 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all shadow-inner"
             />
-            <Search className="w-3.5 h-3.5 text-muted-foreground absolute start-3.5 pointer-events-none" />
+            <Search className="w-4 h-4 text-amber-600/70 absolute start-3.5 pointer-events-none" />
+            <kbd className="absolute end-3 hidden sm:inline-block bg-muted text-muted-foreground text-[10px] font-mono px-1.5 py-0.5 rounded border border-border">
+              ⌘K
+            </kbd>
           </form>
 
           {/* Navigation Links (Desktop) */}
-          <nav className="hidden lg:flex items-center gap-5 text-xs font-semibold">
-            <Link href={`/${locale}/books`} className="text-foreground hover:text-primary transition-colors">
-              {locale === "ar" ? "جميع الكتب والروايات" : "All Stories"}
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-bold">
+            <Link
+              href={`/${locale}/books`}
+              className="text-foreground/90 hover:text-primary transition-colors flex items-center gap-1.5 py-1"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
+              <span>{locale === "ar" ? "معرض الروايات" : "Catalog"}</span>
             </Link>
-            <Link href={`/${locale}/subscriptions`} className="text-primary hover:underline transition-colors flex items-center gap-1">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>{locale === "ar" ? "باقات VIP للقراء" : "VIP Memberships"}</span>
+
+            <Link
+              href={`/${locale}/subscriptions`}
+              className="text-amber-600 dark:text-amber-400 font-extrabold hover:text-amber-700 transition-colors flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/25 px-3 py-1 rounded-full shadow-xs"
+            >
+              <Crown className="w-3.5 h-3.5 text-amber-500" />
+              <span>{locale === "ar" ? "نادي القراء VIP" : "VIP Pass"}</span>
             </Link>
-            <Link href={`/${locale}/library`} className="text-muted-foreground hover:text-primary transition-colors flex items-center gap-1">
-              <Headphones className="w-3.5 h-3.5" />
-              <span>{locale === "ar" ? "مكتبتي الرقمية" : "My Library"}</span>
+
+            <Link
+              href={`/${locale}/library`}
+              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 py-1"
+            >
+              <Headphones className="w-3.5 h-3.5 text-purple-600" />
+              <span>{locale === "ar" ? "مكتبتي الصوتية" : "My Library"}</span>
             </Link>
           </nav>
 
@@ -126,45 +153,43 @@ export function Header({
               variant="ghost"
               size="sm"
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 text-xs font-semibold px-2.5 h-9"
+              className="flex items-center gap-1.5 text-xs font-bold px-2.5 h-9 rounded-full hover:bg-amber-500/10 text-foreground"
               title={dict.nav.change_language}
             >
-              <Globe className="w-4 h-4 text-muted-foreground" />
-              <span>{dict.nav.change_language}</span>
+              <Globe className="w-4 h-4 text-amber-600" />
+              <span>{locale === "ar" ? "EN" : "عربي"}</span>
             </Button>
 
             {/* Account Link */}
-            <Button variant="ghost" size="sm" asChild className="h-9 px-2.5 rounded-full gap-1.5">
+            <Button variant="ghost" size="sm" asChild className="h-9 px-2.5 rounded-full gap-1.5 hover:bg-amber-500/10">
               <Link href={`/${locale}/account`} title={dict.nav.account}>
                 {customer?.avatar ? (
                   <img
                     src={customer.avatar}
                     alt={customer.name}
-                    className="w-5 h-5 rounded-full object-cover border"
+                    className="w-6 h-6 rounded-full object-cover border-2 border-amber-500"
                   />
                 ) : (
-                  <User className="w-4 h-4 text-muted-foreground" />
+                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 flex items-center justify-center font-bold text-[11px]">
+                    <User className="w-3.5 h-3.5" />
+                  </div>
                 )}
                 <span className="hidden sm:inline text-xs font-bold text-foreground">
-                  {customer ? customer.name.split(" ")[0] : dict.nav.account}
+                  {customer ? customer.name.split(" ")[0] : (locale === "ar" ? "حسابي" : "Account")}
                 </span>
-                {customer?.isVip && (
-                  <span className="w-2 h-2 rounded-full bg-purple-600 shrink-0" title="VIP Member" />
-                )}
               </Link>
             </Button>
 
-            {/* Cart Trigger Button */}
+            {/* Luxury Cart Trigger Button */}
             <Button
-              variant="outline"
               size="sm"
               onClick={() => setIsOpen(true)}
-              className="relative h-9 px-3 gap-2 rounded-full border-primary/20 hover:border-primary"
+              className="relative h-10 px-3.5 gap-2 rounded-full stitch-gold-gradient font-black text-xs hover:opacity-95 transition-all"
             >
-              <ShoppingBag className="w-4 h-4 text-primary" />
-              <span className="hidden sm:inline text-xs font-semibold">{dict.nav.cart}</span>
+              <ShoppingBag className="w-4 h-4 text-slate-950" />
+              <span className="hidden sm:inline font-bold text-slate-950">{locale === "ar" ? "السلة" : "Cart"}</span>
               {itemsCount > 0 && (
-                <span className="bg-primary text-primary-foreground text-[11px] font-bold h-5 min-w-[20px] px-1 rounded-full flex items-center justify-center">
+                <span className="bg-slate-950 text-amber-400 text-[11px] font-black h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center shadow-xs">
                   {itemsCount}
                 </span>
               )}
@@ -174,27 +199,30 @@ export function Header({
 
         {/* Mobile Navigation Dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-border p-4 bg-background space-y-3 text-xs font-semibold">
+          <div className="md:hidden border-t border-amber-500/20 p-4 bg-background/95 backdrop-blur space-y-3 text-xs font-bold">
             <Link
               href={`/${locale}/books`}
               onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 hover:bg-muted rounded-md"
+              className="flex items-center gap-2 p-2.5 hover:bg-muted rounded-lg"
             >
-              {locale === "ar" ? "جميع الكتب والروايات" : "All Stories"}
+              <BookOpen className="w-4 h-4 text-amber-600" />
+              <span>{locale === "ar" ? "معرض الروايات والإصدارات" : "All Stories"}</span>
             </Link>
             <Link
               href={`/${locale}/subscriptions`}
               onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 text-primary hover:bg-muted rounded-md"
+              className="flex items-center gap-2 p-2.5 bg-amber-500/10 text-amber-600 rounded-lg font-black"
             >
-              {locale === "ar" ? "باقات VIP للقراء" : "VIP Memberships"}
+              <Crown className="w-4 h-4 text-amber-500" />
+              <span>{locale === "ar" ? "نادي القراء VIP والعضويات" : "VIP Memberships"}</span>
             </Link>
             <Link
               href={`/${locale}/library`}
               onClick={() => setMobileMenuOpen(false)}
-              className="block p-2 hover:bg-muted rounded-md"
+              className="flex items-center gap-2 p-2.5 hover:bg-muted rounded-lg"
             >
-              {locale === "ar" ? "مكتبتي الرقمية (المشغل والقارئ)" : "My Library"}
+              <Headphones className="w-4 h-4 text-purple-600" />
+              <span>{locale === "ar" ? "مكتبتي الرقمية والصوتية" : "My Library"}</span>
             </Link>
           </div>
         )}

@@ -80,39 +80,39 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
       {/* =========================================================================
           1. HERO SECTION: Grand Literary Entrance with 4 Age Group Portals
          ========================================================================= */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/10 via-background to-background pt-12 pb-20 md:pt-20 md:pb-28 border-b border-border">
+      <section className="relative overflow-hidden bg-gradient-to-b from-amber-500/10 via-background to-background pt-14 pb-20 md:pt-24 md:pb-32 border-b border-amber-500/20">
         {/* Ambient Decorative Glows */}
-        <div className="absolute top-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-20 left-1/4 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-20 left-1/4 w-[450px] h-[450px] bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
 
         <div className="container mx-auto px-4 max-w-6xl relative z-10 flex flex-col items-center text-center">
-          {/* Trust Badge */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-4 py-1.5 text-xs font-bold text-primary mb-6 shadow-2xs backdrop-blur-xs">
-            <Sparkles className="w-4 h-4" />
+          {/* Trust Badge with Google Stitch Vibe Design */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-5 py-2 text-xs font-black text-amber-600 dark:text-amber-400 mb-6 shadow-md shadow-amber-500/10 backdrop-blur-md">
+            <Sparkles className="w-4 h-4 fill-amber-500 text-amber-500" />
             <span>
               {isRtl
-                ? "دار النشر المعيارية المتكاملة • روايات وقصص لجميع الأعمار"
-                : "Next-Gen Multi-Format Publishing Platform for All Ages"}
+                ? "دار الروايات العالمية • النشر الرقمي والسمعي الفاخر بمعايير Google Stitch"
+                : "Sovereign Literary House • Multi-Format Masterpieces via Google Stitch"}
             </span>
           </div>
 
           {/* Main Literary Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.2] max-w-4xl">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.18] max-w-4xl">
             {isRtl ? (
               <>
                 عالم الروايات والقصص الساحرة...{" "}
-                <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-amber-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-700 bg-clip-text text-transparent drop-shadow-xs">
                   اقرأ، استمع، واقتنِ
                 </span>{" "}
-                أروع ما كُتب
+                أروع ما سُطّر
               </>
             ) : (
               <>
                 Where Timeless Stories Live.{" "}
-                <span className="bg-gradient-to-r from-purple-600 via-pink-600 to-amber-600 bg-clip-text text-transparent">
+                <span className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-700 bg-clip-text text-transparent drop-shadow-xs">
                   Read, Listen & Own
                 </span>{" "}
-                in Every Format.
+                in Sovereign Luxury.
               </>
             )}
           </h1>
@@ -253,16 +253,27 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
           2. SPOTLIGHT SHOWCASE: Interactive Multi-Format Book Experience
          ========================================================================= */}
       <section className="container mx-auto px-4 max-w-6xl">
-        <div className="relative rounded-3xl bg-gradient-to-br from-card via-card to-purple-950/20 border border-purple-500/20 p-6 sm:p-10 shadow-xl overflow-hidden">
+        <div className="relative rounded-3xl bg-gradient-to-br from-card via-card to-amber-950/20 border border-amber-500/25 p-6 sm:p-10 shadow-2xl overflow-hidden">
           <div className="flex flex-col lg:flex-row items-center gap-10">
-            {/* Book Cover with Live Audio Sample Ribbon */}
-            <div className="relative w-60 sm:w-72 aspect-[2/3] shrink-0 rounded-2xl overflow-hidden shadow-2xl border border-border group">
+            {/* Book Cover with 3D Depth & Live Audio Waveform */}
+            <div className="relative w-60 sm:w-72 aspect-[2/3] shrink-0 rounded-2xl overflow-hidden stitch-book-3d border border-amber-500/30 group">
               <img
                 src={spotlightBook.coverUrl}
                 alt={spotlightBook.title}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-4">
+              {/* Dynamic Animated Waveform Overlay when Audio is Playing */}
+              {currentTrack?.id === `sample_${spotlightBook.id}` && isPlaying && (
+                <div className="absolute top-3 end-3 bg-slate-950/90 backdrop-blur-md px-3 py-1.5 rounded-full border border-amber-500/50 flex items-center gap-1.5 shadow-xl">
+                  <div className="w-1 bg-amber-400 rounded-full stitch-bar-1" />
+                  <div className="w-1 bg-amber-400 rounded-full stitch-bar-2" />
+                  <div className="w-1 bg-amber-400 rounded-full stitch-bar-3" />
+                  <div className="w-1 bg-amber-400 rounded-full stitch-bar-4" />
+                  <div className="w-1 bg-amber-400 rounded-full stitch-bar-5" />
+                  <span className="text-[10px] text-amber-300 font-bold ms-1">جاري الاستماع</span>
+                </div>
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex flex-col justify-end p-4">
                 <span className="text-[11px] font-bold text-amber-300">
                   {isRtl ? "الرواية الأكثر قراءة واستماعاً هذا الشهر" : "Trending Bestseller"}
                 </span>
@@ -416,7 +427,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                 </Button>
 
                 {/* Direct Purchase Link */}
-                <Button asChild className="rounded-2xl h-12 px-6 text-xs font-bold gap-2 bg-purple-600 hover:bg-purple-700 text-white">
+                <Button asChild className="rounded-2xl h-12 px-6 text-xs font-black gap-2 stitch-gold-gradient text-slate-950 hover:opacity-95 shadow-md">
                   <Link href={`/${locale}/books/${spotlightBook.handle}`}>
                     <span>{isRtl ? "اقتنِ الرواية الآن" : "Purchase Title"}</span>
                     {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}

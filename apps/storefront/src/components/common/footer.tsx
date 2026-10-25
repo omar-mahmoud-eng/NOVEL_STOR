@@ -1,6 +1,6 @@
 import React from "react"
 import Link from "next/link"
-import { ShieldCheck, Truck, RotateCcw, Headphones, Lock } from "lucide-react"
+import { ShieldCheck, Truck, RotateCcw, Headphones, Lock, Feather, Crown, Sparkles } from "lucide-react"
 
 export function Footer({
   locale,
@@ -9,64 +9,66 @@ export function Footer({
   locale: "ar" | "en"
   dict: any
 }) {
+  const isRtl = locale === "ar"
+
   return (
-    <footer className="border-t border-border bg-muted/30 mt-auto">
-      {/* Trust Badges Bar */}
-      <div className="border-b border-border bg-background/50">
+    <footer className="border-t border-amber-500/20 bg-background/95 mt-auto">
+      {/* Trust Badges Bar with Google Stitch Gold Accents */}
+      <div className="border-b border-amber-500/15 bg-amber-500/5">
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-start">
-            <div className="flex flex-col md:flex-row items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div className="flex flex-col md:flex-row items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
                 <Truck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-sm">
-                  {locale === "ar" ? "شحن خليجي سريع" : "Express Regional Delivery"}
+                <h4 className="font-bold text-sm text-foreground">
+                  {isRtl ? "شحن ورقي خليجي سريع" : "Express Regional Delivery"}
                 </h4>
-                <p className="text-xs text-muted-foreground">
-                  {locale === "ar" ? "توصيل خلال 24-48 ساعة" : "24-48 hours to your door"}
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRtl ? "توصيل آمن لباب البيت خلال 24-48 ساعة" : "24-48 hours directly to your door"}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div className="flex flex-col md:flex-row items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-sm">
-                  {locale === "ar" ? "منتجات أصلية 100%" : "100% Authentic Products"}
+                <h4 className="font-bold text-sm text-foreground">
+                  {isRtl ? "حماية بث صوتي وتشفير DRM" : "Anti-Piracy DRM Stream"}
                 </h4>
-                <p className="text-xs text-muted-foreground">
-                  {locale === "ar" ? "ضمان رسمي معتمد" : "Official brand warranty"}
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRtl ? "استماع نقي بدون انقطاع وبأعلى دقة" : "High-fidelity lossless streaming"}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div className="flex flex-col md:flex-row items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
                 <RotateCcw className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-sm">
-                  {locale === "ar" ? "إرجاع سهل ومجاني" : "Hassle-Free Returns"}
+                <h4 className="font-bold text-sm text-foreground">
+                  {isRtl ? "ضمان الاستبدال للنسخ الورقية" : "Replacement Guarantee"}
                 </h4>
-                <p className="text-xs text-muted-foreground">
-                  {locale === "ar" ? "خلال 14 يوماً من الاستلام" : "Within 14 calendar days"}
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRtl ? "استبدال فوري لأي نسخة متضررة مجاناً" : "Instant free swap for damaged copies"}
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <div className="flex flex-col md:flex-row items-center gap-3.5">
+              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
                 <Headphones className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-semibold text-sm">
-                  {locale === "ar" ? "دعم عملاء 24/7" : "24/7 Dedicated Support"}
+                <h4 className="font-bold text-sm text-foreground">
+                  {isRtl ? "صالون دعم القراء 24/7" : "24/7 Reader Concierge"}
                 </h4>
-                <p className="text-xs text-muted-foreground">
-                  {locale === "ar" ? "خدمة فورية بالعربية والإنجليزية" : "Instant Arabic & English care"}
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {isRtl ? "خدمة مخصصة بالعربية والإنجليزية" : "Instant care in Arabic & English"}
                 </p>
               </div>
             </div>
@@ -75,97 +77,116 @@ export function Footer({
       </div>
 
       {/* Main Footer Links */}
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 font-bold text-lg">
-              <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black">
-                M
+      <div className="container mx-auto px-4 py-14">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+          {/* Brand Column */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950 flex items-center justify-center font-black shadow-md shadow-amber-500/20">
+                <Feather className="w-5 h-5" />
               </div>
-              <span>{dict.common.store_name}</span>
+              <div>
+                <span className="font-black text-base text-foreground block">
+                  {isRtl ? "دار الروايات العالمية" : "Sovereign Stories"}
+                </span>
+                <span className="text-[10px] text-amber-600 font-bold tracking-wider uppercase block">
+                  Publishing & Audio Lab
+                </span>
+              </div>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {dict.common.tagline}
+              {isRtl
+                ? "المنصة السيادية المتكاملة لنشر الروايات الفاخرة المطبوعة، الروايات الصوتية الدرامية، والكتب الإلكترونية المشفرة لجميع الفئات العمرية."
+                : "The premier all-in-one platform for deluxe printed novels, cinematic audiobooks, and encrypted e-books for all age groups."}
             </p>
-            <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium pt-2">
+            <div className="flex items-center gap-2 text-xs text-emerald-600 font-semibold pt-1">
               <Lock className="w-3.5 h-3.5" />
-              <span>{locale === "ar" ? "منصة محمية ومشفرة بالكامل" : "Fully Hardened Zero-Trust Platform"}</span>
+              <span>{isRtl ? "نظام سيادي محمي ومشفر 100%" : "Zero-Trust Hardened Architecture"}</span>
             </div>
           </div>
 
+          {/* Catalog Columns */}
           <div>
-            <h4 className="font-semibold text-sm mb-3">{dict.nav.categories}</h4>
-            <ul className="space-y-2 text-xs text-muted-foreground">
+            <h4 className="font-bold text-sm text-foreground mb-4 flex items-center gap-1.5">
+              <Crown className="w-4 h-4 text-amber-500" />
+              <span>{isRtl ? "أقسام الروايات" : "Literary Shelves"}</span>
+            </h4>
+            <ul className="space-y-2.5 text-xs text-muted-foreground font-medium">
               <li>
-                <Link href={`/${locale}/products`} className="hover:text-primary transition-colors">
-                  {locale === "ar" ? "الإلكترونيات الذكية" : "Smart Electronics"}
+                <Link href={`/${locale}/books?age=kids_3_6`} className="hover:text-amber-500 transition-colors">
+                  {isRtl ? "👶 واحة براعم الأطفال (3 - 6 سنوات)" : "Early Childhood (3-6 yrs)"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/products`} className="hover:text-primary transition-colors">
-                  {locale === "ar" ? "أجهزة المنزل المبتكرة" : "Smart Home Living"}
+                <Link href={`/${locale}/books?age=kids_7_12`} className="hover:text-amber-500 transition-colors">
+                  {isRtl ? "🧒 كوكب الاستكشاف والناشئة (7 - 12 سنة)" : "Young Explorers (7-12 yrs)"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/products`} className="hover:text-primary transition-colors">
-                  {locale === "ar" ? "الملحقات والإكسسوارات" : "Accessories & Audio"}
+                <Link href={`/${locale}/books?age=teens_13_17`} className="hover:text-amber-500 transition-colors">
+                  {isRtl ? "🧑 صالون الغموض لليافعين (13 - 17 سنة)" : "Teens Mystery (13-17 yrs)"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/books?age=adults_18_plus`} className="hover:text-amber-500 transition-colors">
+                  {isRtl ? "🧑‍💼 ديوان الأدب والتاريخ (18+ سنة)" : "Classical Literature (18+)"}
                 </Link>
               </li>
             </ul>
           </div>
 
+          {/* Reader Club */}
           <div>
-            <h4 className="font-semibold text-sm mb-3">
-              {locale === "ar" ? "خدمة العملاء" : "Customer Care"}
+            <h4 className="font-bold text-sm text-foreground mb-4 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>{isRtl ? "نادي القراء وخدماتنا" : "VIP & Services"}</span>
             </h4>
-            <ul className="space-y-2 text-xs text-muted-foreground">
+            <ul className="space-y-2.5 text-xs text-muted-foreground font-medium">
               <li>
-                <Link href={`/${locale}/account`} className="hover:text-primary transition-colors">
-                  {dict.account.orders}
+                <Link href={`/${locale}/subscriptions`} className="hover:text-amber-500 transition-colors">
+                  {isRtl ? "باقات اشتراك VIP الشهرية والسنوية" : "VIP Membership Passes"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/products`} className="hover:text-primary transition-colors">
-                  {locale === "ar" ? "سياسة الشحن والتوصيل" : "Shipping & Delivery Policy"}
+                <Link href={`/${locale}/library`} className="hover:text-amber-500 transition-colors">
+                  {isRtl ? "مشغل الروايات الصوتية والمكتبة" : "Audio Player & Library"}
                 </Link>
               </li>
               <li>
-                <Link href={`/${locale}/products`} className="hover:text-primary transition-colors">
-                  {locale === "ar" ? "سياسة الإرجاع والاستبدال" : "Returns & Exchanges"}
+                <Link href={`/${locale}/account`} className="hover:text-amber-500 transition-colors">
+                  {isRtl ? "لوحة إدارة حساب القارئ" : "Customer Portal"}
                 </Link>
               </li>
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-semibold text-sm mb-3">
-              {locale === "ar" ? "طرق الدفع المعتمدة" : "Accepted Payment Methods"}
+          {/* Design Badge */}
+          <div className="space-y-3">
+            <h4 className="font-bold text-sm text-foreground mb-4">
+              {isRtl ? "معايير التصميم الفائق" : "Design Standard"}
             </h4>
-            <p className="text-xs text-muted-foreground mb-3">
-              {locale === "ar"
-                ? "دفع آمن معتمد بالريال السعودي والدولار وبطاقات مدى المحلية."
-                : "Secure local Mada cards, Apple Pay, Visa, and Mastercard in SAR, AED, USD."}
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-[11px] font-bold px-2.5 py-1 bg-background rounded border border-border shadow-2xs">
-                Mada مدى
-              </span>
-              <span className="text-[11px] font-bold px-2.5 py-1 bg-background rounded border border-border shadow-2xs">
-                Apple Pay
-              </span>
-              <span className="text-[11px] font-bold px-2.5 py-1 bg-background rounded border border-border shadow-2xs">
-                Visa
-              </span>
-              <span className="text-[11px] font-bold px-2.5 py-1 bg-background rounded border border-border shadow-2xs">
-                Mastercard
-              </span>
+            <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/25 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-600 dark:text-amber-400">
+                <Sparkles className="w-4 h-4 fill-current" />
+                <span>Google Stitch Vibe Design</span>
+              </div>
+              <p className="text-[11px] text-muted-foreground leading-relaxed">
+                {isRtl
+                  ? "تمت صياغة واجهات المتجر وفق فلسفة Google Stitch للتصميم الحركي الراقي والأدب التفاعلي."
+                  : "Engineered in accordance with Google Stitch UI/UX design tokens and high-fidelity typography."}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-border mt-10 pt-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} {dict.common.store_name}. All Rights Reserved.
+        {/* Bottom Copyright */}
+        <div className="border-t border-amber-500/15 pt-8 mt-12 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
+          <p>© {new Date().getFullYear()} {isRtl ? "دار الروايات العالمية. جميع الحقوق الملكية والفكرية محفوظة." : "Sovereign Stories Inc. All rights reserved."}</p>
+          <div className="flex items-center gap-4 text-xs font-semibold">
+            <span className="text-amber-600">All-In-One Enterprise Platform</span>
+            <span>•</span>
+            <span>Zero 3rd-Party Dependencies</span>
+          </div>
         </div>
       </div>
     </footer>

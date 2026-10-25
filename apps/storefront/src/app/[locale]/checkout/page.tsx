@@ -19,6 +19,7 @@ import {
   Loader2,
   FileText,
   ShoppingBag,
+  Sparkles,
 } from "lucide-react"
 
 export default function CheckoutPage({
@@ -139,16 +140,23 @@ export default function CheckoutPage({
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Checkout Minimal Secure Header */}
-      <header className="border-b border-border py-4 bg-card/60 backdrop-blur">
+      <header className="border-b border-border/80 py-4 stitch-glass sticky top-0 z-40">
         <div className="container mx-auto px-4 flex items-center justify-between">
-          <Link href={`/${locale}`} className="flex items-center gap-2 font-bold text-lg">
-            <div className="w-8 h-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-black">
-              M
+          <Link href={`/${locale}`} className="flex items-center gap-2.5 group">
+            <div className="w-9 h-9 rounded-2xl stitch-gold-gradient text-white flex items-center justify-center font-black shadow-md group-hover:scale-105 transition-transform">
+              <Sparkles className="w-5 h-5 text-amber-200" />
             </div>
-            <span className="font-extrabold">{dict.common.store_name}</span>
+            <div>
+              <span className="font-black text-base text-foreground tracking-tight block">
+                {dict.common.store_name}
+              </span>
+              <span className="text-[10px] text-amber-600 dark:text-amber-400 font-bold block -mt-1">
+                Google Stitch Secure Checkout
+              </span>
+            </div>
           </Link>
-          <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold bg-emerald-500/10 px-3 py-1.5 rounded-full">
-            <Lock className="w-3.5 h-3.5" />
+          <div className="flex items-center gap-1.5 text-xs text-amber-700 dark:text-amber-300 font-bold bg-amber-500/10 border border-amber-500/20 px-3.5 py-1.5 rounded-full shadow-2xs">
+            <ShieldCheck className="w-4 h-4 text-amber-500" />
             <span>{dict.cart.security_guarantee}</span>
           </div>
         </div>
@@ -161,10 +169,12 @@ export default function CheckoutPage({
           <div className="lg:col-span-7 space-y-8">
             <form onSubmit={handleFormSubmit} className="space-y-8">
               {/* Step 1: Customer & Shipping Information */}
-              <div className="bg-card rounded-2xl border border-border p-6 space-y-4 shadow-2xs">
-                <div className="flex items-center gap-2 pb-3 border-b border-border">
-                  <Truck className="w-5 h-5 text-primary" />
-                  <h2 className="font-bold text-base text-foreground">
+              <div className="stitch-card bg-card rounded-3xl border border-border/80 p-6 space-y-4 shadow-sm">
+                <div className="flex items-center gap-2 pb-3 border-b border-border/80">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <Truck className="w-4 h-4" />
+                  </div>
+                  <h2 className="font-extrabold text-base text-foreground">
                     {dict.checkout.step_shipping}
                   </h2>
                 </div>
@@ -268,20 +278,22 @@ export default function CheckoutPage({
               </div>
 
               {/* Step 2: Payment Method */}
-              <div className="bg-card rounded-2xl border border-border p-6 space-y-4 shadow-2xs">
-                <div className="flex items-center gap-2 pb-3 border-b border-border">
-                  <CreditCard className="w-5 h-5 text-primary" />
-                  <h2 className="font-bold text-base text-foreground">
+              <div className="stitch-card bg-card rounded-3xl border border-border/80 p-6 space-y-4 shadow-sm">
+                <div className="flex items-center gap-2 pb-3 border-b border-border/80">
+                  <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+                    <CreditCard className="w-4 h-4" />
+                  </div>
+                  <h2 className="font-extrabold text-base text-foreground">
                     {dict.checkout.step_payment}
                   </h2>
                 </div>
 
                 <div className="space-y-2.5">
                   <label
-                    className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                       formData.paymentMethod === "card"
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-border hover:bg-muted/40"
+                        ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500"
+                        : "border-border/80 hover:bg-muted/40"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -291,20 +303,20 @@ export default function CheckoutPage({
                         value="card"
                         checked={formData.paymentMethod === "card"}
                         onChange={() => handleInputChange("paymentMethod", "card")}
-                        className="text-primary focus:ring-primary"
+                        className="text-amber-600 focus:ring-amber-500"
                       />
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-sm font-bold text-foreground">
                         {dict.checkout.payment_methods.card}
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-muted-foreground">مدى / Visa</span>
+                    <span className="text-xs font-black text-amber-700 dark:text-amber-300">مدى / Visa</span>
                   </label>
 
                   <label
-                    className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                       formData.paymentMethod === "apple_pay"
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-border hover:bg-muted/40"
+                        ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500"
+                        : "border-border/80 hover:bg-muted/40"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -314,20 +326,20 @@ export default function CheckoutPage({
                         value="apple_pay"
                         checked={formData.paymentMethod === "apple_pay"}
                         onChange={() => handleInputChange("paymentMethod", "apple_pay")}
-                        className="text-primary focus:ring-primary"
+                        className="text-amber-600 focus:ring-amber-500"
                       />
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-sm font-bold text-foreground">
                         {dict.checkout.payment_methods.apple_pay}
                       </span>
                     </div>
-                    <span className="text-xs font-bold text-muted-foreground">Apple Pay</span>
+                    <span className="text-xs font-black text-foreground">Apple Pay</span>
                   </label>
 
                   <label
-                    className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
+                    className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
                       formData.paymentMethod === "cod"
-                        ? "border-primary bg-primary/5 ring-1 ring-primary"
-                        : "border-border hover:bg-muted/40"
+                        ? "border-amber-500 bg-amber-500/10 ring-1 ring-amber-500"
+                        : "border-border/80 hover:bg-muted/40"
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -337,9 +349,9 @@ export default function CheckoutPage({
                         value="cod"
                         checked={formData.paymentMethod === "cod"}
                         onChange={() => handleInputChange("paymentMethod", "cod")}
-                        className="text-primary focus:ring-primary"
+                        className="text-amber-600 focus:ring-amber-500"
                       />
-                      <span className="text-sm font-semibold text-foreground">
+                      <span className="text-sm font-bold text-foreground">
                         {dict.checkout.payment_methods.cod}
                       </span>
                     </div>
@@ -355,7 +367,7 @@ export default function CheckoutPage({
                 type="submit"
                 size="lg"
                 disabled={isSubmitting}
-                className="w-full h-14 rounded-2xl text-lg font-bold gap-2 shadow-lg"
+                className="stitch-gold-gradient text-white border-0 w-full h-14 rounded-2xl text-lg font-black gap-2 shadow-xl hover:shadow-2xl transition-all"
               >
                 {isSubmitting ? (
                   <>
@@ -374,13 +386,18 @@ export default function CheckoutPage({
 
           {/* Right Side: Order Summary */}
           <div className="lg:col-span-5">
-            <div className="bg-card rounded-2xl border border-border p-6 space-y-6 sticky top-24 shadow-sm">
-              <h3 className="font-bold text-base text-foreground pb-3 border-b border-border">
-                {dict.cart.title}
-              </h3>
+            <div className="stitch-card bg-card rounded-3xl border border-amber-500/30 p-6 space-y-6 sticky top-24 shadow-md">
+              <div className="flex items-center justify-between pb-3 border-b border-border/80">
+                <h3 className="font-extrabold text-base text-foreground">
+                  {dict.cart.title}
+                </h3>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                  Google Stitch Summary
+                </span>
+              </div>
 
               {/* Line Items List */}
-              <div className="divide-y divide-border max-h-72 overflow-y-auto pr-1">
+              <div className="divide-y divide-border/80 max-h-72 overflow-y-auto pr-1">
                 {items.length === 0 ? (
                   <div className="py-4 text-xs text-muted-foreground text-center">
                     {dict.cart.empty_title}
@@ -389,7 +406,7 @@ export default function CheckoutPage({
                   items.map((item) => (
                     <div key={item.id} className="py-3 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <div className="relative w-12 h-12 rounded-lg bg-muted border border-border overflow-hidden shrink-0">
+                        <div className="stitch-book-3d relative w-12 h-14 rounded-lg bg-muted/40 border border-border/80 overflow-hidden shrink-0 shadow-xs">
                           {item.thumbnail ? (
                             <Image
                               src={item.thumbnail}
@@ -398,17 +415,17 @@ export default function CheckoutPage({
                               className="object-cover"
                             />
                           ) : (
-                            <ShoppingBag className="w-6 h-6 m-auto text-muted-foreground" />
+                            <ShoppingBag className="w-5 h-5 m-auto text-amber-500/40" />
                           )}
                         </div>
                         <div>
-                          <h4 className="text-xs font-medium line-clamp-1">{item.title}</h4>
-                          <span className="text-[11px] text-muted-foreground">
+                          <h4 className="text-xs font-bold text-foreground line-clamp-1">{item.title}</h4>
+                          <span className="text-[11px] text-muted-foreground font-mono">
                             {dict.cart.item_quantity.replace("{qty}", item.quantity.toString())}
                           </span>
                         </div>
                       </div>
-                      <span className="text-xs font-bold shrink-0">
+                      <span className="text-xs font-black text-foreground shrink-0 font-mono">
                         {formatCurrency(item.unit_price * item.quantity, currency, locale)}
                       </span>
                     </div>
@@ -417,30 +434,32 @@ export default function CheckoutPage({
               </div>
 
               {/* Pricing Totals */}
-              <div className="space-y-2 text-xs border-t border-border pt-4">
+              <div className="space-y-2 text-xs border-t border-border/80 pt-4">
                 <div className="flex justify-between text-muted-foreground">
                   <span>{dict.cart.subtotal}</span>
-                  <span>{formatCurrency(subtotal, currency, locale)}</span>
+                  <span className="font-mono">{formatCurrency(subtotal, currency, locale)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{dict.cart.tax_vat}</span>
-                  <span>{formatCurrency(taxTotal, currency, locale)}</span>
+                  <span className="font-mono">{formatCurrency(taxTotal, currency, locale)}</span>
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{dict.cart.estimated_shipping}</span>
-                  <span className="text-emerald-600 font-semibold">{dict.cart.free_shipping}</span>
+                  <span className="text-emerald-600 font-bold">{dict.cart.free_shipping}</span>
                 </div>
-                <div className="flex justify-between text-base font-black text-foreground pt-3 border-t border-border">
+                <div className="flex justify-between text-base font-black text-foreground pt-3 border-t border-border/80">
                   <span>{dict.cart.total}</span>
-                  <span>{formatCurrency(total, currency, locale)}</span>
+                  <span className="text-lg text-amber-600 dark:text-amber-400 font-mono">
+                    {formatCurrency(total, currency, locale)}
+                  </span>
                 </div>
               </div>
 
-              <div className="p-3 bg-muted/40 rounded-xl text-[11px] text-muted-foreground flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
+              <div className="p-3.5 bg-amber-500/5 border border-amber-500/15 rounded-2xl text-[11px] text-muted-foreground flex items-center gap-2.5">
+                <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0" />
                 <span>
                   {locale === "ar"
-                    ? "السعر والضريبة معتمدان ومحميان من التلاعب بنسبة 100%."
+                    ? "السعر والضريبة معتمدان ومحميان من التلاعب بنسبة 100% عبر Medusa v2 Workflows."
                     : "Zero Price Manipulation: Calculations verified by Medusa Workflows."}
                 </span>
               </div>

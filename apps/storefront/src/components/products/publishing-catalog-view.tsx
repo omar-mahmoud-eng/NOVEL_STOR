@@ -14,11 +14,13 @@ import {
   Headphones,
   Smartphone,
   Play,
+  Pause,
   ShoppingBag,
   Sparkles,
   ShieldCheck,
   Check,
   Loader2,
+  Volume2,
 } from "lucide-react"
 
 export type StoryBook = {
@@ -47,7 +49,7 @@ export function PublishingCatalogView({
   locale: "ar" | "en"
 }) {
   const { isKidsMode } = useKidsMode()
-  const { playTrack } = useAudio()
+  const { playTrack, currentTrack, isPlaying, togglePlayPause } = useAudio()
   const { addItem } = useCart()
 
   const [selectedAge, setSelectedAge] = useState<string>("all")
@@ -66,7 +68,7 @@ export function PublishingCatalogView({
   })
 
   const ageCategories = [
-    { id: "all", nameAr: "جميع الفئات العمرية", nameEn: "All Ages" },
+    { id: "all", nameAr: "جميع الأروقة والفئات", nameEn: "All Realms" },
     { id: "kids_3_6", nameAr: "👶 أطفال (3 - 6 سنوات)", nameEn: "Kids (3-6 yrs)" },
     { id: "kids_7_12", nameAr: "🧒 أطفال وناشئة (7 - 12 سنة)", nameEn: "Middle Grade (7-12)" },
     { id: "teens_13_17", nameAr: "🧑 يافعين (13 - 17 سنة)", nameEn: "Teens (13-17)" },
@@ -76,6 +78,10 @@ export function PublishingCatalogView({
   const handlePlaySample = (book: StoryBook, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
+    if (currentTrack?.id === book.id) {
+      togglePlayPause()
+      return
+    }
     playTrack({
       id: book.id,
       title: book.title,
@@ -102,7 +108,25 @@ export function PublishingCatalogView({
   }
 
   return (
-    <div className="space-y-8">
+    <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+      {/* Stitch Header Banner */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border/80">
+        <div>
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 mb-3">
+            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+            <span>Google Stitch Vibe Design • الكتالوج السيادي الشامل</span>
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+            {locale === "ar" ? "معرض الروايات والإصدارات الحصرية" : "Sovereign Literary Showcase"}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
+            {locale === "ar"
+              ? "استكشف أحدث الروايات والقصص المصورة والكتب الصوتية المرخصة من دار النشر السيادية، مع عينات استماع مجانية وضمان جودة الطباعة الفاخرة."
+              : "Discover masterfully curated novels, picture books, and DRM audiobooks with instant previews."}
+          </p>
+        </div>
+      </div>
+
       {/* Safe Kids Mode Notification Banner */}
       {isKidsMode && (
         <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-4 animate-in fade-in duration-300">
@@ -123,147 +147,180 @@ export function PublishingCatalogView({
         </div>
       )}
 
-      {/* Age Categories Filter Pills (Disabled if Kids Mode is forced) */}
+      {/* Age Categories Filter Pills */}
       {!isKidsMode && (
         <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {ageCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedAge(cat.id)}
-              className={`px-4 py-2 rounded-full text-xs font-bold transition-all shrink-0 border ${
-                selectedAge === cat.id
-                  ? "bg-primary text-primary-foreground border-primary shadow-xs"
-                  : "bg-background text-muted-foreground border-border hover:bg-muted hover:text-foreground"
-              }`}
-            >
-              {locale === "ar" ? cat.nameAr : cat.nameEn}
-            </button>
-          ))}
+          {ageCategories.map((cat) => {
+            const isActive = selectedAge === cat.id
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedAge(cat.id)}
+                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all shrink-0 border ${
+                  isActive
+                    ? "stitch-gold-gradient text-white border-transparent shadow-md"
+                    : "bg-card text-muted-foreground border-border/80 hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                {locale === "ar" ? cat.nameAr : cat.nameEn}
+              </button>
+            )
+          })}
         </div>
       )}
 
       {/* Books Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {filtered.map((book) => (
-          <div
-            key={book.id}
-            className="group relative flex flex-col rounded-3xl border border-border bg-card overflow-hidden shadow-xs hover:shadow-xl transition-all duration-300"
-          >
-            {/* Book Cover Image with Audio Sample Button */}
-            <Link
-              href={`/${locale}/books/${book.handle}`}
-              className="relative aspect-[3/4] w-full overflow-hidden bg-muted"
+        {filtered.map((book) => {
+          const isThisTrackPlaying = isPlaying && currentTrack?.id === book.id
+
+          return (
+            <div
+              key={book.id}
+              className="stitch-card group relative flex flex-col rounded-3xl border border-border/80 bg-card overflow-hidden shadow-xs hover:shadow-2xl transition-all duration-300"
             >
-              <Image
-                src={book.coverUrl}
-                alt={book.title}
-                fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-              />
+              {/* Book Cover Image with Audio Sample Button */}
+              <Link
+                href={`/${locale}/books/${book.handle}`}
+                className="relative aspect-[3/4] w-full overflow-hidden bg-muted/40 p-4 flex items-center justify-center"
+              >
+                {/* 3D Book Container */}
+                <div className="stitch-book-3d relative w-full h-full rounded-2xl overflow-hidden shadow-lg group-hover:scale-[1.03] transition-transform duration-500">
+                  <Image
+                    src={book.coverUrl}
+                    alt={book.title}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                    className="object-cover"
+                  />
 
-              {/* Age Category Badge */}
-              <div className="absolute top-3 start-3">
-                <Badge
-                  color={
-                    book.ageGroup === "kids_3_6"
-                      ? "green"
+                  {/* Audio Waveform Overlay when playing */}
+                  {isThisTrackPlaying && (
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-xs flex flex-col items-center justify-center gap-2 text-white">
+                      <div className="flex items-center gap-1">
+                        <span className="w-1 h-6 bg-amber-400 rounded-full stitch-bar-1" />
+                        <span className="w-1 h-8 bg-amber-400 rounded-full stitch-bar-2" />
+                        <span className="w-1 h-10 bg-amber-400 rounded-full stitch-bar-3" />
+                        <span className="w-1 h-7 bg-amber-400 rounded-full stitch-bar-4" />
+                        <span className="w-1 h-5 bg-amber-400 rounded-full stitch-bar-5" />
+                      </div>
+                      <span className="text-[11px] font-bold text-amber-300">جارٍ الاستماع...</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Age Category Badge */}
+                <div className="absolute top-4 start-4 z-10">
+                  <Badge
+                    variant="outline"
+                    className="text-[10px] font-black px-2.5 py-0.5 rounded-full bg-background/90 backdrop-blur-md shadow-xs border-amber-500/30 text-amber-700 dark:text-amber-300"
+                  >
+                    {book.ageGroup === "kids_3_6"
+                      ? "3 - 6 سنوات"
                       : book.ageGroup === "kids_7_12"
-                      ? "blue"
+                      ? "7 - 12 سنة"
                       : book.ageGroup === "teens_13_17"
-                      ? "purple"
-                      : "grey"
-                  }
-                  className="text-[10px] font-bold shadow-sm"
-                >
-                  {book.ageGroup === "kids_3_6"
-                    ? "3 - 6 سنوات"
-                    : book.ageGroup === "kids_7_12"
-                    ? "7 - 12 سنة"
-                    : book.ageGroup === "teens_13_17"
-                    ? "13 - 17 سنة"
-                    : "18+ كبار"}
-                </Badge>
-              </div>
+                      ? "13 - 17 سنة"
+                      : "18+ كبار"}
+                  </Badge>
+                </div>
 
-              {/* Free Audio Preview Trigger Button */}
-              {book.hasAudioSample && (
-                <button
-                  onClick={(e) => handlePlaySample(book, e)}
-                  className="absolute bottom-3 end-3 flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/75 backdrop-blur-md text-white text-[11px] font-bold hover:bg-primary transition-colors shadow-lg active:scale-95"
-                  title="استمع للعينة الصوتية المجانية"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>عينة صوتية</span>
-                </button>
-              )}
-            </Link>
-
-            {/* Book Meta Details */}
-            <div className="flex flex-col flex-1 p-5 space-y-3">
-              <div>
-                <span className="text-[11px] font-medium text-muted-foreground block">
-                  بقلم: {book.author}
-                </span>
-                <Link href={`/${locale}/books/${book.handle}`}>
-                  <h3 className="font-extrabold text-base text-foreground group-hover:text-primary transition-colors line-clamp-1 mt-0.5">
-                    {book.title}
-                  </h3>
-                </Link>
-                {book.narrator && (
-                  <span className="text-[10px] text-primary/80 font-semibold block mt-0.5">
-                    🎙️ الراوي الصوتي: {book.narrator}
-                  </span>
+                {/* Free Audio Preview Trigger Button */}
+                {book.hasAudioSample && (
+                  <button
+                    onClick={(e) => handlePlaySample(book, e)}
+                    className={`absolute bottom-4 end-4 z-10 flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[11px] font-bold shadow-lg transition-all active:scale-95 ${
+                      isThisTrackPlaying
+                        ? "stitch-gold-gradient text-white animate-pulse"
+                        : "bg-black/80 hover:bg-black text-white backdrop-blur-md border border-white/20"
+                    }`}
+                    title="استمع للعينة الصوتية المجانية"
+                  >
+                    {isThisTrackPlaying ? (
+                      <>
+                        <Pause className="w-3.5 h-3.5 fill-current" />
+                        <span>إيقاف</span>
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-3.5 h-3.5 fill-current" />
+                        <span>عينة صوتية</span>
+                      </>
+                    )}
+                  </button>
                 )}
-              </div>
+              </Link>
 
-              {/* Multi-Format Badges */}
-              <div className="flex items-center gap-2 text-[10px] font-bold text-muted-foreground">
-                <span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md">
-                  <BookOpen className="w-3 h-3" /> ورقي
-                </span>
-                <span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md">
-                  <Smartphone className="w-3 h-3" /> إلكتروني
-                </span>
-                <span className="flex items-center gap-1 bg-muted px-2 py-0.5 rounded-md">
-                  <Headphones className="w-3 h-3" /> صوتي
-                </span>
-              </div>
-
-              {/* Starting Price */}
-              <div className="pt-2 border-t border-border flex items-baseline justify-between mt-auto">
+              {/* Book Meta Details */}
+              <div className="flex flex-col flex-1 p-5 space-y-3">
                 <div>
-                  <span className="text-xs text-muted-foreground block">يبدأ من</span>
-                  <span className="text-lg font-black text-foreground">
-                    {formatCurrency(book.ebookPrice, "SAR", locale)}
+                  <span className="text-[11px] font-bold text-amber-700/80 dark:text-amber-400/80 block">
+                    بقلم: {book.author}
+                  </span>
+                  <Link href={`/${locale}/books/${book.handle}`}>
+                    <h3 className="font-extrabold text-base text-foreground group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors line-clamp-1 mt-0.5">
+                      {book.title}
+                    </h3>
+                  </Link>
+                  {book.narrator && (
+                    <span className="text-[10px] text-muted-foreground font-medium block mt-0.5">
+                      🎙️ الراوي الصوتي: {book.narrator}
+                    </span>
+                  )}
+                </div>
+
+                {/* Multi-Format Badges */}
+                <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground">
+                  <span className="flex items-center gap-1 bg-muted/60 px-2 py-0.5 rounded-md border border-border/50">
+                    <BookOpen className="w-3 h-3 text-amber-500" /> ورقي
+                  </span>
+                  <span className="flex items-center gap-1 bg-muted/60 px-2 py-0.5 rounded-md border border-border/50">
+                    <Smartphone className="w-3 h-3 text-amber-500" /> إلكتروني
+                  </span>
+                  <span className="flex items-center gap-1 bg-muted/60 px-2 py-0.5 rounded-md border border-border/50">
+                    <Headphones className="w-3 h-3 text-amber-500" /> صوتي
                   </span>
                 </div>
 
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={(e) => handleQuickAdd(book.defaultVariantId, book.id, e)}
-                  disabled={addingId === book.id}
-                  className="rounded-xl h-9 text-xs font-bold gap-1.5"
-                >
-                  {addingId === book.id ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : justAddedId === book.id ? (
-                    <>
-                      <Check className="w-4 h-4 text-emerald-600" />
-                      <span>تمت!</span>
-                    </>
-                  ) : (
-                    <>
-                      <ShoppingBag className="w-3.5 h-3.5" />
-                      <span>طلب سريع</span>
-                    </>
-                  )}
-                </Button>
+                {/* Starting Price & CTA */}
+                <div className="pt-3 border-t border-border/70 flex items-baseline justify-between mt-auto">
+                  <div>
+                    <span className="text-[10px] text-muted-foreground block">يبدأ من</span>
+                    <span className="text-lg font-black text-foreground">
+                      {formatCurrency(book.ebookPrice, "SAR", locale)}
+                    </span>
+                  </div>
+
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={(e) => handleQuickAdd(book.defaultVariantId, book.id, e)}
+                    disabled={addingId === book.id}
+                    className={`rounded-xl h-9 text-xs font-bold gap-1.5 transition-all ${
+                      justAddedId === book.id
+                        ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/30"
+                        : "stitch-gold-gradient text-white border-0 shadow-xs"
+                    }`}
+                  >
+                    {addingId === book.id ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : justAddedId === book.id ? (
+                      <>
+                        <Check className="w-4 h-4 text-emerald-600" />
+                        <span>تمت!</span>
+                      </>
+                    ) : (
+                      <>
+                        <ShoppingBag className="w-3.5 h-3.5" />
+                        <span>طلب سريع</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
