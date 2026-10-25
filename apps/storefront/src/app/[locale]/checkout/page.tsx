@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useState, use } from "react"
+import React, { useState } from "react"
 import Link from "next/link"
 import Image from "next/image"
+import { useParams } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -22,13 +23,10 @@ import {
   Sparkles,
 } from "lucide-react"
 
-export default function CheckoutPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>
-}) {
-  const resolvedParams = use(params)
-  const locale = isValidLocale(resolvedParams.locale) ? (resolvedParams.locale as Locale) : defaultLocale
+export default function CheckoutPage() {
+  const pathParams = useParams()
+  const rawLocale = (pathParams?.locale as string) || "ar"
+  const locale = isValidLocale(rawLocale) ? (rawLocale as Locale) : defaultLocale
   const dict = getDictionary(locale)
   const isRtl = locale === "ar"
 

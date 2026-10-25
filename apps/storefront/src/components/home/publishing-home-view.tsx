@@ -78,173 +78,285 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
   return (
     <div className="flex flex-col gap-20 pb-24 overflow-x-hidden">
       {/* =========================================================================
-          1. HERO SECTION: Grand Literary Entrance with 4 Age Group Portals
+          1. HERO SECTION: Stitch Nocturne Literary Cinema (from p01_base_1440)
          ========================================================================= */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-amber-500/10 via-background to-background pt-14 pb-20 md:pt-24 md:pb-32 border-b border-amber-500/20">
-        {/* Ambient Decorative Glows */}
-        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-amber-500/15 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute top-20 left-1/4 w-[450px] h-[450px] bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
+      <section className="relative w-full overflow-hidden bg-[#0b0e17] border-b border-[#4e463a]/40">
+        {/* Atmospheric Visual Backing */}
+        <div
+          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity scale-105 transition-transform duration-1000 ease-out hover:scale-100"
+          style={{
+            backgroundImage: "url('https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=1600&q=80')",
+          }}
+        />
 
-        <div className="container mx-auto px-4 max-w-6xl relative z-10 flex flex-col items-center text-center">
-          {/* Trust Badge with Google Stitch Vibe Design */}
-          <div className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-5 py-2 text-xs font-black text-amber-600 dark:text-amber-400 mb-6 shadow-md shadow-amber-500/10 backdrop-blur-md">
-            <Sparkles className="w-4 h-4 fill-amber-500 text-amber-500" />
-            <span>
-              {isRtl
-                ? "دار الروايات العالمية • النشر الرقمي والسمعي الفاخر بمعايير Google Stitch"
-                : "Sovereign Literary House • Multi-Format Masterpieces via Google Stitch"}
+        {/* Scrim Gradients for Reading Clarity */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#10131c] via-[#10131c]/85 to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-l from-[#10131c] via-[#10131c]/60 to-transparent" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-[#e6c184]/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Content Sanctuary (Max Width 1280px) */}
+        <div className="relative max-w-[1280px] w-full mx-auto px-4 sm:px-6 pt-20 pb-16 flex flex-col justify-end min-h-[580px] z-10">
+          
+          {/* Editorial Metadata Strip */}
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#93000a]/20 text-[#ffb4ab] text-[11px] font-bold border border-[#ffb4ab]/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#ba1a1a] animate-ping" />
+              +١٨ محتوى للكبار
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#272a33] text-[#e6c184] text-xs font-bold border border-[#4e463a]/30">
+              <span className="material-symbols-outlined text-[15px]">verified</span>
+              إصدار أصلي موثق
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#272a33] text-[#d1c5b5] text-xs font-medium border border-[#4e463a]/30">
+              <span className="material-symbols-outlined text-[15px]">auto_stories</span>
+              غموض وأرشيف تاريخي
+            </span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#1c1f29] text-[#cdc6b8] text-xs font-medium border border-[#4e463a]/30">
+              <span className="material-symbols-outlined text-[15px]">timer</span>
+              ٣ فصول • الفصل الأول ~٨ دقائق
             </span>
           </div>
 
-          {/* Main Literary Headline */}
-          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tight text-foreground leading-[1.18] max-w-4xl">
-            {isRtl ? (
-              <>
-                عالم الروايات والقصص الساحرة...{" "}
-                <span className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-700 bg-clip-text text-transparent drop-shadow-xs">
-                  اقرأ، استمع، واقتنِ
-                </span>{" "}
-                أروع ما سُطّر
-              </>
-            ) : (
-              <>
-                Where Timeless Stories Live.{" "}
-                <span className="bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-700 bg-clip-text text-transparent drop-shadow-xs">
-                  Read, Listen & Own
-                </span>{" "}
-                in Sovereign Luxury.
-              </>
-            )}
-          </h1>
-
-          {/* Subtitle */}
-          <p className="mt-6 text-base sm:text-lg md:text-xl text-muted-foreground max-w-3xl leading-relaxed">
-            {isRtl
-              ? "من قصص ما قبل النوم للأطفال، إلى مغامرات الفضاء للناشئة، وألغاز التاريخ لليافعين، وروائع الأدب الكلاسيكي للكبار. متوفرة بنسخ ورقية فاخرة، إلكترونية مشفرة، وتسجيلات صوتية درامية تحبس الأنفاس."
-              : "From gentle bedtime tales for kids, to deep-space adventures for young explorers, and classic historical epics for book lovers. Enjoy paperback, encrypted e-books, and cinematic audiobooks."}
-          </p>
-
-          {/* Core Trust Pillars */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-4 text-xs font-bold text-foreground">
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border shadow-2xs">
-              <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              <span>{isRtl ? "حماية سحابية ضد القرصنة (DRM)" : "Anti-Piracy DRM"}</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border shadow-2xs">
-              <Layers className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-              <span>{isRtl ? "3 صيغ لكل رواية (ورقي، صوتي، رقمي)" : "3 Formats Per Title"}</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border shadow-2xs">
-              <Truck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span>{isRtl ? "شحن ورقي سريع ومبرد لكافة المدن" : "Fast Doorstep Shipping"}</span>
-            </div>
-            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-card border border-border shadow-2xs">
-              <Sparkles className="w-4 h-4 text-amber-500" />
-              <span>{isRtl ? "اشتراكات VIP بأرصدة تراكمية" : "VIP Monthly Passes"}</span>
-            </div>
+          {/* Main Headline & Excerpt */}
+          <div className="max-w-3xl mb-6">
+            <p className="text-xs text-[#e6c184] tracking-widest mb-1.5 flex items-center gap-2 font-bold">
+              <span>العمل المميز لهذا الأسبوع في StoryVerse</span>
+              <span className="h-px w-12 bg-[#e6c184]/40 inline-block" />
+              <span className="text-[#d1c5b5] text-xs font-normal">بقلم: د. غسان الكيلاني</span>
+            </p>
+            <h1 className="font-serif text-4xl sm:text-6xl font-black text-[#e0e2ef] tracking-tight mb-4">
+              شفرة قصر الحمراء
+            </h1>
+            <p className="text-sm sm:text-base text-[#d1c5b5] leading-relaxed max-w-2xl font-serif">
+              «في بهو الأسود بقصر الحمراء، حين انسحب آخر فوج سياحي وانطفأت الأضواء الكاشفة، بقي طارق معلقًا بنظره عند التاج الرخامي للعمود الثاني عشر. لم تكن النقوش الهندسية مجرد زينة فنية؛ بل كانت تشفيراً رياضياً دقيقاً لأكبر مكتبة علمية أندلسية فُقدت في القرن الخامس عشر.»
+            </p>
           </div>
 
-          {/* 4 Age Group Interactive Portal Cards */}
-          <div className="mt-14 w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-start">
-            {/* Card 1: Kids 3-6 */}
+          {/* Interactive CTAs */}
+          <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
-              href={`/${locale}/books?age=kids_3_6`}
-              className="group p-5 rounded-3xl bg-gradient-to-b from-amber-500/10 via-amber-500/5 to-card border border-amber-400/30 hover:border-amber-400/60 transition-all hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
+              href={`/${locale}/books/alhambra-code-andalusian-manuscript`}
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#e6c184] text-[#422c00] font-black text-xs sm:text-sm shadow-lg shadow-[#e6c184]/15 hover:bg-[#ffdeaa] transition-all transform hover:-translate-y-0.5"
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-3xl">👶</span>
-                <Badge className="bg-amber-500/20 text-amber-500 dark:text-amber-300 border-none text-[10px] font-black">
-                  {isRtl ? "3 - 6 سنوات" : "Ages 3-6"}
-                </Badge>
-              </div>
-              <h3 className="text-base font-black text-foreground group-hover:text-amber-500 transition-colors">
-                {isRtl ? "واحة براعم الأطفال" : "Early Childhood Realm"}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                {isRtl
-                  ? "قصص ما قبل النوم، رسوم دافئة، وتشكيل كامل للحروف مع راوية صوتية هادئة."
-                  : "Gentle bedtime stories with soothing narrations and full vowel marks."}
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-amber-500">
-                <span>{isRtl ? "دخول الواحة" : "Enter Oasis"}</span>
-                {isRtl ? <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />}
-              </div>
+              <span className="material-symbols-outlined text-[20px]">menu_book</span>
+              <span>ابدأ قراءة الفصل الأول</span>
             </Link>
 
-            {/* Card 2: Kids 7-12 */}
-            <Link
-              href={`/${locale}/books?age=kids_7_12`}
-              className="group p-5 rounded-3xl bg-gradient-to-b from-emerald-500/10 via-emerald-500/5 to-card border border-emerald-400/30 hover:border-emerald-400/60 transition-all hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
+            <button
+              onClick={() => handlePlaySample(spotlightBook)}
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-[#1c1f29] text-[#e0e2ef] hover:bg-[#272a33] border border-[#4e463a]/40 font-bold text-xs sm:text-sm transition-colors group"
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-3xl">🧒</span>
-                <Badge className="bg-emerald-500/20 text-emerald-500 dark:text-emerald-300 border-none text-[10px] font-black">
-                  {isRtl ? "7 - 12 سنة" : "Ages 7-12"}
-                </Badge>
-              </div>
-              <h3 className="text-base font-black text-foreground group-hover:text-emerald-600 transition-colors">
-                {isRtl ? "كوكب الاستكشاف والناشئة" : "Young Explorers"}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                {isRtl
-                  ? "سفن الفضاء السحيق، كنوز البحار السبعة، وخيال علمي يوقظ شغف المعرفة."
-                  : "Space quests, mysteries of seven seas, and inspiring sci-fi adventures."}
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-emerald-600">
-                <span>{isRtl ? "بدء الرحلة" : "Start Quest"}</span>
-                {isRtl ? <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />}
-              </div>
-            </Link>
+              <span className="material-symbols-outlined text-[20px] text-[#e6c184] group-hover:scale-110 transition-transform">
+                headphones
+              </span>
+              <span>استمع إلى النسخة الصوتية المتقنة</span>
+              <span className="text-[11px] px-2 py-0.5 rounded bg-[#32343e] text-[#e6c184] font-mono">
+                {spotlightBook.sampleAudioDuration || "03:10"}
+              </span>
+            </button>
 
-            {/* Card 3: Teens 13-17 */}
             <Link
-              href={`/${locale}/books?age=teens_13_17`}
-              className="group p-5 rounded-3xl bg-gradient-to-b from-purple-500/10 via-purple-500/5 to-card border border-purple-400/30 hover:border-purple-400/60 transition-all hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
+              href={`/${locale}/books`}
+              className="inline-flex items-center gap-1.5 px-4 py-3 rounded-xl text-[#d1c5b5] hover:text-[#e6c184] text-xs font-bold transition-colors"
             >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-3xl">🧑</span>
-                <Badge className="bg-purple-500/20 text-purple-400 dark:text-purple-300 border-none text-[10px] font-black">
-                  {isRtl ? "13 - 17 سنة" : "Ages 13-17"}
-                </Badge>
-              </div>
-              <h3 className="text-base font-black text-foreground group-hover:text-purple-600 transition-colors">
-                {isRtl ? "صالون الغموض واليافعين" : "Teens Mystery Salon"}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                {isRtl
-                  ? "شفرات أندلسية، تحقيقات بوليسية، ومخطوطات تاريخية غامضة تحبس الأنفاس."
-                  : "Cryptic Andalusian codes, forensic puzzles, and gripping historical thrillers."}
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-purple-500">
-                <span>{isRtl ? "فك الشفرة" : "Unlock Code"}</span>
-                {isRtl ? <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />}
-              </div>
+              <span className="material-symbols-outlined text-[20px]">bookmark_add</span>
+              <span>تصفح كافة الأروقة</span>
             </Link>
+          </div>
+        </div>
 
-            {/* Card 4: Adults 18+ */}
-            <Link
-              href={`/${locale}/books?age=adults_18_plus`}
-              className="group p-5 rounded-3xl bg-gradient-to-b from-amber-700/10 via-amber-700/5 to-card border border-amber-600/30 hover:border-amber-600/60 transition-all hover:shadow-lg hover:-translate-y-1 relative overflow-hidden"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-3xl">🧑‍💼</span>
-                <Badge className="bg-amber-600/20 text-amber-600 dark:text-amber-300 border-none text-[10px] font-black">
-                  {isRtl ? "18+ سنة" : "Adults 18+"}
-                </Badge>
+        {/* Guest Experience Bar (Matching Stitch p01_base_1440) */}
+        <div className="w-full bg-[#181b25] py-4 border-t border-[#4e463a]/30">
+          <div className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#1c1f29] flex items-center justify-center text-[#e6c184] shrink-0 border border-[#4e463a]/40">
+                <span className="material-symbols-outlined text-[20px]">lock_open</span>
               </div>
-              <h3 className="text-base font-black text-foreground group-hover:text-amber-700 transition-colors">
-                {isRtl ? "ديوان الأدب الكلاسيكي" : "Classical Literature"}
-              </h3>
-              <p className="text-xs text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                {isRtl
-                  ? "ملحمة أطياف بغداد، أسرار بيت الحكمة، ولغة فصحى راقية لصفوة القراء."
-                  : "House of Wisdom epics, ancient Baghdadi scribes, and profound prose."}
-              </p>
-              <div className="mt-4 flex items-center gap-1 text-[11px] font-bold text-amber-600">
-                <span>{isRtl ? "دخول الديوان" : "Enter Salon"}</span>
-                {isRtl ? <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" /> : <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />}
+              <div>
+                <p className="font-bold text-xs sm:text-sm text-[#e0e2ef]">
+                  أنت تتصفح كزائر ضيف في المكتبة العامة المفتوحة
+                </p>
+                <p className="text-[11px] text-[#d1c5b5]">
+                  جميع الأعمال الروائية متاحة للمعاينة الفورية والاستماع للعينات دون قيود تسجيل أو حجب فصول.
+                </p>
               </div>
-            </Link>
+            </div>
+            <div className="flex items-center gap-3 shrink-0">
+              <Link
+                href={`/${locale}/books`}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-[#1c1f29] text-[#e6c184] font-bold text-xs hover:bg-[#272a33] border border-[#4e463a]/40 transition-colors"
+              >
+                <span>اكتشف الكتالوج الكامل</span>
+                <span className="material-symbols-outlined text-[16px]">arrow_left_alt</span>
+              </Link>
+              <Link
+                href={`/${locale}/account`}
+                className="px-4 py-2 rounded-lg text-[#d1c5b5] hover:text-[#e0e2ef] text-xs font-bold transition-colors"
+              >
+                تسجيل الدخول للأعضاء
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          1.5 STORYVERSE MULTI-REALM SELECTOR (Stitch Age Realms)
+         ========================================================================= */}
+      <section className="container mx-auto px-4 max-w-6xl">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-bold text-[#e6c184] mb-2 tracking-widest uppercase">
+              <span className="material-symbols-outlined text-[16px]">travel_explore</span>
+              <span>{isRtl ? "عوالم STORYVERSE التفاعلية" : "StoryVerse Interactive Realms"}</span>
+            </div>
+            <h2 className="font-serif text-2xl sm:text-3xl font-black text-[#e0e2ef]">
+              {isRtl ? "اختر الرواق الأدبي المناسب لفئتك" : "Choose Your Dedicated Literary Realm"}
+            </h2>
+          </div>
+          <p className="text-xs text-[#a5a7b7] max-w-md">
+            {isRtl
+              ? "محتوى منسق خصيصاً لكل فئة عمرية، بتصنيفات دقيقة ومحركات قراءة ومؤثرات صوتية متوافقة مع الذوق الأدبي."
+              : "Tailored curation for every age group, with strict suitability and dedicated audio experiences."}
+          </p>
+        </div>
+
+        {/* 4 Age Group Cards in Stitch Nocturne Style */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-start">
+          {/* Card 1: Little 3-6 */}
+          <Link
+            href={`/${locale}/books?age=kids_3_6`}
+            className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-[#e6c184] transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold text-xl">
+                🧸
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[10px] font-bold">
+                {isRtl ? "٣ - ٦ سنوات" : "Ages 3-6"}
+              </span>
+            </div>
+            <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors">
+              {isRtl ? "واحة براعم الأطفال (Little)" : "StoryVerse Little"}
+            </h3>
+            <p className="text-xs text-[#a5a7b7] mt-2 line-clamp-2 leading-relaxed">
+              {isRtl
+                ? "قصص ما قبل النوم، رسوم دافئة، وتشكيل كامل للحروف مع راوية صوتية هادئة."
+                : "Gentle bedtime stories with soothing narrations and full vowel marks."}
+            </p>
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-[#e6c184]">
+              <span>{isRtl ? "استكشف الواحة" : "Enter Little"}</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                {isRtl ? "arrow_back" : "arrow_forward"}
+              </span>
+            </div>
+          </Link>
+
+          {/* Card 2: Kids 7-12 */}
+          <Link
+            href={`/${locale}/books?age=kids_7_12`}
+            className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-emerald-400/80 transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center font-bold text-xl">
+                🧭
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold">
+                {isRtl ? "٧ - ١٢ سنة" : "Ages 7-12"}
+              </span>
+            </div>
+            <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-emerald-400 transition-colors">
+              {isRtl ? "كوكب الاستكشاف والناشئة" : "Young Explorers"}
+            </h3>
+            <p className="text-xs text-[#a5a7b7] mt-2 line-clamp-2 leading-relaxed">
+              {isRtl
+                ? "سفن الفضاء السحيق، كنوز البحار السبعة، وخيال علمي يوقظ شغف المعرفة."
+                : "Space quests, mysteries of seven seas, and inspiring sci-fi adventures."}
+            </p>
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-emerald-400">
+              <span>{isRtl ? "بدء الرحلة" : "Start Quest"}</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                {isRtl ? "arrow_back" : "arrow_forward"}
+              </span>
+            </div>
+          </Link>
+
+          {/* Card 3: Teens 13-17 */}
+          <Link
+            href={`/${locale}/books?age=teens_13_17`}
+            className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-purple-400/80 transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="w-10 h-10 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center font-bold text-xl">
+                ⚡
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-purple-500/20 text-purple-300 font-mono text-[10px] font-bold">
+                {isRtl ? "١٣ - ١٧ سنة" : "Ages 13-17"}
+              </span>
+            </div>
+            <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-purple-400 transition-colors">
+              {isRtl ? "صالون الغموض واليافعين" : "Teens Mystery Realm"}
+            </h3>
+            <p className="text-xs text-[#a5a7b7] mt-2 line-clamp-2 leading-relaxed">
+              {isRtl
+                ? "شفرات أندلسية، تحقيقات بوليسية، ومخطوطات تاريخية غامضة تحبس الأنفاس."
+                : "Cryptic Andalusian codes, forensic puzzles, and gripping historical thrillers."}
+            </p>
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-purple-400">
+              <span>{isRtl ? "فك الشفرة" : "Unlock Code"}</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                {isRtl ? "arrow_back" : "arrow_forward"}
+              </span>
+            </div>
+          </Link>
+
+          {/* Card 4: Adults 18+ */}
+          <Link
+            href={`/${locale}/books?age=adults_18_plus`}
+            className="group p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 hover:border-[#e6c184] transition-all hover:shadow-xl hover:-translate-y-1 relative overflow-hidden"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="w-10 h-10 rounded-xl bg-[#e6c184]/10 text-[#e6c184] flex items-center justify-center font-bold text-xl">
+                🏛️
+              </span>
+              <span className="px-2.5 py-1 rounded-full bg-[#e6c184]/20 text-[#e6c184] font-mono text-[10px] font-bold">
+                {isRtl ? "١٨+ سنة" : "Adults 18+"}
+              </span>
+            </div>
+            <h3 className="font-serif text-base font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors">
+              {isRtl ? "ديوان الأدب (Originals)" : "StoryVerse Originals"}
+            </h3>
+            <p className="text-xs text-[#a5a7b7] mt-2 line-clamp-2 leading-relaxed">
+              {isRtl
+                ? "ملحمة أطياف بغداد، أسرار بيت الحكمة، وسينما روائية متكاملة لصفوة القراء."
+                : "Literary epics, nocturnal cinema, archival manuscripts, and profound prose."}
+            </p>
+            <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-[#e6c184]">
+              <span>{isRtl ? "دخول الديوان" : "Enter Originals"}</span>
+              <span className="material-symbols-outlined text-[16px] group-hover:-translate-x-1 transition-transform">
+                {isRtl ? "arrow_back" : "arrow_forward"}
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Core Trust Pillars */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs font-bold text-[#d1c5b5]">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#181b25] border border-[#4e463a]/30">
+            <span className="material-symbols-outlined text-[18px] text-emerald-400">verified_user</span>
+            <span>{isRtl ? "حماية سحابية ضد القرصنة (DRM)" : "Cloud DRM Anti-Piracy"}</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#181b25] border border-[#4e463a]/30">
+            <span className="material-symbols-outlined text-[18px] text-[#e6c184]">auto_stories</span>
+            <span>{isRtl ? "٣ صيغ لكل رواية (ورقي، صوتي، رقمي)" : "3 Formats Per Title"}</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#181b25] border border-[#4e463a]/30">
+            <span className="material-symbols-outlined text-[18px] text-blue-400">local_shipping</span>
+            <span>{isRtl ? "شحن ورقي مجلد سريع لكافة المدن" : "Fast Doorstep Shipping"}</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#181b25] border border-[#4e463a]/30">
+            <span className="material-symbols-outlined text-[18px] text-purple-400">workspace_premium</span>
+            <span>{isRtl ? "عضوية VIP بأرصدة شهرية تراكمية" : "VIP Monthly Passes"}</span>
           </div>
         </div>
       </section>

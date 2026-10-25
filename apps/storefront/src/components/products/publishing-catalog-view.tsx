@@ -44,35 +44,51 @@ export type StoryBook = {
 export function PublishingCatalogView({
   initialBooks,
   locale,
+  initialAge = "all",
 }: {
   initialBooks: StoryBook[]
   locale: "ar" | "en"
+  initialAge?: string
 }) {
   const { isKidsMode } = useKidsMode()
   const { playTrack, currentTrack, isPlaying, togglePlayPause } = useAudio()
   const { addItem } = useCart()
 
-  const [selectedAge, setSelectedAge] = useState<string>("all")
+  const [selectedAge, setSelectedAge] = useState<string>(initialAge)
+  const [searchQuery, setSearchQuery] = useState<string>("")
+  const [selectedGenre, setSelectedGenre] = useState<string>("all")
   const [addingId, setAddingId] = useState<string | null>(null)
   const [justAddedId, setJustAddedId] = useState<string | null>(null)
 
-  // Filter books: If Kids Mode is active, automatically restrict to kids categories
+  const isRtl = locale === "ar"
+
+  // Filter books: by Kids Mode, selectedAge, and search query
   let filtered = initialBooks.filter((book) => {
     if (isKidsMode) {
-      return book.ageGroup === "kids_3_6" || book.ageGroup === "kids_7_12"
+      if (book.ageGroup !== "kids_3_6" && book.ageGroup !== "kids_7_12") {
+        return false
+      }
+    } else if (selectedAge !== "all" && book.ageGroup !== selectedAge) {
+      return false
     }
-    if (selectedAge !== "all") {
-      return book.ageGroup === selectedAge
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim()
+      const titleMatch = book.title.toLowerCase().includes(q)
+      const authorMatch = book.author.toLowerCase().includes(q)
+      const descMatch = (book.description || "").toLowerCase().includes(q)
+      if (!titleMatch && !authorMatch && !descMatch) return false
     }
+
     return true
   })
 
   const ageCategories = [
-    { id: "all", nameAr: "جميع الأروقة والفئات", nameEn: "All Realms" },
-    { id: "kids_3_6", nameAr: "👶 أطفال (3 - 6 سنوات)", nameEn: "Kids (3-6 yrs)" },
-    { id: "kids_7_12", nameAr: "🧒 أطفال وناشئة (7 - 12 سنة)", nameEn: "Middle Grade (7-12)" },
-    { id: "teens_13_17", nameAr: "🧑 يافعين (13 - 17 سنة)", nameEn: "Teens (13-17)" },
-    { id: "adults_18_plus", nameAr: "🧑‍💼 روايات عامة (18+ سنة)", nameEn: "Adults (18+)" },
+    { id: "all", nameAr: "جميع الأروقة", nameEn: "All Realms", icon: "auto_stories" },
+    { id: "adults_18_plus", nameAr: "Originals (+18)", nameEn: "Originals (18+)", icon: "theater_comedy" },
+    { id: "teens_13_17", nameAr: "Teens (13-17)", nameEn: "Teens (13-17)", icon: "bolt" },
+    { id: "kids_7_12", nameAr: "Kids (7-12)", nameEn: "Kids (7-12)", icon: "explore" },
+    { id: "kids_3_6", nameAr: "Little (3-6)", nameEn: "Little (3-6)", icon: "toys" },
   ]
 
   const handlePlaySample = (book: StoryBook, e: React.MouseEvent) => {
@@ -110,20 +126,42 @@ export function PublishingCatalogView({
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
       {/* Stitch Header Banner */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-border/80">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#4e463a]/40">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 mb-3">
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Google Stitch Vibe Design • الكتالوج السيادي الشامل</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-[#1c1f29] text-[#e6c184] border border-[#4e463a]/40 mb-3">
+            <span className="material-symbols-outlined text-[16px] text-[#e6c184]">local_library</span>
+            <span>{isRtl ? "مكتبة STORYVERSE السيادية" : "StoryVerse Sovereign Catalog"}</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
-            {locale === "ar" ? "معرض الروايات والإصدارات الحصرية" : "Sovereign Literary Showcase"}
+          <h1 className="font-serif text-3xl sm:text-4xl font-black text-[#e0e2ef] tracking-tight">
+            {isRtl ? "معرض الروايات والإصدارات الحصرية" : "Sovereign Literary Showcase"}
           </h1>
-          <p className="text-sm text-muted-foreground mt-2 max-w-2xl">
-            {locale === "ar"
-              ? "استكشف أحدث الروايات والقصص المصورة والكتب الصوتية المرخصة من دار النشر السيادية، مع عينات استماع مجانية وضمان جودة الطباعة الفاخرة."
+          <p className="text-xs sm:text-sm text-[#d1c5b5] mt-2 max-w-2xl leading-relaxed">
+            {isRtl
+              ? "استكشف أحدث الروايات والقصص المصورة والكتب الصوتية المرخصة، مع عينات استماع مجانية وقراءة فورية للفصول الأولى."
               : "Discover masterfully curated novels, picture books, and DRM audiobooks with instant previews."}
           </p>
+        </div>
+
+        {/* Live Search Input */}
+        <div className="w-full md:w-80 relative shrink-0">
+          <span className="material-symbols-outlined absolute start-3.5 top-1/2 -translate-y-1/2 text-[18px] text-[#9a8f81]">
+            search
+          </span>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={isRtl ? "ابحث باسم الرواية أو الكاتب..." : "Search by title or author..."}
+            className="w-full bg-[#1c1f29] border border-[#4e463a]/50 rounded-xl py-2.5 ps-10 pe-4 text-xs font-medium text-[#e0e2ef] placeholder-[#9a8f81] focus:outline-none focus:border-[#e6c184] transition-colors"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute end-3 top-1/2 -translate-y-1/2 text-xs text-[#9a8f81] hover:text-[#e0e2ef]"
+            >
+              ✕
+            </button>
+          )}
         </div>
       </div>
 
@@ -134,10 +172,12 @@ export function PublishingCatalogView({
             <span className="text-2xl">👶</span>
             <div>
               <h4 className="text-sm font-bold text-amber-900 dark:text-amber-200">
-                وضع تصفح الأطفال الآمن مفعل حالياً
+                {isRtl ? "وضع تصفح الأطفال الآمن مفعل حالياً" : "Safe Kids Mode Active"}
               </h4>
               <p className="text-xs text-amber-800/80 dark:text-amber-300/80">
-                يتم الآن عرض القصص المصورة والقصص الصوتية المعتمدة للأطفال والناشئة فقط.
+                {isRtl
+                  ? "يتم الآن عرض القصص المصورة والقصص الصوتية المعتمدة للأطفال والناشئة فقط."
+                  : "Showing curated content approved for children and young readers only."}
               </p>
             </div>
           </div>
@@ -147,22 +187,23 @@ export function PublishingCatalogView({
         </div>
       )}
 
-      {/* Age Categories Filter Pills */}
+      {/* Age Realm Filter Tabs matching Stitch */}
       {!isKidsMode && (
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
           {ageCategories.map((cat) => {
             const isActive = selectedAge === cat.id
             return (
               <button
                 key={cat.id}
                 onClick={() => setSelectedAge(cat.id)}
-                className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all shrink-0 border ${
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all shrink-0 border ${
                   isActive
-                    ? "stitch-gold-gradient text-white border-transparent shadow-md"
-                    : "bg-card text-muted-foreground border-border/80 hover:bg-muted hover:text-foreground"
+                    ? "bg-[#e6c184] text-[#422c00] border-[#e6c184] shadow-md shadow-[#e6c184]/15"
+                    : "bg-[#1c1f29] text-[#d1c5b5] border-[#4e463a]/40 hover:bg-[#272a33] hover:text-[#e0e2ef]"
                 }`}
               >
-                {locale === "ar" ? cat.nameAr : cat.nameEn}
+                <span className="material-symbols-outlined text-[16px]">{cat.icon}</span>
+                <span>{locale === "ar" ? cat.nameAr : cat.nameEn}</span>
               </button>
             )
           })}

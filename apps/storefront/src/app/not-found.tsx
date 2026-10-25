@@ -1,23 +1,13 @@
-import Link from "next/link"
-
 export default function NotFound() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-6 text-center bg-muted/20 text-foreground font-sans">
-      <div className="max-w-md w-full bg-card p-8 rounded-3xl shadow-sm border border-border space-y-4">
-        <h1 className="text-5xl font-black text-primary">404</h1>
-        <h2 className="text-xl font-bold">الصفحة غير موجودة</h2>
-        <p className="text-xs text-muted-foreground">
-          Page Not Found. The requested page could not be located.
-        </p>
-        <div className="pt-4">
-          <Link
-            href="/ar"
-            className="inline-block rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 transition-colors"
-          >
-            العودة للمتجر / Return to Store
-          </Link>
+    <html lang="ar" dir="rtl">
+      <body style={{ backgroundColor: "#10131c", color: "#e0e2ef", display: "flex", alignItems: "center", justifyContent: "center", height: "100vh", margin: 0, fontFamily: "sans-serif" }}>
+        <div style={{ textAlign: "center", padding: "40px", backgroundColor: "#1c1f29", borderRadius: "16px", border: "1px solid #4e463a" }}>
+          <h1 style={{ fontSize: "48px", color: "#e6c184", margin: "0 0 16px 0" }}>٤٠٤</h1>
+          <p style={{ margin: "0 0 24px 0", color: "#d1c5b5" }}>الصفحة غير موجودة في أرشيف StoryVerse</p>
+          <a href="/ar" style={{ backgroundColor: "#e6c184", color: "#422c00", padding: "10px 20px", borderRadius: "8px", textDecoration: "none", fontWeight: "bold" }}>العودة للرئيسية</a>
         </div>
-      </div>
-    </div>
+      </body>
+    </html>
   )
 }

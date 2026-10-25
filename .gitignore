@@ -39,3 +39,7 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+
+# Stitch Large Exports
+stitch_export/
+*.zip

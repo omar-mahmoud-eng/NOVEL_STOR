@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -28,26 +29,26 @@
   }
 
   .dark {
-    /* Google Stitch Deep Obsidian & Onyx Dark Theme */
-    --background: 224 28% 7%; /* Deep Midnight Onyx #0B0E14 */
-    --foreground: 40 15% 96%; /* Soft Warm Ivory White */
-    --card: 224 26% 10%; /* Elevated Dark Slate Surface */
-    --card-foreground: 40 15% 96%;
-    --popover: 224 26% 10%;
-    --popover-foreground: 40 15% 96%;
-    --primary: 42 94% 54%; /* Radiant Amber Gold */
-    --primary-foreground: 224 28% 7%;
-    --secondary: 224 24% 14%;
-    --secondary-foreground: 40 15% 96%;
-    --muted: 224 24% 14%;
-    --muted-foreground: 220 15% 65%;
-    --accent: 224 24% 15%;
-    --accent-foreground: 42 94% 54%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 224 22% 16%;
-    --input: 224 22% 16%;
-    --ring: 42 94% 54%;
+    /* Google Stitch Nocturne Literary Cinema Dark Theme (#10131c / #e6c184) */
+    --background: 224 27% 9%; /* #10131c Deep Nocturnal Ink */
+    --foreground: 228 32% 91%; /* #e0e2ef Crisp Reading Silver */
+    --card: 227 18% 14%; /* #1c1f29 Elevated Container */
+    --card-foreground: 228 32% 91%;
+    --popover: 227 18% 14%;
+    --popover-foreground: 228 32% 91%;
+    --primary: 38 67% 71%; /* #e6c184 Antique Gold Leaf */
+    --primary-foreground: 38 100% 13%; /* #422c00 Deep Bronze */
+    --secondary: 215 36% 80%; /* #b8c8df Nocturne Slate */
+    --secondary-foreground: 215 33% 20%;
+    --muted: 225 15% 18%; /* #272a33 High Container */
+    --muted-foreground: 33 22% 77%; /* #d1c5b5 Warm Muted Stone */
+    --accent: 38 48% 60%; /* #c8a56b Primary Container */
+    --accent-foreground: 38 100% 13%;
+    --destructive: 6 100% 84%; /* #ffb4ab */
+    --destructive-foreground: 356 100% 21%;
+    --border: 36 15% 27%; /* #4e463a Outline Variant */
+    --input: 36 15% 27%;
+    --ring: 38 67% 71%;
   }
 
   * {

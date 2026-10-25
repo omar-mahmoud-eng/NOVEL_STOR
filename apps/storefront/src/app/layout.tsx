@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { Inter, IBM_Plex_Sans_Arabic } from "next/font/google"
+import { Inter, IBM_Plex_Sans_Arabic, Noto_Serif } from "next/font/google"
 import "@/styles/globals.css"
 
 const inter = Inter({
@@ -15,9 +15,16 @@ const ibmPlexArabic = IBM_Plex_Sans_Arabic({
   display: "swap",
 })
 
+const notoSerif = Noto_Serif({
+  subsets: ["latin"],
+  weight: ["400", "600", "700"],
+  variable: "--font-serif",
+  display: "swap",
+})
+
 export const metadata: Metadata = {
-  title: "Enterprise Headless E-Commerce",
-  description: "Production-ready Medusa v2 & Next.js 15 Storefront",
+  title: "StoryVerse | منصة الروايات والأدب العربي الرقمي والصوتي",
+  description: "المنصة السيادية المتكاملة لقراءة واستماع الروايات العربية لجميع الأعمار وفق تصميم Google Stitch",
 }
 
 export default function RootLayout({
@@ -27,10 +34,10 @@ export default function RootLayout({
 }) {
   return (
     <html
-      className={`${inter.variable} ${ibmPlexArabic.variable} h-full antialiased`}
+      className={`${inter.variable} ${ibmPlexArabic.variable} ${notoSerif.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="min-h-full flex flex-col bg-background text-foreground font-sans">
         {children}
       </body>
     </html>

@@ -214,8 +214,24 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
             </Button>
           </div>
 
-          <div className="w-full max-w-[380px] mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground">
-            <ShieldCheck className="w-4 h-4 text-primary shrink-0" />
+          {/* Stitch Production Badges Strip (from p06_base_1440) */}
+          <div className="grid grid-cols-3 gap-2 p-1.5 bg-[#1c1f29] rounded-xl border border-[#4e463a]/40 w-full max-w-[380px] mt-4 shadow-sm">
+            <div className="flex items-center justify-center gap-1.5 py-2 px-1 text-center bg-[#272a33] rounded-lg text-[#e0e2ef] text-xs font-bold">
+              <span className="material-symbols-outlined text-[#e6c184] text-[18px]">menu_book</span>
+              <span>نص روائي مُحقق</span>
+            </div>
+            <div className="flex items-center justify-center gap-1.5 py-2 px-1 text-center bg-[#272a33] rounded-lg text-[#e0e2ef] text-xs font-bold">
+              <span className="material-symbols-outlined text-[#e6c184] text-[18px]">graphic_eq</span>
+              <span>أداء استوديو كامل</span>
+            </div>
+            <div className="flex items-center justify-center gap-1.5 py-2 px-1 text-center bg-[#272a33] rounded-lg text-[#e0e2ef] text-xs font-bold">
+              <span className="material-symbols-outlined text-[#e6c184] text-[18px]">explore</span>
+              <span>وثائق أرشيفية</span>
+            </div>
+          </div>
+
+          <div className="w-full max-w-[380px] mt-3 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+            <ShieldCheck className="w-4 h-4 text-[#e6c184] shrink-0" />
             <span>
               {locale === "ar"
                 ? "محتوى رقمي محمي بترخيص DRM وروابط بث مؤمنة مشفرة"

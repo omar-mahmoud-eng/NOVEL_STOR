@@ -12,62 +12,62 @@ export function Footer({
   const isRtl = locale === "ar"
 
   return (
-    <footer className="border-t border-amber-500/20 bg-background/95 mt-auto">
-      {/* Trust Badges Bar with Google Stitch Gold Accents */}
-      <div className="border-b border-amber-500/15 bg-amber-500/5">
-        <div className="container mx-auto px-4 py-8">
+    <footer className="border-t border-[#4e463a]/30 bg-[#0b0e17] text-[#e0e2ef] mt-auto">
+      {/* Trust Badges Bar with Google Stitch Nocturne Accents */}
+      <div className="border-b border-[#4e463a]/25 bg-[#10131c]">
+        <div className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center md:text-start">
             <div className="flex flex-col md:flex-row items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
+              <div className="w-11 h-11 rounded-2xl bg-[#1c1f29] text-[#e6c184] flex items-center justify-center shrink-0 border border-[#4e463a]/40 shadow-xs">
                 <Truck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-foreground">
+                <h4 className="font-bold text-sm text-[#e0e2ef]">
                   {isRtl ? "شحن ورقي خليجي سريع" : "Express Regional Delivery"}
                 </h4>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-[#d1c5b5] mt-0.5">
                   {isRtl ? "توصيل آمن لباب البيت خلال 24-48 ساعة" : "24-48 hours directly to your door"}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
+              <div className="w-11 h-11 rounded-2xl bg-[#1c1f29] text-[#e6c184] flex items-center justify-center shrink-0 border border-[#4e463a]/40 shadow-xs">
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-foreground">
+                <h4 className="font-bold text-sm text-[#e0e2ef]">
                   {isRtl ? "حماية بث صوتي وتشفير DRM" : "Anti-Piracy DRM Stream"}
                 </h4>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-[#d1c5b5] mt-0.5">
                   {isRtl ? "استماع نقي بدون انقطاع وبأعلى دقة" : "High-fidelity lossless streaming"}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
+              <div className="w-11 h-11 rounded-2xl bg-[#1c1f29] text-[#e6c184] flex items-center justify-center shrink-0 border border-[#4e463a]/40 shadow-xs">
                 <RotateCcw className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-foreground">
+                <h4 className="font-bold text-sm text-[#e0e2ef]">
                   {isRtl ? "ضمان الاستبدال للنسخ الورقية" : "Replacement Guarantee"}
                 </h4>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-[#d1c5b5] mt-0.5">
                   {isRtl ? "استبدال فوري لأي نسخة متضررة مجاناً" : "Instant free swap for damaged copies"}
                 </p>
               </div>
             </div>
 
             <div className="flex flex-col md:flex-row items-center gap-3.5">
-              <div className="w-11 h-11 rounded-2xl bg-amber-500/15 text-amber-600 flex items-center justify-center shrink-0 border border-amber-500/25 shadow-xs">
+              <div className="w-11 h-11 rounded-2xl bg-[#1c1f29] text-[#e6c184] flex items-center justify-center shrink-0 border border-[#4e463a]/40 shadow-xs">
                 <Headphones className="w-5 h-5" />
               </div>
               <div>
-                <h4 className="font-bold text-sm text-foreground">
+                <h4 className="font-bold text-sm text-[#e0e2ef]">
                   {isRtl ? "صالون دعم القراء 24/7" : "24/7 Reader Concierge"}
                 </h4>
-                <p className="text-xs text-muted-foreground mt-0.5">
+                <p className="text-xs text-[#d1c5b5] mt-0.5">
                   {isRtl ? "خدمة مخصصة بالعربية والإنجليزية" : "Instant care in Arabic & English"}
                 </p>
               </div>
@@ -77,29 +77,27 @@ export function Footer({
       </div>
 
       {/* Main Footer Links */}
-      <div className="container mx-auto px-4 py-14">
+      <div className="max-w-[1280px] w-full mx-auto px-4 sm:px-6 py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
           {/* Brand Column */}
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950 flex items-center justify-center font-black shadow-md shadow-amber-500/20">
-                <Feather className="w-5 h-5" />
-              </div>
+              <span className="material-symbols-outlined text-[#e6c184] text-[28px]">auto_stories</span>
               <div>
-                <span className="font-black text-base text-foreground block">
-                  {isRtl ? "دار الروايات العالمية" : "Sovereign Stories"}
+                <span className="font-serif font-black text-lg text-[#e6c184] block">
+                  StoryVerse Originals
                 </span>
-                <span className="text-[10px] text-amber-600 font-bold tracking-wider uppercase block">
-                  Publishing & Audio Lab
+                <span className="text-[10px] text-[#d1c5b5] font-bold tracking-wider uppercase block">
+                  Sovereign Publishing & Audio Lab
                 </span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground leading-relaxed">
+            <p className="text-xs text-[#d1c5b5] leading-relaxed">
               {isRtl
-                ? "المنصة السيادية المتكاملة لنشر الروايات الفاخرة المطبوعة، الروايات الصوتية الدرامية، والكتب الإلكترونية المشفرة لجميع الفئات العمرية."
+                ? "المنصة السيادية المتكاملة لنشر الروايات الفاخرة المطبوعة، الروايات الصوتية الدرامية، والكتب الإلكترونية المشفرة لجميع الفئات العمرية وفق تصميم Google Stitch."
                 : "The premier all-in-one platform for deluxe printed novels, cinematic audiobooks, and encrypted e-books for all age groups."}
             </p>
-            <div className="flex items-center gap-2 text-xs text-emerald-600 font-semibold pt-1">
+            <div className="flex items-center gap-2 text-xs text-emerald-400 font-semibold pt-1">
               <Lock className="w-3.5 h-3.5" />
               <span>{isRtl ? "نظام سيادي محمي ومشفر 100%" : "Zero-Trust Hardened Architecture"}</span>
             </div>

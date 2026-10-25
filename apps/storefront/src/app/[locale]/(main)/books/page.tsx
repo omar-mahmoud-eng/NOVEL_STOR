@@ -11,11 +11,15 @@ export const metadata = {
 
 export default async function BooksCatalogPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>
+  searchParams?: Promise<{ age?: string }>
 }) {
   const { locale } = await params
   const validLocale = isValidLocale(locale) ? (locale as Locale) : defaultLocale
+  const resolvedSearchParams = searchParams ? await searchParams : undefined
+  const initialAge = resolvedSearchParams?.age || "all"
 
   const formattedBooks: StoryBook[] = PUBLISHING_BOOKS.map((b) => ({
     id: b.id,
@@ -37,7 +41,11 @@ export default async function BooksCatalogPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <PublishingCatalogView initialBooks={formattedBooks} locale={validLocale} />
+      <PublishingCatalogView
+        initialBooks={formattedBooks}
+        locale={validLocale}
+        initialAge={initialAge}
+      />
     </div>
   )
 }

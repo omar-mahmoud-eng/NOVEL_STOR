@@ -5,13 +5,11 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 import { useCustomerAuth } from "@/context/customer-auth-context"
-import { Button } from "@/components/ui/button"
-import { CartSheet } from "@/components/cart/cart-sheet"
 import { KidsModeToggle } from "@/components/kids/kids-mode-toggle"
+import { CartSheet } from "@/components/cart/cart-sheet"
 import {
   ShoppingBag,
   User,
-  Globe,
   Search,
   Menu,
   X,
@@ -19,8 +17,8 @@ import {
   BookOpen,
   Headphones,
   Crown,
-  Compass,
-  Feather,
+  ChevronDown,
+  Check,
 } from "lucide-react"
 
 export function Header({
@@ -35,13 +33,14 @@ export function Header({
   const pathname = usePathname()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [realmDropdownOpen, setRealmDropdownOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
 
   const toggleLanguage = () => {
     const nextLocale = locale === "ar" ? "en" : "ar"
     document.cookie = `NEXT_LOCALE=${nextLocale}; path=/; max-age=31536000`
 
-    const segments = pathname.split("/")
+    const segments = (pathname || "/").split("/")
     segments[1] = nextLocale
     const nextPath = segments.join("/") || `/${nextLocale}`
     router.push(nextPath)
@@ -56,179 +55,216 @@ export function Header({
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full stitch-glass border-b border-amber-500/15 transition-all">
-        {/* Top Luxury Announcement Ribbon */}
-        <div className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-700 text-slate-950 px-4 py-1.5 text-center text-xs font-bold flex items-center justify-center gap-2 shadow-inner">
-          <Sparkles className="w-3.5 h-3.5 fill-current text-slate-950" />
-          <span>
-            {locale === "ar"
-              ? "دار النشر المعيارية: روايات فاخرة ورقية، كتب صوتية مشفرة، وتفعيل اشتراك VIP الشهري الفوري"
-              : "Sovereign Literary Platform: Deluxe Hardcover Novels, DRM-Protected Audiobooks & VIP Pass"}
-          </span>
-          <span className="hidden sm:inline-block bg-slate-950/15 text-slate-950 px-2 py-0.2 rounded-full text-[10px] font-black uppercase">
-            STITCH DESIGN
-          </span>
-        </div>
-
-        {/* Main Header Bar */}
-        <div className="container mx-auto px-4 h-18 flex items-center justify-between gap-4">
-          {/* Mobile Menu Toggle & Brand */}
-          <div className="flex items-center gap-3">
+      <header className="sticky top-0 w-full z-50 bg-[#10131c]/90 backdrop-blur-xl border-b border-[#4e463a]/30 shadow-sm transition-all">
+        {/* Main Header Bar (Matching Stitch p01_base_1440) */}
+        <div className="h-20 max-w-[1280px] w-full mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
+          
+          {/* Brand & Realm Switcher */}
+          <div className="flex items-center gap-6">
+            
+            {/* Mobile menu trigger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-muted-foreground hover:text-foreground rounded-lg"
+              className="lg:hidden p-2 text-[#d1c5b5] hover:text-[#e0e2ef] rounded-lg"
               aria-label="Toggle menu"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
+            {/* StoryVerse Logo */}
             <Link href={`/${locale}`} className="flex items-center gap-2.5 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 text-slate-950 flex items-center justify-center font-black shadow-md shadow-amber-500/20 group-hover:scale-105 transition-transform">
-                <Feather className="w-5 h-5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-black text-base sm:text-lg tracking-tight text-foreground group-hover:text-primary transition-colors flex items-center gap-1.5">
-                  <span>{locale === "ar" ? "دار الروايات العالمية" : "Sovereign Stories"}</span>
-                  <Crown className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                </span>
-                <span className="hidden sm:inline-block text-[10px] text-muted-foreground font-semibold tracking-wider uppercase">
-                  {locale === "ar" ? "منصة النشر والأدب الرقمي والسمعي" : "Multi-Format Publishing House"}
-                </span>
-              </div>
+              <span className="material-symbols-outlined text-[#e6c184] text-[28px]">auto_stories</span>
+              <span className="font-serif font-black text-xl text-[#e6c184] tracking-wide">StoryVerse</span>
+              <span className="text-[10px] font-bold bg-[#93000a]/20 text-[#ffb4ab] px-2 py-0.5 rounded border border-[#ffb4ab]/30">
+                +١٨ المكتبة العامة
+              </span>
             </Link>
+
+            {/* Stitch Multi-Realm Dropdown */}
+            <div className="relative hidden xl:block">
+              <button
+                type="button"
+                onClick={() => setRealmDropdownOpen(!realmDropdownOpen)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1c1f29] hover:bg-[#272a33] transition-colors text-[#d1c5b5] hover:text-[#e0e2ef] text-xs font-bold border border-[#4e463a]/40"
+              >
+                <span className="material-symbols-outlined text-[16px] text-[#e6c184]">theater_comedy</span>
+                <span>Originals (18+)</span>
+                <ChevronDown className={`w-3.5 h-3.5 transition-transform ${realmDropdownOpen ? "rotate-180" : ""}`} />
+              </button>
+
+              {realmDropdownOpen && (
+                <div
+                  onMouseLeave={() => setRealmDropdownOpen(false)}
+                  className="absolute right-0 top-full mt-1.5 w-64 bg-[#1c1f29] rounded-xl shadow-2xl border border-[#4e463a]/60 p-1.5 z-50 animate-in fade-in duration-200"
+                >
+                  <Link
+                    href={`/${locale}/books?age=adults_18_plus`}
+                    onClick={() => setRealmDropdownOpen(false)}
+                    className="flex items-center justify-between px-3 py-2 rounded-lg bg-[#272a33] text-[#e6c184] text-xs font-bold"
+                  >
+                    <span>Originals / المكتبة العامة (+18)</span>
+                    <Check className="w-3.5 h-3.5 text-[#e6c184]" />
+                  </Link>
+
+                  <Link
+                    href={`/${locale}/books?age=teens_13_17`}
+                    onClick={() => setRealmDropdownOpen(false)}
+                    className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
+                  >
+                    Teens / عالم الناشئة (13-17)
+                  </Link>
+
+                  <Link
+                    href={`/${locale}/books?age=kids_7_12`}
+                    onClick={() => setRealmDropdownOpen(false)}
+                    className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
+                  >
+                    Kids / عالم الأطفال (7-12)
+                  </Link>
+
+                  <Link
+                    href={`/${locale}/books?age=kids_3_6`}
+                    onClick={() => setRealmDropdownOpen(false)}
+                    className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
+                  >
+                    Little / عالم الصغار (3-6)
+                  </Link>
+
+                  <div className="my-1 bg-[#32343e] h-px" />
+
+                  <Link
+                    href={`/${locale}/account`}
+                    onClick={() => setRealmDropdownOpen(false)}
+                    className="flex items-center px-3 py-2 rounded-lg text-[#d1c5b5] hover:bg-[#272a33] hover:text-[#e0e2ef] text-xs font-medium transition-colors"
+                  >
+                    Family Hub / مركز الأسرة
+                  </Link>
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Navigation Links */}
+            <nav className="hidden lg:flex items-center gap-6 text-xs font-bold">
+              <Link href={`/${locale}`} className="text-[#e6c184] hover:text-[#ffdeaa] transition-colors">
+                اكتشف
+              </Link>
+              <Link href={`/${locale}/books`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                الأنواع والكتالوج
+              </Link>
+              <Link href={`/${locale}/library`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                الصوتيات والقارئ
+              </Link>
+              <Link href={`/${locale}/subscriptions`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                باقات VIP
+              </Link>
+            </nav>
           </div>
 
-          {/* Search Bar (Desktop) with Google Stitch Styling */}
-          <form
-            onSubmit={handleSearchSubmit}
-            className="hidden md:flex flex-1 max-w-md items-center relative"
-          >
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={locale === "ar" ? "ابحث بالرواية، اسم المؤلف، الراوي الصوتي..." : "Search stories, authors, narrators..."}
-              className="w-full h-10 px-4 ps-10 pe-16 rounded-full border border-amber-500/25 bg-background/60 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all shadow-inner"
-            />
-            <Search className="w-4 h-4 text-amber-600/70 absolute start-3.5 pointer-events-none" />
-            <kbd className="absolute end-3 hidden sm:inline-block bg-muted text-muted-foreground text-[10px] font-mono px-1.5 py-0.5 rounded border border-border">
-              ⌘K
-            </kbd>
-          </form>
+          {/* Right Action Icons & Controls */}
+          <div className="flex items-center gap-3">
+            
+            {/* Search Input Trigger */}
+            <form onSubmit={handleSearchSubmit} className="hidden sm:flex items-center relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="ابحث في الأرشيف..."
+                className="w-48 h-9 px-3 ps-8 rounded-lg bg-[#1c1f29] border border-[#4e463a]/40 text-xs text-[#e0e2ef] placeholder:text-[#9a8f81] focus:outline-none focus:w-64 focus:border-[#e6c184] transition-all"
+              />
+              <Search className="w-3.5 h-3.5 text-[#9a8f81] absolute start-2.5 pointer-events-none" />
+            </form>
 
-          {/* Navigation Links (Desktop) */}
-          <nav className="hidden lg:flex items-center gap-6 text-xs font-bold">
-            <Link
-              href={`/${locale}/books`}
-              className="text-foreground/90 hover:text-primary transition-colors flex items-center gap-1.5 py-1"
-            >
-              <BookOpen className="w-3.5 h-3.5 text-amber-600" />
-              <span>{locale === "ar" ? "معرض الروايات" : "Catalog"}</span>
-            </Link>
+            {/* Guest indicator pill */}
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded bg-[#181b25] text-[#d1c5b5] text-[11px] font-bold border border-[#4e463a]/30">
+              <span className="w-2 h-2 rounded-full bg-[#e6c184]/70 animate-pulse" />
+              <span>تصفح كزائر</span>
+            </div>
 
-            <Link
-              href={`/${locale}/subscriptions`}
-              className="text-amber-600 dark:text-amber-400 font-extrabold hover:text-amber-700 transition-colors flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/25 px-3 py-1 rounded-full shadow-xs"
-            >
-              <Crown className="w-3.5 h-3.5 text-amber-500" />
-              <span>{locale === "ar" ? "نادي القراء VIP" : "VIP Pass"}</span>
-            </Link>
-
-            <Link
-              href={`/${locale}/library`}
-              className="text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1.5 py-1"
-            >
-              <Headphones className="w-3.5 h-3.5 text-purple-600" />
-              <span>{locale === "ar" ? "مكتبتي الصوتية" : "My Library"}</span>
-            </Link>
-          </nav>
-
-          {/* Action Icons */}
-          <div className="flex items-center gap-2 sm:gap-3">
-            {/* Safe Kids Mode Switcher */}
+            {/* Kids Mode Toggle */}
             <KidsModeToggle locale={locale} />
 
             {/* Language Switcher */}
-            <Button
-              variant="ghost"
-              size="sm"
+            <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 text-xs font-bold px-2.5 h-9 rounded-full hover:bg-amber-500/10 text-foreground"
-              title={dict.nav.change_language}
+              className="p-2 rounded-lg bg-[#1c1f29] hover:bg-[#272a33] text-[#d1c5b5] hover:text-[#e0e2ef] text-xs font-bold transition-colors"
+              title="تغيير اللغة / Switch Language"
             >
-              <Globe className="w-4 h-4 text-amber-600" />
-              <span>{locale === "ar" ? "EN" : "عربي"}</span>
-            </Button>
+              {locale === "ar" ? "EN" : "عربي"}
+            </button>
 
-            {/* Account Link */}
-            <Button variant="ghost" size="sm" asChild className="h-9 px-2.5 rounded-full gap-1.5 hover:bg-amber-500/10">
-              <Link href={`/${locale}/account`} title={dict.nav.account}>
-                {customer?.avatar ? (
-                  <img
-                    src={customer.avatar}
-                    alt={customer.name}
-                    className="w-6 h-6 rounded-full object-cover border-2 border-amber-500"
-                  />
-                ) : (
-                  <div className="w-6 h-6 rounded-full bg-amber-500/20 text-amber-700 flex items-center justify-center font-bold text-[11px]">
-                    <User className="w-3.5 h-3.5" />
-                  </div>
-                )}
-                <span className="hidden sm:inline text-xs font-bold text-foreground">
-                  {customer ? customer.name.split(" ")[0] : (locale === "ar" ? "حسابي" : "Account")}
-                </span>
-              </Link>
-            </Button>
+            {/* Account / Portal Link */}
+            <Link
+              href={`/${locale}/account`}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1c1f29] hover:bg-[#272a33] text-[#e6c184] text-xs font-bold border border-[#4e463a]/40 transition-colors"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline-block">
+                {customer ? customer.name.split(" ")[0] : "تسجيل الدخول"}
+              </span>
+            </Link>
 
-            {/* Luxury Cart Trigger Button */}
-            <Button
-              size="sm"
+            {/* Cart Button */}
+            <button
               onClick={() => setIsOpen(true)}
-              className="relative h-10 px-3.5 gap-2 rounded-full stitch-gold-gradient font-black text-xs hover:opacity-95 transition-all"
+              className="relative p-2 rounded-lg bg-[#e6c184] text-[#422c00] hover:bg-[#ffdeaa] transition-colors font-bold shadow-md"
+              aria-label="سلة المقتنيات"
             >
-              <ShoppingBag className="w-4 h-4 text-slate-950" />
-              <span className="hidden sm:inline font-bold text-slate-950">{locale === "ar" ? "السلة" : "Cart"}</span>
+              <ShoppingBag className="w-4 h-4" />
               {itemsCount > 0 && (
-                <span className="bg-slate-950 text-amber-400 text-[11px] font-black h-5 min-w-[20px] px-1.5 rounded-full flex items-center justify-center shadow-xs">
+                <span className="absolute -top-1 -start-1 bg-[#ba1a1a] text-white text-[10px] font-black rounded-full w-4 h-4 flex items-center justify-center">
                   {itemsCount}
                 </span>
               )}
-            </Button>
+            </button>
           </div>
         </div>
 
-        {/* Mobile Navigation Dropdown */}
+        {/* Mobile menu dropdown */}
         {mobileMenuOpen && (
-          <div className="md:hidden border-t border-amber-500/20 p-4 bg-background/95 backdrop-blur space-y-3 text-xs font-bold">
-            <Link
-              href={`/${locale}/books`}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 p-2.5 hover:bg-muted rounded-lg"
-            >
-              <BookOpen className="w-4 h-4 text-amber-600" />
-              <span>{locale === "ar" ? "معرض الروايات والإصدارات" : "All Stories"}</span>
-            </Link>
-            <Link
-              href={`/${locale}/subscriptions`}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 p-2.5 bg-amber-500/10 text-amber-600 rounded-lg font-black"
-            >
-              <Crown className="w-4 h-4 text-amber-500" />
-              <span>{locale === "ar" ? "نادي القراء VIP والعضويات" : "VIP Memberships"}</span>
-            </Link>
-            <Link
-              href={`/${locale}/library`}
-              onClick={() => setMobileMenuOpen(false)}
-              className="flex items-center gap-2 p-2.5 hover:bg-muted rounded-lg"
-            >
-              <Headphones className="w-4 h-4 text-purple-600" />
-              <span>{locale === "ar" ? "مكتبتي الرقمية والصوتية" : "My Library"}</span>
-            </Link>
+          <div className="lg:hidden border-t border-[#4e463a]/30 bg-[#10131c] p-4 space-y-3">
+            <nav className="flex flex-col gap-2 text-xs font-bold">
+              <Link
+                href={`/${locale}`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#e6c184] bg-[#1c1f29]"
+              >
+                اكتشف
+              </Link>
+              <Link
+                href={`/${locale}/books`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                الأنواع والكتالوج
+              </Link>
+              <Link
+                href={`/${locale}/library`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                الصوتيات والقارئ
+              </Link>
+              <Link
+                href={`/${locale}/subscriptions`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                باقات VIP
+              </Link>
+              <Link
+                href={`/${locale}/account`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                مركز الأسرة والحساب
+              </Link>
+            </nav>
           </div>
         )}
       </header>
 
-      {/* Slide-over Cart component */}
+      {/* Cart Sheet Component */}
       <CartSheet locale={locale} dict={dict} />
     </>
   )
