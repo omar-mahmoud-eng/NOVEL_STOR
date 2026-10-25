@@ -141,36 +141,56 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
     },
   ]
 
-  // If customer is NOT logged in: Show Login / Register form + Demo Customer Switcher
+  // If customer is NOT logged in: Show Stitch P12 Login / Register form + Demo Customer Switcher
   if (!customer) {
     return (
       <div className="container mx-auto px-4 py-12 max-w-2xl">
-        <div className="stitch-card bg-card rounded-3xl border border-amber-500/30 p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+        <div className="bg-[#1c1f29] rounded-3xl border border-[#4e463a]/50 p-6 sm:p-10 shadow-2xl relative overflow-hidden text-start">
           {/* Subtle golden ambient glow */}
-          <div className="absolute top-0 end-0 w-72 h-72 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute top-0 end-0 w-72 h-72 bg-[#e6c184]/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Header */}
-          <div className="text-center mb-6 relative z-10">
-            <div className="w-14 h-14 rounded-2xl stitch-gold-gradient text-white flex items-center justify-center mx-auto mb-3 shadow-md">
-              <User className="w-7 h-7" />
+          {/* Header (Stitch P12 Folio) */}
+          <div className="mb-6 relative z-10">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-[#93000a]/20 text-[#ffb4ab] border border-[#ffb4ab]/30">
+                <ShieldCheck className="w-3.5 h-3.5" />
+                <span>بروتوكول التحقق الفئوي (+١٨)</span>
+              </div>
+              <span className="text-[10px] text-[#9a8f81] font-mono tracking-widest uppercase">
+                Folio Registration • 012
+              </span>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black bg-amber-500/10 text-amber-700 dark:text-amber-300 border border-amber-500/20 mb-2">
-              <Sparkles className="w-3 h-3 text-amber-500" />
-              <span>Google Stitch Vibe Onboarding</span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-foreground">
-              {locale === "ar" ? "بوابة القراء والتوجيه الذكي" : "Smart Reader Portal & Onboarding"}
+
+            <h1 className="font-serif text-2xl sm:text-3xl font-black text-[#e0e2ef]">
+              {locale === "ar" ? "بوابة القراء والتحقق السيادي" : "Reader Account Portal & Access"}
             </h1>
-            <p className="text-xs text-muted-foreground mt-1 max-w-md mx-auto leading-relaxed">
+            <p className="font-serif text-xs text-[#d1c5b5] mt-1.5 leading-relaxed">
               {locale === "ar"
-                ? "حدد فئتك العمرية المفضلة لنقوم بتوجيهك فوراً إلى الرواق والروايات المناسبة لاهتماماتك."
-                : "Select your preferred age category to be automatically guided to your tailored literary department."}
+                ? "فضاء أدبي مستقل للقراء البالغين والأوصياء يتيح حفظ التقدم، والمزامنة السحابية للمخطوطات، وحماية المحتوى الفلسفي والنصوص الناضجة غير المقتطعة."
+                : "A sovereign literary space for adult readers with offline DRM synchronization and zero behavioral tracking."}
             </p>
+          </div>
+
+          {/* Guardian & Age Legal Policy Clarification Callout (Stitch P12 Signature) */}
+          <div className="mb-6 p-4 rounded-2xl bg-[#181b25] border border-[#4e463a]/40 flex gap-3 items-start">
+            <span className="material-symbols-outlined text-[#e6c184] text-[22px] shrink-0 mt-0.5">
+              family_restroom
+            </span>
+            <div className="text-xs space-y-1">
+              <span className="font-bold text-[#e6c184] block">
+                {locale === "ar" ? "سياسة الحسابات الأسرية وإشراف الأوصياء:" : "Family & Guardian Policy:"}
+              </span>
+              <p className="text-[11px] text-[#cdc6b8] leading-relaxed">
+                {locale === "ar"
+                  ? "التسجيل المباشر متاح حصراً لمن أتموا ثمانية عشر عاماً (+١٨). يتم ضبط صلاحيات الأطفال والناشئة بحماية PIN من داخل مركز الأسرة (Family Hub)."
+                  : "Direct registration is strictly for adults (18+). Child profiles are managed with PIN security under guardian oversight in Family Hub."}
+              </p>
+            </div>
           </div>
 
           {/* Age Group Selector Card Grid */}
           <div className="mb-6">
-            <label className="block text-xs font-bold text-foreground mb-2 text-start">
+            <label className="block text-xs font-bold text-[#e0e2ef] mb-2 text-start">
               {locale === "ar" ? "اختر الفئة العمرية (تحدد قسمك فور الدخول):" : "Select Age Group (Determines Destination):"}
             </label>
             <div className="grid grid-cols-2 gap-2.5">
@@ -184,21 +204,21 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
                     onClick={() => setSelectedAgeGroup(groupKey)}
                     className={`p-3 rounded-2xl border text-start transition-all relative overflow-hidden ${
                       isSelected
-                        ? `${conf.colorTheme.bgLight} ${conf.colorTheme.accentBorder} ring-2 ring-primary/40 shadow-xs`
-                        : "bg-muted/30 border-border/70 hover:bg-muted/70"
+                        ? "bg-[#272a33] border-[#e6c184] ring-2 ring-[#e6c184]/40 shadow-xs"
+                        : "bg-[#181b25] border-[#4e463a]/30 hover:bg-[#272a33]"
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-lg">{conf.icon}</span>
-                      <span className="font-bold text-xs text-foreground">
+                      <span className="font-bold text-xs text-[#e0e2ef]">
                         {locale === "ar" ? conf.labelAr : conf.labelEn}
                       </span>
                     </div>
-                    <p className="text-[11px] text-muted-foreground line-clamp-1">
+                    <p className="text-[11px] text-[#9a8f81] line-clamp-1">
                       {locale === "ar" ? conf.taglineAr : conf.taglineEn}
                     </p>
                     {isSelected && (
-                      <span className="absolute top-2 left-2 text-[10px] font-bold text-primary">
+                      <span className="absolute top-2 left-2 text-[10px] font-bold text-[#e6c184]">
                         ✓
                       </span>
                     )}
@@ -209,7 +229,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
           </div>
 
           {/* Login / Register Tab Switcher */}
-          <div className="grid grid-cols-2 p-1 rounded-2xl bg-muted/60 mb-6">
+          <div className="grid grid-cols-2 p-1 rounded-2xl bg-[#181b25] border border-[#4e463a]/40 mb-6">
             <button
               onClick={() => {
                 setAuthTab("login")
@@ -217,8 +237,8 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
               }}
               className={`py-2.5 text-xs font-bold rounded-xl transition-all ${
                 authTab === "login"
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-[#272a33] text-[#e6c184] shadow-xs border border-[#e6c184]/30"
+                  : "text-[#9a8f81] hover:text-[#e0e2ef]"
               }`}
             >
               <span className="flex items-center justify-center gap-1.5">
@@ -234,8 +254,8 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
               }}
               className={`py-2.5 text-xs font-bold rounded-xl transition-all ${
                 authTab === "register"
-                  ? "bg-card text-foreground shadow-xs"
-                  : "text-muted-foreground hover:text-foreground"
+                  ? "bg-[#272a33] text-[#e6c184] shadow-xs border border-[#e6c184]/30"
+                  : "text-[#9a8f81] hover:text-[#e0e2ef]"
               }`}
             >
               <span className="flex items-center justify-center gap-1.5">

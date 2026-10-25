@@ -163,8 +163,14 @@ export function Header({
               <Link href={`/${locale}/interactive`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
                 سرد تفاعلي
               </Link>
-              <Link href={`/${locale}/library`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
-                مكتبتي والقارئ
+              <Link href={`/${locale}/atlas`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                أطلس السرد
+              </Link>
+              <Link href={`/${locale}/illustrated`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                روايات مصورة
+              </Link>
+              <Link href={`/${locale}/products`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
+                المقتنيات الفاخرة
               </Link>
               <Link href={`/${locale}/subscriptions`} className="text-[#d1c5b5] hover:text-[#e0e2ef] transition-colors">
                 باقات VIP
@@ -277,6 +283,41 @@ export function Header({
                 className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
               >
                 الروايات التفاعلية (مسارات متعددة)
+              </Link>
+              <Link
+                href={`/${locale}/atlas`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                أطلس السرد وشبكة الشخصيات
+              </Link>
+              <Link
+                href={`/${locale}/illustrated`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                الروايات المصورة والويب تون
+              </Link>
+              <Link
+                href={`/${locale}/mood-selector`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                محدد المزاج والوقت القرائي
+              </Link>
+              <Link
+                href={`/${locale}/products`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                المقتنيات المجلدة الفاخرة
+              </Link>
+              <Link
+                href={`/${locale}/preferences`}
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg text-[#d1c5b5] hover:bg-[#1c1f29]"
+              >
+                تفضيلات القراءة والهدوء
               </Link>
               <Link
                 href={`/${locale}/realms/teens`}

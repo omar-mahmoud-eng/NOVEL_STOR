@@ -166,6 +166,31 @@ export function Footer({
                 </Link>
               </li>
               <li>
+                <Link href={`/${locale}/atlas`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "أطلس السرد وشبكة الشخصيات" : "Narrative Atlas & Network"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/illustrated`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "الروايات المصورة والويب تون" : "Illustrated Graphic Novels"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/mood-selector`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "محدد المزاج والوقت القرائي" : "Reading Mood Selector"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/products`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "أروقة المقتنيات المجلدة الفاخرة" : "Deluxe Physical Editions"}
+                </Link>
+              </li>
+              <li>
+                <Link href={`/${locale}/preferences`} className="hover:text-[#e6c184] transition-colors">
+                  {isRtl ? "تفضيلات القراءة وبيئة المطالعة" : "Reading Preferences"}
+                </Link>
+              </li>
+              <li>
                 <Link href={`/${locale}/subscriptions`} className="hover:text-[#e6c184] transition-colors">
                   {isRtl ? "باقات اشتراك VIP الشهرية والسنوية" : "VIP Membership Passes"}
                 </Link>
