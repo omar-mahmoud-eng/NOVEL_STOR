@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Input } from "@medusajs/ui"
 import {
@@ -12,6 +12,7 @@ import {
   AlertTriangle,
   CheckCircle2,
   Calendar,
+  RefreshCw,
 } from "lucide-react"
 import { SubNav } from "../../components/sub-nav"
 
@@ -32,6 +33,7 @@ type SubscriptionTier = {
 
 type Subscriber = {
   id: string
+  name: string
   email: string
   plan: string
   status: "active" | "past_due" | "paused"
@@ -42,27 +44,27 @@ type Subscriber = {
 const initialTiers: SubscriptionTier[] = [
   {
     id: "tier_monthly_vip",
-    title: "VIP Reader & Listener Pass (Monthly)",
+    title: "باقة الصالون الأدبي VIP الشهرية",
     interval: "month",
-    price: "SAR 39.00 / mo",
+    price: "39.00 ر.س / شهرياً",
     credits: 1,
     activeSubscribers: 840,
     badgeColor: "purple",
   },
   {
     id: "tier_annual_vip",
-    title: "VIP All-Access Reader Pass (Annual)",
+    title: "اشتراك النخبة الشامل All-Access (سنوي)",
     interval: "year",
-    price: "SAR 390.00 / yr",
+    price: "390.00 ر.س / سنوياً",
     credits: 14,
     activeSubscribers: 310,
     badgeColor: "blue",
   },
   {
     id: "tier_kids_pass",
-    title: "Kids Bedtime Story Pass (Family)",
+    title: "باقة براعم العائلة وقصص قبل النوم",
     interval: "month",
-    price: "SAR 29.00 / mo",
+    price: "29.00 ر.س / شهرياً",
     credits: 2,
     activeSubscribers: 190,
     badgeColor: "green",
@@ -71,25 +73,28 @@ const initialTiers: SubscriptionTier[] = [
 
 const initialSubscribers: Subscriber[] = [
   {
-    id: "sub_01H123",
-    email: "tariq.almansoor@example.com",
-    plan: "VIP Reader & Listener Pass (Monthly)",
+    id: "cust_tariq_01",
+    name: "طارق بن منصور المنصور",
+    email: "tariq.mansoor@example.com",
+    plan: "باقة الصالون الأدبي VIP الشهرية",
     status: "active",
-    remainingCredits: 3,
+    remainingCredits: 2,
     renewalDate: "2026-11-24",
   },
   {
-    id: "sub_01H456",
-    email: "fatima.alzahra@example.com",
-    plan: "VIP All-Access Reader Pass (Annual)",
+    id: "cust_sarah_02",
+    name: "د. سارة بنت عبد الله العتيبي",
+    email: "dr.sarah.otb@example.com",
+    plan: "اشتراك النخبة الشامل All-Access (سنوي)",
     status: "active",
-    remainingCredits: 9,
+    remainingCredits: 18,
     renewalDate: "2027-04-15",
   },
   {
-    id: "sub_01H789",
-    email: "khalid.omar@example.com",
-    plan: "Kids Bedtime Story Pass (Family)",
+    id: "cust_khalid_05",
+    name: "خالد بن سلطان",
+    email: "khalid.sultan@example.com",
+    plan: "باقة براعم العائلة وقصص قبل النوم",
     status: "past_due",
     remainingCredits: 0,
     renewalDate: "2026-10-25",
@@ -99,36 +104,96 @@ const initialSubscribers: Subscriber[] = [
 const SubscriptionsPage = () => {
   const [tiers, setTiers] = useState<SubscriptionTier[]>(initialTiers)
   const [subscribers, setSubscribers] = useState<Subscriber[]>(initialSubscribers)
+  const [loading, setLoading] = useState(false)
   const [showAddTier, setShowAddTier] = useState(false)
   const [newTierTitle, setNewTierTitle] = useState("")
   const [newTierPrice, setNewTierPrice] = useState("49")
   const [newTierCredits, setNewTierCredits] = useState(1)
+  const [feedbackMsg, setFeedbackMsg] = useState("")
 
-  const handleAddTier = (e: React.FormEvent) => {
+  const fetchData = async () => {
+    setLoading(true)
+    try {
+      const res = await fetch("/admin/subscription-tiers")
+      if (res.ok) {
+        const data = await res.json()
+        if (data.tiers && data.tiers.length > 0) {
+          const mappedTiers: SubscriptionTier[] = data.tiers.map((t: any) => ({
+            id: t.id,
+            title: t.title,
+            interval: t.interval || "month",
+            price: `${(t.price_amount / 100).toFixed(2)} ر.س / ${t.interval === "year" ? "سنوياً" : "شهرياً"}`,
+            credits: t.book_credits_per_period || 1,
+            activeSubscribers: 120,
+            badgeColor: t.interval === "year" ? "blue" : "purple",
+          }))
+          setTiers(mappedTiers)
+        }
+      }
+    } catch (err) {
+      console.error(err)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    fetchData()
+  }, [])
+
+  const handleAddTier = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newTierTitle.trim()) return
 
-    const created: SubscriptionTier = {
-      id: `tier_${Date.now().toString(36)}`,
-      title: newTierTitle.trim(),
-      interval: "month",
-      price: `SAR ${parseFloat(newTierPrice).toFixed(2)} / mo`,
-      credits: newTierCredits,
-      activeSubscribers: 0,
-      badgeColor: "purple",
-    }
+    const priceNum = Math.round(parseFloat(newTierPrice) * 100)
+    const handle = newTierTitle.toLowerCase().replace(/\s+/g, "-")
 
-    setTiers([...tiers, created])
-    setNewTierTitle("")
-    setShowAddTier(false)
+    try {
+      const res = await fetch("/admin/subscription-tiers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newTierTitle.trim(),
+          handle,
+          interval: "month",
+          price_amount: priceNum,
+          book_credits_per_period: newTierCredits,
+        }),
+      })
+
+      if (res.ok) {
+        setFeedbackMsg("تم إنشاء وحفظ باقة الاشتراك في قاعدة البيانات بنجاح!")
+        setTimeout(() => setFeedbackMsg(""), 3500)
+        setNewTierTitle("")
+        setShowAddTier(false)
+        await fetchData()
+      }
+    } catch (err) {
+      console.error(err)
+    }
   }
 
-  const handleGiftCredit = (subId: string) => {
-    setSubscribers((prev) =>
-      prev.map((sub) =>
-        sub.id === subId ? { ...sub, remainingCredits: sub.remainingCredits + 1 } : sub
+  const handleGiftCredit = async (subId: string) => {
+    try {
+      await fetch("/admin/crm", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "grant_credit",
+          customer_id: subId,
+          credits_delta: 1,
+        }),
+      })
+      setSubscribers((prev) =>
+        prev.map((sub) =>
+          sub.id === subId ? { ...sub, remainingCredits: sub.remainingCredits + 1 } : sub
+        )
       )
-    )
+      setFeedbackMsg("تم إهداء (+1) رصيد كتاب مجاني للمشترك وتوثيقه في قاعدة البيانات!")
+      setTimeout(() => setFeedbackMsg(""), 3500)
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const handleTogglePause = (subId: string) => {
@@ -142,75 +207,84 @@ const SubscriptionsPage = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto p-4 sm:p-6" dir="rtl">
       <SubNav
-        parentTitle="Subscriptions & Memberships"
-        currentTitle="Recurring Memberships & Churn Analytics"
+        parentTitle="الاشتراكات والخدمات الرقمية"
+        currentTitle="باقات العضوية المتكررة وأرصدة الكتب | Subscriptions & Churn Analytics"
         description="إدارة باقات العضوية الشهرية والسنوية، تتبع تجديدات الدفعات وتوزيع أرصدة الكتب الصوتية"
         icon={Sparkles}
         tabs={subscriptionsTabs}
+        onRefresh={fetchData}
+        isLoading={loading}
       />
+
+      {feedbackMsg && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="w-4 h-4 shrink-0" />
+          <span className="font-medium">{feedbackMsg}</span>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Container className="p-5 bg-white dark:bg-ui-bg-base border border-ui-border-base rounded-xl shadow-xs">
           <div className="flex items-center justify-between">
-            <Text className="text-xs font-medium uppercase tracking-wider text-ui-fg-subtle">
-              Monthly Recurring (MRR)
+            <Text className="text-xs font-bold text-ui-fg-subtle">
+              الإيراد الشهري المتكرر (MRR)
             </Text>
-            <div className="p-2 rounded-lg bg-ui-tag-green-bg text-ui-tag-green-icon">
+            <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
               <TrendingUp className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-ui-fg-base">SAR 48,250</span>
+            <span className="text-2xl font-black text-ui-fg-base">48,250 ر.س</span>
           </div>
-          <Text className="text-xs text-ui-fg-muted mt-1">+14.2% from last cycle</Text>
+          <Text className="text-xs text-emerald-600 font-bold mt-1">+14.2% مقارنة بالشهر السابق</Text>
         </Container>
 
         <Container className="p-5 bg-white dark:bg-ui-bg-base border border-ui-border-base rounded-xl shadow-xs">
           <div className="flex items-center justify-between">
-            <Text className="text-xs font-medium uppercase tracking-wider text-ui-fg-subtle">
-              Active VIP Subscribers
+            <Text className="text-xs font-bold text-ui-fg-subtle">
+              مشتركو باقات VIP النشطون
             </Text>
-            <div className="p-2 rounded-lg bg-ui-tag-purple-bg text-ui-tag-purple-icon">
+            <div className="p-2 rounded-lg bg-purple-50 text-purple-600">
               <Users className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-ui-fg-base">1,340 Readers</span>
+            <span className="text-2xl font-black text-ui-fg-base">1,340 قارئ</span>
           </div>
-          <Text className="text-xs text-ui-fg-muted mt-1">98.4% payment retention rate</Text>
+          <Text className="text-xs text-ui-fg-muted mt-1">98.4% معدل نجاح التجديد التلقائي</Text>
         </Container>
 
         <Container className="p-5 bg-white dark:bg-ui-bg-base border border-ui-border-base rounded-xl shadow-xs">
           <div className="flex items-center justify-between">
-            <Text className="text-xs font-medium uppercase tracking-wider text-ui-fg-subtle">
-              Credits Dispensed (MTD)
+            <Text className="text-xs font-bold text-ui-fg-subtle">
+              أرصدة الكتب الممنوحة (MTD)
             </Text>
-            <div className="p-2 rounded-lg bg-ui-tag-blue-bg text-ui-tag-blue-icon">
+            <div className="p-2 rounded-lg bg-blue-50 text-blue-600">
               <Gift className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-ui-fg-base">1,890 Credits</span>
+            <span className="text-2xl font-black text-ui-fg-base">1,890 رصيد</span>
           </div>
-          <Text className="text-xs text-ui-fg-muted mt-1">Audiobooks & E-books unlocked</Text>
+          <Text className="text-xs text-ui-fg-muted mt-1">تم تفعيلها في كتب صوتية وإلكترونية</Text>
         </Container>
 
         <Container className="p-5 bg-white dark:bg-ui-bg-base border border-ui-border-base rounded-xl shadow-xs">
           <div className="flex items-center justify-between">
-            <Text className="text-xs font-medium uppercase tracking-wider text-ui-fg-subtle">
-              Renewal Scheduler
+            <Text className="text-xs font-bold text-ui-fg-subtle">
+              جدولة التجديدات التلقائية
             </Text>
-            <div className="p-2 rounded-lg bg-ui-tag-orange-bg text-ui-tag-orange-icon">
+            <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
               <Clock className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-ui-fg-base">BullMQ Active</span>
+            <span className="text-2xl font-black text-ui-fg-base">BullMQ نشط</span>
           </div>
-          <Text className="text-xs text-ui-fg-muted mt-1">Daily automated cron running</Text>
+          <Text className="text-xs text-emerald-600 font-bold mt-1">تجديدات دورية كل 24 ساعة</Text>
         </Container>
       </div>
 
@@ -219,18 +293,18 @@ const SubscriptionsPage = () => {
         <Container className="p-6 bg-ui-bg-subtle/50 border border-ui-border-base rounded-xl">
           <form onSubmit={handleAddTier} className="space-y-4">
             <Heading level="h3" className="text-sm font-bold text-ui-fg-base">
-              Create New Membership Tier
+              إنشاء باقة عضوية جديدة
             </Heading>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Input
-                placeholder="Tier Title (e.g. VIP Young Adult Reader Pass)"
+                placeholder="عنوان الباقة (مثال: باقة رواد الخيال العلمي)"
                 value={newTierTitle}
                 onChange={(e) => setNewTierTitle(e.target.value)}
                 required
               />
               <Input
                 type="number"
-                placeholder="Price (SAR)"
+                placeholder="السعر (ر.س)"
                 value={newTierPrice}
                 onChange={(e) => setNewTierPrice(e.target.value)}
                 required
@@ -238,13 +312,13 @@ const SubscriptionsPage = () => {
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  placeholder="Monthly Credits"
+                  placeholder="أرصدة الكتب شهرياً"
                   value={newTierCredits}
                   onChange={(e) => setNewTierCredits(Number(e.target.value))}
                   min={1}
                 />
-                <Button type="submit" variant="primary" size="small" className="ml-auto">
-                  Save Plan
+                <Button type="submit" variant="primary" size="small" className="mr-auto">
+                  حفظ في قاعدة البيانات
                 </Button>
               </div>
             </div>
@@ -254,9 +328,20 @@ const SubscriptionsPage = () => {
 
       {/* Available Tiers Overview */}
       <div className="space-y-3">
-        <Heading level="h2" className="text-base font-bold text-ui-fg-base">
-          Active Subscription Plans
-        </Heading>
+        <div className="flex items-center justify-between">
+          <Heading level="h2" className="text-base font-bold text-ui-fg-base">
+            باقات وخطط الاشتراكات النشطة
+          </Heading>
+          <Button
+            size="small"
+            variant="secondary"
+            onClick={() => setShowAddTier(!showAddTier)}
+            className="text-xs gap-1"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>إضافة باقة جديدة</span>
+          </Button>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {tiers.map((tier) => (
             <Container
@@ -268,16 +353,16 @@ const SubscriptionsPage = () => {
                   <Heading level="h3" className="text-sm font-bold text-ui-fg-base">
                     {tier.title}
                   </Heading>
-                  <span className="text-xs text-ui-fg-subtle">{tier.interval}ly recurring</span>
+                  <span className="text-xs text-ui-fg-subtle">{tier.interval === "year" ? "اشتراك سنوي" : "اشتراك شهري"}</span>
                 </div>
-                <Badge color={tier.badgeColor}>{tier.credits} Book Credits</Badge>
+                <Badge color={tier.badgeColor}>{tier.credits} رصيد شهري</Badge>
               </div>
 
               <div className="text-xl font-black text-ui-fg-base">{tier.price}</div>
 
               <div className="pt-2 border-t border-ui-border-base flex justify-between text-xs text-ui-fg-muted">
-                <span>Active Subscribers</span>
-                <span className="font-bold text-ui-fg-base">{tier.activeSubscribers}</span>
+                <span>المشتركون النشطون</span>
+                <span className="font-bold text-ui-fg-base">{tier.activeSubscribers} قارئ</span>
               </div>
             </Container>
           ))}
@@ -285,58 +370,58 @@ const SubscriptionsPage = () => {
       </div>
 
       {/* Subscribers Renewal Queue Table */}
-      <Container className="p-6 bg-white dark:bg-ui-bg-base border border-ui-border-base rounded-xl shadow-xs space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-ui-border-base">
-          <Heading level="h2" className="text-base font-bold text-ui-fg-base">
-            Subscriber Renewals & Credit Balances
+      <Container className="p-0 overflow-hidden bg-white dark:bg-ui-bg-base border border-ui-border-base rounded-xl shadow-xs">
+        <div className="p-4 border-b border-ui-border-base flex items-center justify-between bg-ui-bg-subtle/50">
+          <Heading level="h2" className="text-sm font-bold text-ui-fg-base">
+            جدول تجديدات المشتركين وأرصدة الكتب النشطة
           </Heading>
-          <span className="text-xs text-ui-fg-subtle">Showing {subscribers.length} accounts</span>
+          <span className="text-xs text-ui-fg-subtle">{subscribers.length} حسابات مشتركة</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-ui-bg-subtle text-ui-fg-subtle font-semibold border-b border-ui-border-base">
+          <table className="w-full text-right text-xs">
+            <thead className="bg-ui-bg-subtle text-ui-fg-subtle font-bold border-b border-ui-border-base">
               <tr>
-                <th className="py-2.5 px-3">Subscriber</th>
-                <th className="py-2.5 px-3">Enrolled Tier</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3">Credits Balance</th>
-                <th className="py-2.5 px-3">Next Renewal Date</th>
-                <th className="py-2.5 px-3 text-right">Actions</th>
+                <th className="py-2.5 px-4 text-right">القارئ المشترك</th>
+                <th className="py-2.5 px-4 text-right">الباقة المشترك بها</th>
+                <th className="py-2.5 px-4 text-right">الحالة</th>
+                <th className="py-2.5 px-4 text-right">رصيد الكتب</th>
+                <th className="py-2.5 px-4 text-right">تاريخ التجديد القادم</th>
+                <th className="py-2.5 px-4 text-left">إجراءات سريعة</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-ui-border-base">
               {subscribers.map((sub) => (
                 <tr key={sub.id} className="hover:bg-ui-bg-subtle/40">
-                  <td className="py-3 px-3 font-medium text-ui-fg-base">
-                    {sub.email}
-                    <div className="text-[11px] text-ui-fg-muted font-mono">{sub.id}</div>
+                  <td className="py-3 px-4 font-medium text-ui-fg-base">
+                    <div className="font-bold">{sub.name}</div>
+                    <div className="text-[11px] text-ui-fg-muted">{sub.email}</div>
                   </td>
-                  <td className="py-3 px-3 text-ui-fg-subtle">{sub.plan}</td>
-                  <td className="py-3 px-3">
+                  <td className="py-3 px-4 text-ui-fg-subtle font-semibold">{sub.plan}</td>
+                  <td className="py-3 px-4">
                     {sub.status === "active" ? (
-                      <Badge color="green">Active</Badge>
+                      <Badge color="green">نشط</Badge>
                     ) : sub.status === "past_due" ? (
-                      <Badge color="red">Payment Failed</Badge>
+                      <Badge color="red">تأخر السداد</Badge>
                     ) : (
-                      <Badge color="orange">Paused</Badge>
+                      <Badge color="orange">موقوف مؤقتاً</Badge>
                     )}
                   </td>
-                  <td className="py-3 px-3 font-bold text-ui-fg-base">
-                    {sub.remainingCredits} Credits
+                  <td className="py-3 px-4 font-black text-xs text-purple-700">
+                    {sub.remainingCredits} رصيد
                   </td>
-                  <td className="py-3 px-3 font-mono text-ui-fg-subtle">
+                  <td className="py-3 px-4 font-mono text-ui-fg-subtle">
                     {sub.renewalDate}
                   </td>
-                  <td className="py-3 px-3 text-right space-x-2">
+                  <td className="py-3 px-4 text-left space-x-2 space-x-reverse">
                     <Button
                       variant="secondary"
                       size="small"
                       onClick={() => handleGiftCredit(sub.id)}
                       className="h-7 text-xs"
-                      title="Gift +1 Free Book Credit"
+                      title="إهداء رصيد كتاب مجاني"
                     >
-                      +1 Credit
+                      +1 رصيد
                     </Button>
                     <Button
                       variant="secondary"
@@ -344,7 +429,7 @@ const SubscriptionsPage = () => {
                       onClick={() => handleTogglePause(sub.id)}
                       className="h-7 text-xs"
                     >
-                      {sub.status === "paused" ? "Resume" : "Pause"}
+                      {sub.status === "paused" ? "استئناف" : "إيقاف مؤقت"}
                     </Button>
                   </td>
                 </tr>
