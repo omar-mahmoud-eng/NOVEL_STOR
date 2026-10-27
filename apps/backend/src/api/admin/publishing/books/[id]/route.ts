@@ -1,0 +1,9 @@
+import type { MedusaRequest,MedusaResponse } from "@medusajs/framework/http"
+import { z } from "zod"
+import { getDbPool } from "../../../../../utils/db"
+import { readingBook } from "../../../../../utils/reading-content"
+import { accessOf } from "../../../../../utils/publishing-access"
+import { saveDraftBook,transitionBook } from "../../../../../utils/publishing-books"
+import { apiError } from "../../../../../utils/api-error"
+export async function GET(req:MedusaRequest,res:MedusaResponse){const row=(await getDbPool().query("SELECT * FROM reading_stories WHERE id=$1 AND deleted_at IS NULL",[req.params.id])).rows[0];if(!row)return res.status(404).json({message:"الكتاب غير موجود"});const versions=await getDbPool().query("SELECT revision,action,actor_id,note,created_at,snapshot->>'title' AS title FROM reading_story_versions WHERE story_id=$1 ORDER BY revision DESC LIMIT 100",[row.id]);res.setHeader("Cache-Control","no-store");return res.json({book:{...readingBook(row),review_note:row.review_note,submitted_at:row.submitted_at,approved_at:row.approved_at,published_at:row.published_at},versions:versions.rows,storefront_url:process.env.NEXT_PUBLIC_BASE_URL||"http://localhost:3000"})}
+export async function POST(req:MedusaRequest,res:MedusaResponse){try{const body=z.object({revision:z.number().int().min(1),action:z.enum(["save","submit","approve","reject","reopen","publish","archive","restore"]).default("save"),note:z.string().max(2000).default(""),restore_revision:z.number().int().min(1).optional()}).passthrough().parse(req.body);const row=body.action==="save"?await saveDraftBook(body,req.params.id,body.revision,accessOf(req)!):await transitionBook(req.params.id,body.revision,body.action,accessOf(req)!,body.note,body.restore_revision);return res.json({book:readingBook(row)})}catch(error){return apiError(res,error)}}

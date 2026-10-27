@@ -6,6 +6,10 @@
 
 متجر كتب عربي/إنجليزي باستخدام Medusa v2 وNext.js 15، مع PostgreSQL وRedis ووحدات للكتب الرقمية والاشتراكات ولوحة إدارة.
 
+دليل مساحة النشر والأدوار ومزامنة القراءة والاختبارات الجديدة: [مساحة النشر المطورة](docs/PUBLISHING_WORKSPACE.ar.md).
+
+نتائج التحديث والتحقق بتاريخ 27 أكتوبر 2026: [تقرير التحديث](UPGRADE_VERIFICATION_2026-10-27.md).
+
 ## التشغيل المحلي
 
 يتطلب Node.js 22 أو 24 وnpm وDocker. الاعتماديات مثبتة من ملف القفل؛ إصدار TypeScript مثبت لتوافق بناء Medusa.
@@ -15,7 +19,6 @@ npm ci
 node scripts/setup-env.cjs
 docker compose up -d postgres redis
 npm run db:migrate --workspace=@enterprise/backend
-npm run db:seed --workspace=@enterprise/backend
 npm run dev
 ```
 

@@ -1,7 +1,9 @@
+import{activeReader}from"../utils/reader-profiles"
 import { defineMiddlewares } from "@medusajs/medusa"
 import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from "@medusajs/framework/http"
 import { authenticate } from "@medusajs/framework/http"
 import { z, ZodError } from "zod"
+import {publishingAccessMiddleware}from"../utils/publishing-access"
 
 /**
  * In-memory sliding window rate limiter
@@ -63,6 +65,9 @@ const storeGeneralRateLimiter = new SlidingWindowRateLimiter(60000, 150) // 150 
 // fetch several chapters at once. Keep their read-only allowance separate
 // from checkout, account, library-license and other store operations.
 const readingContentRateLimiter = new SlidingWindowRateLimiter(60000, 600)
+const familyUnlockLimiter = new SlidingWindowRateLimiter(60000,6)
+const clientEventLimiter = new SlidingWindowRateLimiter(60000,20)
+const bounded=(limiter:SlidingWindowRateLimiter)=>(req:MedusaRequest,res:MedusaResponse,next:MedusaNextFunction)=>{const result=limiter.check(req.ip||req.socket?.remoteAddress||"unknown");if(!result.allowed)return res.status(429).setHeader("Retry-After",String(result.retryAfterSec)).json({message:"محاولات كثيرة؛ حاول بعد قليل"});return next()}
 
 /**
  * Production Security Headers Middleware
@@ -195,24 +200,33 @@ export function validateRequestBody(schema: z.ZodSchema) {
 
 export default defineMiddlewares({
   routes: [
-    {matcher:"/store/support*",middlewares:[authenticate("customer",["session","bearer"])]},
+    {matcher:"/store/recommendations",middlewares:[authenticate("customer",["session","bearer"],{allowUnauthenticated:true}),activeReader]},
+    {matcher:"/admin/publishing/books*",bodyParser:{sizeLimit:"3mb"},middlewares:[securityHeadersMiddleware]},
+    {matcher:"/store/customers/me",middlewares:[authenticate("customer",["session","bearer"]),activeReader]},
+    {matcher:"/store/reading-state",bodyParser:{sizeLimit:"3mb"},middlewares:[authenticate("customer",["session","bearer"]),activeReader]},
+    {matcher:"/store/reader-profiles*",middlewares:[authenticate("customer",["session","bearer"]),activeReader]},
+    {matcher:"/store/family-unlock",middlewares:[authenticate("customer",["session","bearer"]),activeReader,bounded(familyUnlockLimiter)]},
+    {matcher:"/store/client-events",middlewares:[bounded(clientEventLimiter)]},
+    {matcher:"/admin/assets/uploads/:id/parts/:part",bodyParser:false,middlewares:[securityHeadersMiddleware]},
+    {matcher:"/store/support*",middlewares:[authenticate("customer",["session","bearer"]),activeReader]},
     {matcher:"/admin/story-media/upload",bodyParser:false,middlewares:[securityHeadersMiddleware]},
     {matcher:"/admin/reading-stories*",bodyParser:{sizeLimit:"3mb"},middlewares:[securityHeadersMiddleware]},
     {
-      matcher: /^\/store\/library\/?$/,
-      middlewares: [authenticate("customer", ["session", "bearer"])],
+      matcher: "/store/library",
+      methods: ["GET"],
+      middlewares: [authenticate("customer", ["session", "bearer"]),activeReader],
     },
     {
       matcher: "/store/library/stream/*",
-      middlewares: [authenticate("customer", ["session", "bearer"], { allowUnauthenticated: true })],
+      middlewares: [authenticate("customer", ["session", "bearer"], { allowUnauthenticated: true }),activeReader],
     },
     {
       matcher: "/store/loyalty/*",
-      middlewares: [authenticate("customer", ["session", "bearer"])],
+      middlewares: [authenticate("customer", ["session", "bearer"]),activeReader],
     },
     {
       matcher: "/store/tracking/*",
-      middlewares: [authenticate("customer", ["session", "bearer"])],
+      middlewares: [authenticate("customer", ["session", "bearer"]),activeReader],
     },
     {
       matcher: "/storefront/webhooks/payment",
@@ -225,7 +239,9 @@ export default defineMiddlewares({
     },
     {
       matcher: "/admin/*",
-      middlewares: [securityHeadersMiddleware],
+      middlewares: [securityHeadersMiddleware,
+       (req:MedusaRequest,res:MedusaResponse,next:MedusaNextFunction)=>req.originalUrl.split("?")[0].replace(/\/$/,"")==="/admin/invites/accept"?next():authenticate("user",["session","bearer","api-key"])(req,res,next),
+       (req:MedusaRequest,res:MedusaResponse,next:MedusaNextFunction)=>req.originalUrl.split("?")[0].replace(/\/$/,"")==="/admin/invites/accept"?next():publishingAccessMiddleware(req,res,next)],
     },
     {
       matcher: "/auth/*",

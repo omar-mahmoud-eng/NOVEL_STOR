@@ -1,0 +1,8 @@
+const test=require('node:test'),assert=require('node:assert/strict'),{loadSource}=require('./source-loader.cjs');
+const {rolePermissions,permissionFor}=loadSource('apps/backend/src/utils/publishing-access.ts');
+const {validateTransition}=loadSource('apps/backend/src/utils/publishing-books.ts');
+const {csvCell}=loadSource('apps/backend/src/api/admin/publishing/reports/route.ts');
+const access=role=>({user_id:'test',role,permissions:rolePermissions[role]});
+test('Editorial approval cannot be skipped by publishing from draft or review',()=>{for(const state of ['draft','review','archived'])assert.throws(()=>validateTransition(state,'publish',access('publisher')),e=>e.status===409);assert.equal(validateTransition('approved','publish',access('publisher')),'published');assert.throws(()=>validateTransition('review','approve',access('editor')),e=>e.status===403);assert.throws(()=>validateTransition('review','reject',access('publisher'),''),e=>e.status===400)});
+test('Unknown native administrative paths remain denied for restricted staff',()=>{assert.equal(permissionFor('/admin/api-keys','GET'),'admin.manage');assert.equal(permissionFor('/admin/publishing/roles','POST'),'staff.manage');assert.equal(permissionFor('/admin/products/p/story-media','POST'),'media.write');assert.equal(permissionFor('/admin/products/p/variants/v','POST'),'catalog.write');assert.equal(permissionFor('/admin/orders/o/fulfillments','POST'),'inventory.write');assert.equal(permissionFor('/admin/users/me','GET'),'session.read')});
+test('CSV export escapes quotes, multiline values and spreadsheet formulas',()=>{assert.equal(csvCell('=HYPERLINK("bad")'),'"\'=HYPERLINK(""bad"")"');assert.equal(csvCell(' @SUM(1)'),'"\' @SUM(1)"');assert.equal(csvCell('chapter\nbook'),'"chapter\nbook"')});

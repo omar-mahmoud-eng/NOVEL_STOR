@@ -14,10 +14,11 @@ function loadSource(relative, mocks = {}, cache = new Map()) {
   const nativeRequire = instance.require.bind(instance)
   instance.require = (id) => {
     if (Object.hasOwn(mocks, id)) return mocks[id]
+    if (id === "@enterprise/schemas") return loadSource("packages/schemas/src/index.ts", mocks, cache)
     if (id.startsWith(".")) {
       const base = path.resolve(path.dirname(filename), id)
       if (mocks[base]) return mocks[base]
-      const candidate = [base, `${base}.ts`, `${base}.tsx`, `${base}/index.ts`].find((file) => fs.existsSync(file) && fs.statSync(file).isFile())
+      const candidate = [base, `${base}.ts`, `${base}.tsx`, base.replace(/\.js$/, ".ts"), `${base}/index.ts`].find((file) => fs.existsSync(file) && fs.statSync(file).isFile())
       if (candidate && /\.tsx?$/.test(candidate)) return loadSource(path.relative(path.resolve(__dirname, ".."), candidate), mocks, cache)
     }
     return nativeRequire(id)

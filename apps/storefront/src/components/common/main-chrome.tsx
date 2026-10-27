@@ -7,6 +7,7 @@ import { RealmHeader, RealmFooter } from "@/components/realms/realm-chrome"
 import type { Dictionary, Locale } from "@/lib/i18n"
 import { ReadingBreak } from "@/components/family/reading-break"
 import { CatalogNotice } from "./catalog-notice"
+import { ReadingSyncStatus } from "./reading-sync-status"
 
 export function MainChrome({ children, locale, dict }: { children: React.ReactNode; locale: Locale; dict: Dictionary }) {
   const path = usePathname() || ""
@@ -14,6 +15,7 @@ export function MainChrome({ children, locale, dict }: { children: React.ReactNo
   const immersive = /\/(reader|player|illustrated|interactive)(\/|$)/.test(path) || /\/realms\/[^/]+\/(words|quest-map|detective|complete)(\/|$)/.test(path)
   return <div data-reading-realm={realm} className="flex flex-col min-h-screen min-w-0">
     <CatalogNotice />
+    <ReadingSyncStatus locale={locale}/>
     {!immersive && (realm === "originals" ? <Header locale={locale} dict={dict} /> : <RealmHeader realm={realm} locale={locale} />)}
     {realm !== "originals" && <ReadingBreak locale={locale} />}
     <main className="flex-1 min-w-0">{children}</main>

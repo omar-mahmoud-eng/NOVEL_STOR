@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react"
 import { useReadingState } from "@/context/reading-state-context"
+import {ReadingSyncPreferences}from"@/components/common/reading-sync-status"
 import Link from "@/components/common/realm-link"
 import {
   Sliders,
@@ -48,6 +49,7 @@ export function ReadingPreferencesView({ locale }: ReadingPreferencesViewProps) 
 
   return (
     <div className="min-h-screen bg-[#10131c] text-[#e0e2ef] pb-24">
+      <div className="max-w-[1280px] mx-auto px-4 py-6"><ReadingSyncPreferences locale={locale}/></div>
       {/* Top Banner (Stitch P16) */}
       <section className="relative overflow-hidden bg-[#0b0e17] border-b border-[#4e463a]/40 pt-12 pb-16">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-[#e6c184]/5 rounded-full blur-3xl pointer-events-none" />

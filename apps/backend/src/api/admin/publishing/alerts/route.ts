@@ -1,0 +1,6 @@
+import type{MedusaRequest,MedusaResponse}from"@medusajs/framework/http"
+import{z}from"zod"
+import{getDbPool}from"../../../../utils/db"
+import{accessOf}from"../../../../utils/publishing-access"
+export async function GET(req:MedusaRequest,res:MedusaResponse){const rows=await getDbPool().query("SELECT * FROM publishing_alerts WHERE ($1::boolean OR resolved_at IS NULL) ORDER BY last_seen_at DESC LIMIT 200",[req.query.include_resolved==="true"]);res.setHeader("Cache-Control","no-store");return res.json({alerts:rows.rows})}
+export async function POST(req:MedusaRequest,res:MedusaResponse){const body=z.object({id:z.string(),action:z.enum(["acknowledge","resolve","reopen"])}).safeParse(req.body);if(!body.success)return res.status(400).json({message:"Invalid action"});const row=await getDbPool().query(`UPDATE publishing_alerts SET acknowledged_by=CASE WHEN $2='acknowledge' THEN $3 ELSE acknowledged_by END,acknowledged_at=CASE WHEN $2='acknowledge' THEN now() ELSE acknowledged_at END,resolved_at=CASE WHEN $2='resolve' THEN now() WHEN $2='reopen' THEN NULL ELSE resolved_at END WHERE id=$1 RETURNING id`,[body.data.id,body.data.action,accessOf(req)!.user_id]);return row.rowCount?res.json({success:true}):res.status(404).json({message:"Alert not found"})}

@@ -1,0 +1,3 @@
+import type{MedusaRequest,MedusaResponse}from"@medusajs/framework/http"
+import{getDbPool}from"../../../../../../../utils/db"
+export async function GET(req:MedusaRequest,res:MedusaResponse){const version=Number(req.params.revision);if(!Number.isInteger(version)||version<1)return res.status(400).json({message:"Invalid revision"});const row=(await getDbPool().query("SELECT snapshot,action,actor_id,note,created_at FROM reading_story_versions WHERE story_id=$1 AND revision=$2",[req.params.id,version])).rows[0];if(!row)return res.status(404).json({message:"النسخة غير موجودة"});res.setHeader("Cache-Control","no-store");return res.json({version:row})}

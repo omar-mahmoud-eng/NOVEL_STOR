@@ -1,0 +1,7 @@
+import type{MedusaRequest,MedusaResponse,MedusaNextFunction}from"@medusajs/framework/http"
+import{createHash}from"node:crypto"
+import{getDbPool}from"./db"
+export function stepupHash(value:string){return createHash("sha256").update(value).digest("hex")}
+export async function lockActiveReader(client:any,id:string){const row=await client.query("SELECT id FROM customer WHERE id=$1 AND deleted_at IS NULL FOR SHARE",[id]);if(!row.rowCount)throw Object.assign(new Error("حساب القراءة لم يعد متاحًا"),{status:401})}
+export async function activeReader(req:MedusaRequest,res:MedusaResponse,next:MedusaNextFunction){const id=(req as any).auth_context?.actor_id;if(!id)return next();try{const row=await getDbPool().query("SELECT id FROM customer WHERE id=$1 AND deleted_at IS NULL",[id]);if(!row.rowCount)return res.status(401).json({message:"حساب القراءة لم يعد متاحًا"});return next()}catch{return res.status(503).json({message:"تعذر التحقق من حساب القراءة"})}}
+export async function requireFamilyStepup(req:MedusaRequest){const id=(req as any).auth_context?.actor_id,token=req.headers["x-family-stepup"];if(!id||typeof token!=="string"||token.length>150)throw Object.assign(new Error("أعد التحقق بكلمة مرور حسابك لإدارة ملفات الأسرة"),{status:403});const row=await getDbPool().query("SELECT customer_id FROM customer_stepups WHERE token_hash=$1 AND customer_id=$2 AND expires_at>now()",[stepupHash(token),id]);if(!row.rowCount)throw Object.assign(new Error("انتهى تحقق ولي الحساب؛ أدخل كلمة المرور مجددًا"),{status:403});return id as string}

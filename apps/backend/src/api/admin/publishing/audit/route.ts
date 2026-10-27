@@ -1,0 +1,3 @@
+import type{MedusaRequest,MedusaResponse}from"@medusajs/framework/http"
+import{getDbPool}from"../../../../utils/db"
+export async function GET(req:MedusaRequest,res:MedusaResponse){const offset=Math.max(0,Math.min(100000,Number(req.query.offset)||0)),resource=typeof req.query.resource==="string"?req.query.resource.slice(0,100):null;const result=await getDbPool().query(`SELECT a.*,u.email AS actor_email FROM publishing_audit a LEFT JOIN "user" u ON u.id=a.actor_id WHERE ($1::text IS NULL OR resource=$1) ORDER BY created_at DESC LIMIT 100 OFFSET $2`,[resource,offset]);return res.json({events:result.rows,offset,limit:100})}

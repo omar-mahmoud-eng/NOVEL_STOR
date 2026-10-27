@@ -58,11 +58,21 @@ async function main() {
   cleanup.push(() => api('/admin/uploads/' + file.id, 'DELETE'))
   const beforeImage = Buffer.from(await (await fetch(file.url)).arrayBuffer())
   const storyResponse = await api('/admin/reading-stories', 'POST', { title: 'Restart fixture ' + run, handle: 'audit-restart-' + run,
-    realm: 'originals', status: 'published', description: 'Persistence verification', coverUrl: file.url,
+    realm: 'kids', status: 'published', description: 'Persistence verification', coverUrl: file.url,
     author: { name: 'Audit', bio: '', avatar: '' }, sampleText: ['Persistent text ' + run], sectionImages: [], genre: 'classics', minutes: 1 })
   assert.equal(storyResponse.status, 201)
   const story = (await storyResponse.json()).story
   cleanup.push(() => pool.query('DELETE FROM reading_stories WHERE id=$1 AND handle=$2', [story.id, story.handle]))
+  const edited = await api('/admin/publishing/books/'+story.id, 'POST', {...story, action:'save', status:'draft', title:'Unpublished restart '+run})
+  assert.equal(edited.status,200)
+  const createdCustomer=await api('/admin/customers','POST',{email:'audit-restart-'+run+'@storyverse.test',first_name:'Persistence fixture'})
+  assert.equal(createdCustomer.status,200);const customer=(await createdCustomer.json()).customer,profile='profile_restart_'+run
+  cleanup.push(()=>pool.query('DELETE FROM customer WHERE id=$1',[customer.id]))
+  cleanup.push(()=>pool.query('DELETE FROM reader_profiles WHERE id=$1 AND customer_id=$2',[profile,customer.id]))
+  cleanup.push(()=>pool.query('DELETE FROM reader_states WHERE customer_id=$1 AND profile_id=$2',[customer.id,profile]))
+  const readerData={kids:{entries:{[story.id]:{page:0,saved:true,notes:'Persistent note fixture '+run}}}}
+  await pool.query("INSERT INTO reader_profiles(id,customer_id,name,realm,settings) VALUES($1,$2,'Persistence fixture','kids',$3::jsonb)",[profile,customer.id,JSON.stringify({voice:true,reports:false,dailyLimit:30})])
+  await pool.query('INSERT INTO reader_states(customer_id,profile_id,data,revision) VALUES($1,$2,$3::jsonb,1)',[customer.id,profile,JSON.stringify(readerData)])
   await pool.end() // Do not retain a PostgreSQL socket across its planned restart.
   console.log('Fixtures saved; restarting the project services.')
   await restart(); await ready()
@@ -71,6 +81,15 @@ async function main() {
   assert.equal(persisted.status, 200)
   assert.equal((await persisted.json()).story.sampleText[0], 'Persistent text ' + run)
   report.passed.push('Published reading content persists in PostgreSQL')
+  const publicResponse=await fetch(back+'/store/reading-stories/'+story.handle,{headers:{'x-publishable-api-key':process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY}})
+  assert.equal(publicResponse.status,200);assert.equal((await publicResponse.json()).book.title,'Restart fixture '+run)
+  const editorial=(await(await api('/admin/publishing/books/'+story.id)).json());assert.equal(editorial.book.title,'Unpublished restart '+run);assert.equal(editorial.book.workflow_state,'draft');assert.ok(editorial.versions.length>=2)
+  report.passed.push('The working draft, immutable public edition and editorial versions survive restart independently')
+  const persistedPool=new Pool({connectionString:process.env.DATABASE_URL});try{const state=(await persistedPool.query('SELECT data FROM reader_states WHERE customer_id=$1 AND profile_id=$2',[customer.id,profile])).rows[0];assert.deepEqual(state.data,readerData);const family=(await persistedPool.query('SELECT settings FROM reader_profiles WHERE id=$1 AND customer_id=$2',[profile,customer.id])).rows[0];assert.equal(family.settings.voice,true)}finally{await persistedPool.end()}
+  report.passed.push('Cloud reading notes, bookmarks and account family preferences persist in PostgreSQL')
+  assert.equal((await(await api('/admin/publishing/access')).json()).access.role,'admin')
+  report.passed.push('Server-enforced employee roles persist across backend and database restart')
+
   const afterImage = Buffer.from(await (await fetch(file.url)).arrayBuffer())
   assert.equal(createHash('sha256').update(afterImage).digest('hex'), createHash('sha256').update(beforeImage).digest('hex'))
   report.passed.push('Native Medusa public uploads persist byte-for-byte in their mounted volume')

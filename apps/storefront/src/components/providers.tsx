@@ -1,5 +1,6 @@
 "use client"
 
+import {ClientErrorMonitor} from "@/components/common/client-error-monitor"
 import React, { useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { CustomerAuthProvider } from "@/context/customer-auth-context"
@@ -32,6 +33,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         <KidsModeProvider>
           <CartProvider>
             <AudioProvider>
+              <ClientErrorMonitor/>
               {children}
               <FloatingAudioPlayer />
             </AudioProvider>

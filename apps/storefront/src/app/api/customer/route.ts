@@ -22,7 +22,7 @@ export async function GET() {
   if (!token) return json({ customer: null }, 401)
   try {
     const response = await backendFetch("/store/customers/me", {}, token)
-    if (!response.ok) return json({ customer: null }, response.status)
+    if (!response.ok) {if([401,404].includes(response.status)){(await cookies()).delete(CUSTOMER_COOKIE);(await cookies()).delete("storyverse_family_stepup")}return json({ customer: null }, response.status)}
     return json(await response.json())
   } catch {
     return json({ message: "Customer service unavailable" }, 502)
@@ -32,6 +32,7 @@ export async function GET() {
 export async function DELETE(request: Request) {
   if (!sameOrigin(request)) return json({ message: "Invalid origin" }, 403)
   ;(await cookies()).delete(CUSTOMER_COOKIE)
+  ;(await cookies()).delete("storyverse_family_stepup")
   return json({ success: true })
 }
 

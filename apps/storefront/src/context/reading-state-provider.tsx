@@ -1,27 +1,58 @@
 "use client"
-import{createContext,useContext,useEffect,useRef,useState}from"react"
-import{usePathname}from"next/navigation"
-import{useCustomerAuth}from"./customer-auth-context"
-import{useFamilySetting}from"@/hooks/use-family-setting"
-import{realmFromPath,type ReadingRealm}from"@/lib/realms"
-import{freshReadingState,sanitizeReadingState,readingScopeKey,type ReadingEntry,type RealmReadingState,type ReadingState}from"@/lib/reading-state"
+import {createContext,useContext,useEffect,useRef,useState,useCallback} from "react"
+import {usePathname} from "next/navigation"
+import {useCustomerAuth} from "./customer-auth-context"
+import {useFamilySetting} from "@/hooks/use-family-setting"
+import {realmFromPath,type ReadingRealm} from "@/lib/realms"
+import {freshReadingState,sanitizeReadingState,readingScopeKey,mergeReadingStates,stripDeviceReadingState,type ReadingEntry,type RealmReadingState,type ReadingState} from "@/lib/reading-state"
 export type{ReadingEntry,RealmReadingState}from"@/lib/reading-state"
 type Profile={id:string;name:string;realm:"little"|"kids"|"teens"}
-type Value={state:ReadingState;ready:boolean;scopeKey:string;updateEntry:(realm:ReadingRealm,id:string,value:Partial<ReadingEntry>)=>void;updateSettings:(realm:ReadingRealm,value:Partial<Omit<RealmReadingState,"entries">>)=>void;clearHistory:(realm:ReadingRealm)=>void}
+type SyncStatus="local"|"loading"|"syncing"|"saved"|"offline"|"error"
+type Value={state:ReadingState;ready:boolean;scopeKey:string;updateEntry:(realm:ReadingRealm,id:string,value:Partial<ReadingEntry>)=>void;updateSettings:(realm:ReadingRealm,value:Partial<Omit<RealmReadingState,"entries">>)=>void;clearHistory:(realm:ReadingRealm)=>void;syncStatus:SyncStatus;syncError:string;lastSyncedAt:string;retrySync:()=>void;analyticsOptIn:boolean;setAnalyticsOptIn:(value:boolean)=>void;importGuest:()=>void}
 const Context=createContext<Value|null>(null)
+function withDownloads(remote:unknown,local:ReadingState){const result=sanitizeReadingState(remote);for(const realm of Object.keys(result)as ReadingRealm[])for(const[id,entry]of Object.entries(local[realm].entries))if(entry.downloaded!==undefined){result[realm].entries[id]||={};result[realm].entries[id].downloaded=entry.downloaded}return result}
 export function ReadingStateProvider({children}:{children:React.ReactNode}){
  const {customer,isLoading}=useCustomerAuth(),path=usePathname()||"",realm=realmFromPath(path)
  const [profile]=useFamilySetting<Profile|null>("storyverse.family.activeProfile",null)
- const profileId=profile?.realm===realm&&typeof profile?.id==="string"?profile.id:undefined,key=readingScopeKey(customer?.id,profileId)
+ const profileId=profile?.realm===realm&&typeof profile.id==="string"?profile.id:undefined,key=readingScopeKey(customer?.id,profileId)
  const [state,setState]=useState<ReadingState>(freshReadingState),[loadedKey,setLoadedKey]=useState("")
- const currentKey=useRef(key);currentKey.current=key
- useEffect(()=>{if(isLoading)return;const read=()=>{let stored;try{stored=JSON.parse(localStorage.getItem(key)||"null")}catch{}setState(sanitizeReadingState(stored));setLoadedKey(key)};read();const change=(event:StorageEvent)=>{if(event.key===key)read()};window.addEventListener("storage",change);return()=>window.removeEventListener("storage",change)},[key,isLoading])
+ const [syncStatus,setSyncStatus]=useState<SyncStatus>("local"),[syncError,setSyncError]=useState(""),[lastSyncedAt,setLastSyncedAt]=useState(""),[analyticsOptIn,setConsent]=useState(false)
+ const currentKey=useRef(key),currentState=useRef(state),consent=useRef(false),consentDirty=useRef(false),cloudReady=useRef(false),lastCloud=useRef(""),lastConsent=useRef(false),busy=useRef(false),device=useRef(""),timeOffset=useRef(0),lastTime=useRef(0),pushRef=useRef<()=>void>(()=>{}),pullRef=useRef<()=>void>(()=>{}),abort=useRef<AbortController|null>(null)
+ currentKey.current=key;currentState.current=state;consent.current=analyticsOptIn
  const ready=loadedKey===key&&!isLoading
+ function clock(){const now=Math.max(Date.now()+timeOffset.current,lastTime.current+1);lastTime.current=now;return new Date(now).toISOString()+"|"+device.current}
+ useEffect(()=>{try{device.current=localStorage.getItem("storyverse.device.id")||crypto.randomUUID();localStorage.setItem("storyverse.device.id",device.current)}catch{device.current=String(Math.random())}},[])
+ useEffect(()=>{if(isLoading)return;const read=()=>{let stored;try{stored=JSON.parse(localStorage.getItem(key)||"null")}catch{}setState(sanitizeReadingState(stored));setLoadedKey(key)};read();cloudReady.current=false;lastCloud.current="";busy.current=false;consentDirty.current=false;setConsent(false);setSyncError("");setLastSyncedAt("");setSyncStatus(customer?(navigator.onLine?"loading":"offline"):"local");const change=(event:StorageEvent)=>{if(event.key===key)read()};window.addEventListener("storage",change);return()=>window.removeEventListener("storage",change)},[key,isLoading,customer?.id])
  useEffect(()=>{if(!ready)return;try{localStorage.setItem(key,JSON.stringify(state))}catch{}},[key,state,ready])
+ const push=useCallback(async()=>{
+  const scope=key,account=customer?.id;if(!account||currentKey.current!==scope||!cloudReady.current||busy.current)return
+  const snapshot=currentState.current,sent=JSON.stringify(stripDeviceReadingState(snapshot)),choice=consent.current
+  if(sent===lastCloud.current&&choice===lastConsent.current){setSyncStatus("saved");return}
+  if(!navigator.onLine){setSyncStatus("offline");return}
+  busy.current=true;setSyncStatus("syncing");setSyncError("")
+  try{const response=await fetch("/api/medusa/store/reading-state",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({customer_id:account,profile_id:profileId||"",state:JSON.parse(sent),...(choice!==lastConsent.current?{analytics_opt_in:choice}:{})}),signal:abort.current?.signal});const data=await response.json();if(!response.ok)throw Error(data.message||"تعذر حفظ القراءة على الحساب");if(currentKey.current!==scope)return
+   timeOffset.current=Date.parse(data.server_time)-Date.now();lastCloud.current=JSON.stringify(stripDeviceReadingState(data.state));lastConsent.current=data.analytics_opt_in;if(consent.current===choice){consentDirty.current=false;setConsent(data.analytics_opt_in)}
+   setState(current=>{if(currentKey.current!==scope)return current;if(JSON.stringify(stripDeviceReadingState(current))===sent)return withDownloads(data.state,current);const rebased=sanitizeReadingState(current),stamp=clock();for(const realm of Object.keys(rebased)as ReadingRealm[]){if(rebased[realm]._historyResetAt!==snapshot[realm]._historyResetAt)rebased[realm]._historyResetAt=stamp;for(const field of ["level","theme","fontSize","fontFamily","quiet","speed"]as const)if(rebased[realm][field]!==snapshot[realm][field]){rebased[realm]._settingsClocks||={};rebased[realm]._settingsClocks![field]=stamp}for(const[id,entry]of Object.entries(rebased[realm].entries)){const sentEntry=snapshot[realm].entries[id]||{};for(const field of ["saved","page","furthest","completed","notes","branch"]as const)if(JSON.stringify(entry[field])!==JSON.stringify(sentEntry[field])){entry._fieldClocks||={};entry._fieldClocks[field]=stamp}if(entry._resetAt!==sentEntry._resetAt)entry._resetAt=stamp}}return mergeReadingStates(data.state,rebased,{preserveDownloads:true})});setLastSyncedAt(new Date().toISOString());setSyncStatus("saved")
+  }catch(error:any){if(currentKey.current===scope&&error.name!=="AbortError"){setSyncError(error.message);setSyncStatus(navigator.onLine?"error":"offline")}}finally{if(currentKey.current===scope)busy.current=false}
+ },[key,customer?.id,profileId])
+ pushRef.current=()=>{void push()}
+ useEffect(()=>{
+  if(!ready||!customer)return;const scope=key,account=customer.id,controller=new AbortController();abort.current=controller;let active=true
+  async function pull(){if(!active||busy.current||!navigator.onLine)return;if(cloudReady.current&&(JSON.stringify(stripDeviceReadingState(currentState.current))!==lastCloud.current||consent.current!==lastConsent.current)){pushRef.current();return}
+   try{const query=new URLSearchParams({customer_id:account,profile_id:profileId||""}),response=await fetch("/api/medusa/store/reading-state?"+query,{cache:"no-store",signal:controller.signal}),data=await response.json();if(!response.ok)throw Error(data.message||"تعذر مزامنة القراءة");if(!active||currentKey.current!==scope)return
+    timeOffset.current=Date.parse(data.server_time)-Date.now();cloudReady.current=true;lastCloud.current=JSON.stringify(stripDeviceReadingState(data.state));lastConsent.current=data.analytics_opt_in;if(!consentDirty.current)setConsent(data.analytics_opt_in);setState(current=>currentKey.current===scope?data.revision===0?{...current}:mergeReadingStates(data.state,current,{preserveDownloads:true}):current);setSyncStatus("syncing");setSyncError("");setLastSyncedAt(new Date().toISOString())
+   }catch(error:any){if(active&&currentKey.current===scope&&error.name!=="AbortError"){setSyncStatus(navigator.onLine?"error":"offline");setSyncError(error.message)}}}
+  pullRef.current=()=>{void pull()};void pull();const timer=setInterval(()=>{if(document.visibilityState==="visible"){if(JSON.stringify(stripDeviceReadingState(currentState.current))!==lastCloud.current)pushRef.current();else void pull()}},30000),online=()=>{if(cloudReady.current)pushRef.current();else void pull()},offline=()=>setSyncStatus("offline")
+  window.addEventListener("online",online);window.addEventListener("offline",offline);window.addEventListener("focus",online)
+  const leave=()=>{if(!cloudReady.current||currentKey.current!==scope)return;const changed=consent.current!==lastConsent.current,choice=changed?{analytics_opt_in:consent.current}:{},data=JSON.stringify({customer_id:account,profile_id:profileId||"",state:stripDeviceReadingState(currentState.current),...choice}),payload=data.length<60000?data:changed?JSON.stringify({customer_id:account,profile_id:profileId||"",...choice}):"";if(payload)navigator.sendBeacon?.("/api/medusa/store/reading-state",new Blob([payload],{type:"application/json"}))};window.addEventListener("pagehide",leave)
+  return()=>{active=false;controller.abort();cloudReady.current=false;clearInterval(timer);window.removeEventListener("online",online);window.removeEventListener("offline",offline);window.removeEventListener("focus",online);window.removeEventListener("pagehide",leave)}
+ },[ready,key,customer?.id,profileId])
+ useEffect(()=>{if(!ready||!customer||!cloudReady.current)return;const timer=setTimeout(()=>{void push()},consent.current!==lastConsent.current?0:850);return()=>clearTimeout(timer)},[state,analyticsOptIn,ready,customer?.id,push])
  const mutate=(fn:(current:ReadingState)=>ReadingState)=>{if(!ready)return;const scope=key;setState(current=>currentKey.current===scope?fn(current):current)}
- const updateEntry:Value["updateEntry"]=(realm,id,value)=>mutate(current=>({...current,[realm]:{...current[realm],entries:{...current[realm].entries,[id]:{...current[realm].entries[id],...value,updatedAt:new Date().toISOString()}}}}))
- const updateSettings:Value["updateSettings"]=(realm,value)=>mutate(current=>({...current,[realm]:{...current[realm],...value}}))
- const clearHistory:Value["clearHistory"]=(realm)=>mutate(current=>({...current,[realm]:{...current[realm],entries:Object.fromEntries(Object.entries(current[realm].entries).map(([id,entry])=>[id,{saved:entry.saved,downloaded:entry.downloaded}]))}}))
- return <Context.Provider value={{state:ready?state:freshReadingState(),ready,scopeKey:key,updateEntry,updateSettings,clearHistory}}>{children}</Context.Provider>
+ const updateEntry:Value["updateEntry"]=(realm,id,value)=>{const stamp=clock();mutate(current=>{const previous=current[realm].entries[id]||{},clocks={...previous._fieldClocks};for(const field of Object.keys(value))if(!["downloaded","updatedAt","_fieldClocks","_resetAt"].includes(field))clocks[field]=stamp;return{...current,[realm]:{...current[realm],entries:{...current[realm].entries,[id]:{...previous,...value,updatedAt:stamp.split("|")[0],_fieldClocks:clocks}}}}})}
+ const updateSettings:Value["updateSettings"]=(realm,value)=>{const stamp=clock();mutate(current=>{const clocks={...current[realm]._settingsClocks};for(const field of Object.keys(value))if(!field.startsWith("_"))clocks[field]=stamp;return{...current,[realm]:{...current[realm],...value,_settingsClocks:clocks}}})}
+ const clearHistory:Value["clearHistory"]=(realm)=>{const stamp=clock();mutate(current=>({...current,[realm]:{...current[realm],_historyResetAt:stamp,entries:Object.fromEntries(Object.entries(current[realm].entries).map(([id,entry])=>[id,{saved:entry.saved,downloaded:entry.downloaded,updatedAt:stamp.split("|")[0],_resetAt:stamp,_fieldClocks:{...entry._fieldClocks,page:stamp,furthest:stamp,completed:stamp,notes:stamp,branch:stamp}}]))}}))}
+ function importGuest(){if(!customer||profileId)return;try{const guest=sanitizeReadingState(JSON.parse(localStorage.getItem(readingScopeKey())||"null")),stamp=clock();for(const r of Object.keys(guest)as ReadingRealm[]){for(const entry of Object.values(guest[r].entries)){entry._fieldClocks={};for(const field of ["saved","page","furthest","completed","notes","branch"])if(Object.prototype.hasOwnProperty.call(entry,field))entry._fieldClocks[field]=stamp}guest[r]._settingsClocks={}}mutate(current=>mergeReadingStates(current,guest,{preserveDownloads:true}))}catch{setSyncError("تعذر قراءة محفوظات الزائر")}}
+ return <Context.Provider value={{state:ready?state:freshReadingState(),ready:ready&&(!customer||syncStatus!=="loading"),scopeKey:key,updateEntry,updateSettings,clearHistory,syncStatus,syncError,lastSyncedAt,analyticsOptIn,setAnalyticsOptIn:(value)=>{consentDirty.current=true;setConsent(value)},importGuest,retrySync:()=>{if(cloudReady.current)pushRef.current();else pullRef.current()}}}>{children}</Context.Provider>
 }
 export function useReadingState(){const value=useContext(Context);if(!value)throw Error("ReadingStateProvider is required");return value}

@@ -192,6 +192,7 @@ services:
       - ./tests:/app/tests:ro
       - ./scripts:/app/scripts:ro
       - ./apps:/app/apps:ro
+      - ./packages/schemas/src:/app/packages/schemas/src:ro
     shm_size: 1gb
     networks:
       - medusa_network

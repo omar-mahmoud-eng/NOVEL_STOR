@@ -1,11 +1,2 @@
-export type ReadingEntry={saved?:boolean;page?:number;furthest?:number;completed?:boolean;updatedAt?:string;notes?:string;branch?:string[];downloaded?:boolean}
-export type RealmReadingState={entries:Record<string,ReadingEntry>;level:number;theme:string;fontSize:number;fontFamily:string;quiet:boolean;speed:number}
-export type ReadingState=Record<"originals"|"little"|"kids"|"teens",RealmReadingState>
-export function freshReadingState():ReadingState{const realm=():RealmReadingState=>({entries:{},level:2,theme:"paper",fontSize:22,fontFamily:"serif",quiet:false,speed:1});return {originals:realm(),little:realm(),kids:realm(),teens:realm()}}
-export function sanitizeReadingState(input:unknown):ReadingState{
- const next=freshReadingState();if(!input||typeof input!=="object")return next
- for(const realm of Object.keys(next) as (keyof ReadingState)[]){const value=(input as any)[realm];if(!value||typeof value!=="object")continue;const target=next[realm];target.fontSize=Math.max(16,Math.min(32,Number(value.fontSize)||22));target.level=[1,2,3].includes(value.level)?value.level:2;target.speed=[0.75,1,1.25,1.5].includes(value.speed)?value.speed:1;target.theme=["paper","night","ivory","contrast"].includes(value.theme)?value.theme:"paper";target.fontFamily=["serif","sans","ruqah"].includes(value.fontFamily)?value.fontFamily:"serif";target.quiet=value.quiet===true
- if(value.entries&&typeof value.entries==="object"&&!Array.isArray(value.entries))for(const [id,raw]of Object.entries(value.entries)){if(!raw||typeof raw!=="object"||["__proto__","constructor","prototype"].includes(id))continue;const entry=raw as any;target.entries[id]={saved:entry.saved===true,completed:entry.completed===true,downloaded:entry.downloaded===true,...(Number.isInteger(entry.page)&&entry.page>=0?{page:Math.min(10000,entry.page)}:{}),...(Number.isInteger(entry.furthest)&&entry.furthest>=0?{furthest:Math.min(10000,entry.furthest)}:{}),...(typeof entry.notes==="string"?{notes:entry.notes.slice(0,100000)}:{}),...(typeof entry.updatedAt==="string"&&Number.isFinite(Date.parse(entry.updatedAt))?{updatedAt:entry.updatedAt}:{}),...(Array.isArray(entry.branch)?{branch:entry.branch.filter((item:unknown)=>typeof item==="string").slice(0,100)}:{})}}
- }return next
-}
-export function readingScopeKey(accountId?:string,profileId?:string){return `storyverse.reading.v1.${accountId||"guest"}${profileId?`.profile.${profileId}`:""}`}
+export {freshReadingState,sanitizeReadingState,readingScopeKey,hasReadingHistory,mergeReadingStates,stripDeviceReadingState} from "@enterprise/schemas"
+export type {ReadingEntry,RealmReadingState,ReadingState} from "@enterprise/schemas"

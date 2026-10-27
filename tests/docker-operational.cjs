@@ -7,7 +7,7 @@ async function suite(file,env={}){await new Promise((resolve,reject)=>{const chi
 async function main(){
  await startBridges()
  for(const url of [front+"/ar",back+"/health"]){let ready=false;for(let i=0;i<30;i++){try{if((await fetch(url,{signal:AbortSignal.timeout(3000)})).ok){ready=true;break}}catch{}await new Promise(resolve=>setTimeout(resolve,1000))}assert.ok(ready,"Service not ready: "+url)}
- await check("Linux application regression suite",()=>suite("tests/unit-suites.cjs"))
+ if(process.env.SKIP_UNIT_SUITE!=="true")await check("Linux application regression suite",()=>suite("tests/unit-suites.cjs"))
  await check("Existing UI journeys run inside Docker Chromium",()=>suite("tests/ui-operational.cjs"))
  const browser=await chromium.launch({headless:true});const context=await browser.newContext({viewport:{width:1440,height:1000},acceptDownloads:true});const page=await context.newPage();page.setDefaultTimeout(12000)
  page.on("pageerror",error=>report.consoleErrors.push(error.message));page.on("response",response=>{if(response.status()>=500)report.requestsFailed.push({status:response.status(),url:response.url().replace(/token=[^&]+/g,"token=[redacted]")})})

@@ -1,0 +1,5 @@
+import type{MedusaRequest,MedusaResponse}from"@medusajs/framework/http"
+import{getDbPool}from"../../../../utils/db"
+import{lockActiveReader,requireFamilyStepup}from"../../../../utils/reader-profiles"
+import{apiError}from"../../../../utils/api-error"
+export async function DELETE(req:MedusaRequest,res:MedusaResponse){const client=await getDbPool().connect();try{const customer=await requireFamilyStepup(req);await client.query("BEGIN");await lockActiveReader(client,customer);const result=await client.query("UPDATE reader_profiles SET deleted_at=now(),updated_at=now() WHERE id=$1 AND customer_id=$2 AND deleted_at IS NULL RETURNING id",[req.params.id,customer]);if(!result.rowCount)throw Object.assign(new Error("ملف القراءة غير موجود"),{status:404});await client.query("DELETE FROM reader_states WHERE customer_id=$1 AND profile_id=$2",[customer,req.params.id]);await client.query("DELETE FROM reading_events WHERE customer_id=$1 AND profile_id=$2",[customer,req.params.id]);await client.query("COMMIT");return res.json({deleted:true})}catch(error){await client.query("ROLLBACK");return apiError(res,error)}finally{client.release()}}

@@ -4,6 +4,7 @@ COPY --from=storyverse-backend:local /app/node_modules ./node_modules
 COPY package.json package-lock.json ./
 COPY apps apps
 COPY packages packages
+COPY --from=storyverse-backend:local /app/packages/schemas/dist ./packages/schemas/dist
 COPY scripts scripts
 COPY tests tests
 ENV TEST_BROWSER_CHANNEL=chromium TEST_STOREFRONT_URL=http://medusa-storefront:3000 TEST_BACKEND_URL=http://medusa-backend:9000

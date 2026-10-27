@@ -1,4 +1,5 @@
 "use client"
+import {CloudFamilyProfiles} from "./cloud-family-profiles"
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -21,6 +22,7 @@ export function FamilySetupView({ locale, mode }: { locale: "ar" | "en"; mode: "
     const next = { id: crypto.randomUUID(), date: new Date().toISOString(), voice, reports }
     localStorage.setItem("storyverse.family.receipt", JSON.stringify(next)); setReceipt(next); router.push(`/${locale}/family-hub/receipt`)
   }
+  if(mode==="profiles"&&customer)return <CloudFamilyProfiles locale={locale}/>
   return <div className="family-setup"><div className="max-w-3xl mx-auto px-5 py-10 space-y-7"><nav className="flex flex-wrap gap-3 text-sm"><Link href={`/${locale}/family-hub`}>{ar ? "مركز الأسرة" : "Family hub"}</Link><span>/</span><span>{mode === "profiles" ? "ملفات الأسرة" : mode === "receipt" ? "إيصال التفضيلات" : "التحقق والموافقة"}</span></nav>
     <h1 className="text-3xl font-bold leading-relaxed">{mode === "profiles" ? ar ? "ملفات الأسرة على هذا الجهاز" : "Family profiles on this device" : mode === "receipt" ? ar ? "إيصال إعدادات الأسرة" : "Family settings receipt" : ar ? "توثيق ولي الأمر والموافقة المحددة الغرض" : "Guardian verification and consent"}</h1>
     {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-800">{error}</p>}
