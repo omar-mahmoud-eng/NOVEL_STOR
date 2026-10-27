@@ -1,5 +1,7 @@
 # StoryVerse
 
+للتشغيل على جهاز أو سيرفر آخر: [دليل التثبيت والنقل والنشر](docs/DEPLOYMENT_AR.md). ولتنفيذ المهمة بواسطة إيجنت: [برومبت التشغيل الجاهز](docs/AGENT_DEPLOYMENT_PROMPT_AR.md).
+
 آخر دليل للتشغيل الكامل على Docker، إدارة ميدوسا، النسخ الاحتياطي والاختبارات: [OPERATIONS.md](OPERATIONS.md). نتائج الفحص الحالية وحدود الإطلاق: [PRODUCTION_READINESS_REPORT.md](PRODUCTION_READINESS_REPORT.md).
 
 متجر كتب عربي/إنجليزي باستخدام Medusa v2 وNext.js 15، مع PostgreSQL وRedis ووحدات للكتب الرقمية والاشتراكات ولوحة إدارة.

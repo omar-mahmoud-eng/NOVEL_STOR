@@ -1,5 +1,7 @@
 # تشغيل StoryVerse والتحقق منه
 
+لجهاز أو سيرفر جديد أو لنقل البيانات، اتبع [دليل التثبيت والنقل والنشر](docs/DEPLOYMENT_AR.md). برومبت الإيجنت في [AGENT_DEPLOYMENT_PROMPT_AR.md](docs/AGENT_DEPLOYMENT_PROMPT_AR.md).
+
 26 أكتوبر 2026. الدفع مؤجل. هذا الدليل يخص المشروع المحلي وDocker Compose؛ لا يتضمن نشرًا على خادم عام.
 
 ## الخدمات المحلية
