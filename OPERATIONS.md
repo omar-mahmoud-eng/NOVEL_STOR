@@ -60,6 +60,7 @@ docker compose --profile testing run --rm --no-deps tests node tests/run-in-dock
 docker compose --profile testing run --rm --no-deps tests node tests/run-in-docker.cjs customer-integration
 docker compose --profile testing run --rm --no-deps tests node tests/admin-operations.cjs
 docker compose --profile testing run --rm --no-deps tests node tests/admin-workflows.cjs
+docker compose --profile testing run --rm --no-deps tests node tests/medusa-orders.cjs
 docker compose --profile testing run --rm --no-deps tests node tests/storefront-commerce.cjs
 docker compose --profile testing run --rm --no-deps tests node tests/docker-operational.cjs
 docker compose --profile testing run --rm --no-deps tests node tests/run-in-docker.cjs smoke
@@ -91,5 +92,25 @@ node tests/backup-restore.cjs
 - أضف المخطوطات والكتب الصوتية الكاملة والحقوق والبيانات التحريرية الفعلية من لوحة الإدارة. مرجع Stitch يتضمن 39 معاينة قراءة، وليس مكتبة ملفات إنتاج كاملة.
 
 شاشات الحملات والرسائل والأتمتة تحفظ مسودات وتعريفات. أرصدة الولاء والتصنيف اليدوي وسجل المخازن لا تُشغّل مزود تسويق أو تحول أموالًا أو تعدل مخزون Medusa الأصلي تلقائيًا. إدارة المخزون الأصلي متاحة عبر صفحات Inventory القياسية في ميدوسا. الدفع والشراء بالاشتراك واستبدال المكافآت النقدية مؤجلة.
+
+## إصلاح تفاصيل طلب قديم بلا ملخص
+
+قد تحتوي قواعد التجهيز القديمة على طلبات أُدخلت مباشرة دون سجل `order_summary`. تظهر القائمة لكن تفاصيل الطلب تقع بخطأ `pending_difference`. هذه مشكلة بيانات مختلفة عن خطأ `No QueryClient set` في المسودات، الذي عولج بتوحيد TanStack داخل إعداد Vite في `medusa-config.ts` وإعادة بناء الخلفية ولوحة الإدارة.
+
+بعد نسخة PostgreSQL احتياطية، اعرض مرشحي الإصلاح دون كتابة:
+
+```powershell
+docker compose run --rm --no-deps medusa-backend node ../../node_modules/@medusajs/cli/cli.js exec ./src/scripts/repair-order-summaries.js
+```
+
+راجع `candidates` و`skipped`. للتطبيق على الطلبات المؤهلة فقط:
+
+```powershell
+docker compose run --rm --no-deps -e ORDER_SUMMARY_REPAIR_APPLY=true medusa-backend node ../../node_modules/@medusajs/cli/cli.js exec ./src/scripts/repair-order-summaries.js
+```
+
+يمكن حصر المعالجة بإضافة `-e "ORDER_SUMMARY_REPAIR_IDS=order_ID1,order_ID2"` قبل اسم الخدمة. الأداة تضيف الملخص المفقود فقط للإصدار الأول الذي لا يملك سجل تعديلات أو credit lines، وتستخدم حاسبة Medusa الأصلية ومعاملات الطلب الفعلية. لا تغير السعر أو العملة أو حالة الدفع أو بنود الطلب، ولا تستبدل ملخصًا موجودًا. تسجل الإضافات في `storyverse_order_summary_repairs`؛ إعادة التطبيق لا تكررها. الحالات ذات التاريخ المالي لا تُخمن، بل تظهر في `skipped` لاسترجاع ملخصها الصحيح من النسخ أو مراجعتها محاسبيًا.
+
+ابنِ صورة الخلفية من إصدار يتضمن الأداة قبل استخدامها. في نشر HTTPS استعمل معاملي Compose الموثقين في دليل النشر. بعد تحديث لوحة الإدارة حدّث التبويب القديم تحديثًا كاملًا لتحميل أصول الواجهة الجديدة.
 
 تقدم ملفات الأسرة وسجل القراءة والتفضيلات تخزينًا محليًا مفصولًا حسب الحساب والملف على الجهاز. تحقق الوالد المحلي ليس خدمة تحقق هوية، والصالونات تحفظ مسودات محلية. هذه الحدود تحتاج قرار منتج وخدمة فعلية إذا كان مطلوبًا مزامنة متعددة الأجهزة أو مجتمع عام.

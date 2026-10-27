@@ -41,6 +41,15 @@ export default defineConfig({
     disable: process.env.DISABLE_MEDUSA_ADMIN === "true",
     backendUrl: process.env.MEDUSA_ADMIN_BACKEND_URL || "",
     path: "/app",
+    // Dashboard and first-party admin plugins must share one query context.
+    // Workspace dependencies can otherwise resolve separate TanStack copies.
+    vite: (config) => ({
+      resolve: {
+        // Medusa merges this override into its base configuration. Returning
+        // the whole base would register Vite's plugins a second time.
+        dedupe: [...new Set([...(config.resolve?.dedupe || []), "@tanstack/react-query", "@tanstack/query-core"])],
+      },
+    }),
   },
   modules: [
     ...(process.env.STRIPE_API_KEY && process.env.STRIPE_WEBHOOK_SECRET ? [{
