@@ -23,6 +23,8 @@ out/
 postgres_data/
 redis_data/
 uploads/
+!apps/backend/src/api/admin/assets/uploads/
+!apps/backend/src/api/admin/assets/uploads/**
 
 # Logs
 npm-debug.log*
