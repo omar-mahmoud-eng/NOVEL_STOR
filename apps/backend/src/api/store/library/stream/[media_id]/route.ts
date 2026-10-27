@@ -7,6 +7,7 @@ const StreamParamsSchema = z.object({
 })
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
+  res.setHeader("Cache-Control", "private, no-store")
   try {
     const { media_id } = StreamParamsSchema.parse(req.params)
 
@@ -29,9 +30,10 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       error.message?.includes("DRM Access Denied") ||
       error.message?.includes("Authentication required")
 
-    return res.status(isAuthError ? 403 : 400).json({
+    const status = error.message?.includes("Authentication required") ? 401 : isAuthError ? 403 : 400
+    return res.status(status).json({
       code: isAuthError ? "DRM_ACCESS_DENIED" : "STREAM_REQUEST_FAILED",
-      message: error.message || "Unable to generate secure playback stream.",
+      message: isAuthError ? error.message : "Unable to generate secure playback stream.",
     })
   }
 }

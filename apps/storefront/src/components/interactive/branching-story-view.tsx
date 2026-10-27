@@ -1,8 +1,10 @@
 "use client"
 
 import React, { useState } from "react"
-import Link from "next/link"
-import { useAudio } from "@/context/audio-context"
+import Link from "@/components/common/realm-link"
+import { useLocalSetting } from "@/hooks/use-local-setting"
+import { useNarration } from "@/hooks/use-narration"
+import { useCustomerAuth } from "@/context/customer-auth-context"
 import {
   RotateCcw,
   BookmarkCheck,
@@ -228,54 +230,27 @@ const STORY_NODES: Record<string, StoryNode> = {
 
 export function BranchingStoryView({ locale }: BranchingStoryViewProps) {
   const isRtl = locale === "ar"
-  const { playTrack, togglePlayPause, currentTrack, isPlaying } = useAudio()
+  const narration = useNarration()
+  const {customer}=useCustomerAuth()
 
-  const [currentNodeId, setCurrentNodeId] = useState<string>("root")
-  const [history, setHistory] = useState<string[]>([])
-  const [savedTime, setSavedTime] = useState<string>("منذ دقيقة")
+  const [path,setPath]=useLocalSetting<string[]>(`storyverse.branch.${customer?.id||"guest"}`, ["root"])
+  const currentNodeId=path[path.length-1] || "root"
+  const history=path.slice(0,-1)
+  const [savedTime, setSavedTime] = useState<string>("على هذا الجهاز")
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md")
 
   const currentNode = STORY_NODES[currentNodeId] || STORY_NODES["root"]
 
-  const handleChoose = (targetId: string) => {
-    setHistory((prev) => [...prev, currentNodeId])
-    setCurrentNodeId(targetId)
-    setSavedTime("الآن")
-  }
+  const handleChoose = (targetId:string) => { narration.stop();setPath([...path,targetId]);setSavedTime("حُفظ على الجهاز") }
+  const handleUndo = () => { if(path.length>1){narration.stop();setPath(path.slice(0,-1));setSavedTime("تم التراجع")}}
+  const handleRestart = () => {narration.stop();setPath(["root"]);setSavedTime("بداية جديدة")}
+  const handlePlayVoiceover = () => narration.toggle(currentNode.prose.join(" "),1,locale)
+  const fontSizeClasses = { sm: "text-base leading-loose", md: "text-xl leading-loose", lg: "text-2xl leading-loose" }
 
-  const handleUndo = () => {
-    if (history.length === 0) return
-    const prev = history[history.length - 1]
-    setHistory((h) => h.slice(0, -1))
-    setCurrentNodeId(prev)
-    setSavedTime("تم التراجع")
-  }
-
-  const handleRestart = () => {
-    setHistory([])
-    setCurrentNodeId("root")
-    setSavedTime("بداية جديدة")
-  }
-
-  const handlePlayVoiceover = () => {
-    playTrack({
-      id: `branch_${currentNode.id}`,
-      title: `${currentNode.chapterTitle} (سرد صوتي درامي)`,
-      author: "أداء صوتي درامي متزامن",
-      narrator: "سامي المهدي",
-      coverUrl: currentNode.bannerImg,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    })
-  }
-
-  const fontSizeClasses = {
-    sm: "text-sm sm:text-base leading-relaxed",
-    md: "text-base sm:text-lg leading-[2.1]",
-    lg: "text-lg sm:text-xl leading-[2.3]",
-  }
 
   return (
     <div className="min-h-screen bg-[#10131c] text-[#e0e2ef] pb-24">
+      {narration.message && <p role="status" className="p-4 text-center">{narration.message}</p>}
       {/* Top Breadcrumb & Control Strip (from Stitch p10_base_1440) */}
       <div className="border-b border-[#4e463a]/40 bg-[#0b0e17] py-4">
         <div className="max-w-[1280px] mx-auto px-4 sm:px-6 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -376,7 +351,7 @@ export function BranchingStoryView({ locale }: BranchingStoryViewProps) {
                     className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-[#272a33] text-[#e6c184] hover:bg-[#32343e] font-bold transition-colors"
                   >
                     <Volume2 className="w-4 h-4" />
-                    <span>{isRtl ? "استمع للأداء الصوتي الدرامي" : "Play Voice Narration"}</span>
+                    <span>{isRtl ? "قراءة النص بصوت الجهاز" : "Play Voice Narration"}</span>
                   </button>
                 </div>
                 <div className="flex items-center gap-3">
@@ -617,10 +592,10 @@ export function BranchingStoryView({ locale }: BranchingStoryViewProps) {
             <div className="p-5 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30 text-xs text-[#cdc6b8] space-y-2">
               <div className="flex items-center gap-2 text-[#e6c184] font-bold">
                 <span className="material-symbols-outlined text-[18px]">verified_user</span>
-                <span>محرك سرد مشفر بحماية DRM</span>
+                <span>مسارات محفوظة على هذا الجهاز</span>
               </div>
               <p className="text-[11px] leading-relaxed">
-                كل مسار تتخذه يرتبط بجلسة القارئ المعتمدة، مع منع النسخ الآلي وحفظ تقدمك فورياً عبر السحابة.
+                يُحفظ مسارك محليًا في المتصفح لهذا الحساب أو الزائر، ويمكنك الرجوع إلى خطوة سابقة أو البدء من جديد.
               </p>
             </div>
           </aside>

@@ -54,7 +54,7 @@ export const AGE_GROUP_CONFIGS: Record<AgeGroupType, AgeGroupThemeConfig> = {
       gradient: "from-amber-500/20 via-orange-400/10 to-transparent",
       buttonClass: "bg-amber-500 hover:bg-amber-600 text-white",
     },
-    targetPath: "/books?age=kids_3_6",
+    targetPath: "/realms/little",
     recommendedBookHandle: "samsem-the-bunny-adventure",
   },
   kids_7_12: {
@@ -72,7 +72,7 @@ export const AGE_GROUP_CONFIGS: Record<AgeGroupType, AgeGroupThemeConfig> = {
       gradient: "from-emerald-500/20 via-teal-400/10 to-transparent",
       buttonClass: "bg-emerald-600 hover:bg-emerald-700 text-white",
     },
-    targetPath: "/books?age=kids_7_12",
+    targetPath: "/realms/kids",
     recommendedBookHandle: "secret-spaceship-emerald-planet",
   },
   teens_13_17: {
@@ -90,7 +90,7 @@ export const AGE_GROUP_CONFIGS: Record<AgeGroupType, AgeGroupThemeConfig> = {
       gradient: "from-purple-500/20 via-indigo-500/10 to-transparent",
       buttonClass: "bg-purple-600 hover:bg-purple-700 text-white",
     },
-    targetPath: "/books?age=teens_13_17",
+    targetPath: "/realms/teens",
     recommendedBookHandle: "alhambra-code-andalusian-manuscript",
   },
   adults_18_plus: {
@@ -108,7 +108,7 @@ export const AGE_GROUP_CONFIGS: Record<AgeGroupType, AgeGroupThemeConfig> = {
       gradient: "from-amber-700/20 via-amber-600/10 to-transparent",
       buttonClass: "bg-amber-700 hover:bg-amber-800 text-white",
     },
-    targetPath: "/books?age=adults_18_plus",
+    targetPath: "/library",
     recommendedBookHandle: "spectres-of-ancient-baghdad",
   },
 }
@@ -190,13 +190,58 @@ type CustomerAuthContextType = {
 }
 
 const CustomerAuthContext = createContext<CustomerAuthContextType | undefined>(undefined)
+export const DEMO_MODE = process.env.NEXT_PUBLIC_ENABLE_DEMO_MODE === "true"
+
+function fromProfile(profile: any, age?: AgeGroupType): CustomerUser {
+  const group = age || profile.metadata?.ageGroup
+  return {
+    id: profile.id, name: [profile.first_name, profile.last_name].filter(Boolean).join(" ") || profile.email,
+    email: profile.email, phone: profile.phone,
+    ageGroup: group in AGE_GROUP_CONFIGS ? group : "adults_18_plus",
+    isVip: false, credits: 0, unlockedBooksCount: 0,
+    preferredFormat: profile.metadata?.preferredFormat || "ebook",
+  }
+}
 
 export function CustomerAuthProvider({ children }: { children: React.ReactNode }) {
-  const [customer, setCustomer] = useState<CustomerUser | null>(DEMO_CUSTOMERS[3]) // Default to Tariq (Adults)
+  const [customer, setCustomer] = useState<CustomerUser | null>(null)
   const [activeAgeGroup, setActiveAgeGroup] = useState<AgeGroupType>("adults_18_plus")
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    if (!customer || DEMO_MODE) return
+    let cancelled = false
+    const customerId = customer.id
+    fetch("/api/medusa/store/library", { cache: "no-store" })
+      .then(async (response) => response.ok ? response.json() : null)
+      .then((data) => {
+        if (cancelled || !data) return
+        setCustomer((current) => current?.id === customerId ? { ...current,
+          isVip: data.vip_subscription?.active === true,
+          credits: data.vip_subscription?.remaining_credits ?? 0,
+          vipPlan: data.vip_subscription?.plan,
+          unlockedBooksCount: data.library_count ?? 0,
+        } : current)
+      }).catch(() => {})
+    return () => { cancelled = true }
+  }, [customer?.id])
+
+  useEffect(() => {
+    if (!DEMO_MODE) {
+      let cancelled = false
+      fetch("/api/customer", { cache: "no-store" })
+        .then(async (res) => res.ok ? res.json() : { customer: null })
+        .then((data) => {
+          if (cancelled || !data.customer) return
+          const user = fromProfile(data.customer)
+          setCustomer(user)
+          setActiveAgeGroup(user.ageGroup)
+        })
+        .catch(() => {})
+        .finally(() => { if (!cancelled) setIsLoading(false) })
+      localStorage.removeItem("publishing_customer_session")
+      return () => { cancelled = true }
+    }
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem("publishing_customer_session")
       if (stored) {
@@ -207,15 +252,16 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
             setActiveAgeGroup(parsed.ageGroup)
           }
         } catch {
-          setCustomer(DEMO_CUSTOMERS[3])
+          setCustomer(null)
         }
       }
     }
+    setIsLoading(false)
   }, [])
 
   const saveCustomer = (cust: CustomerUser | null) => {
     setCustomer(cust)
-    if (typeof window !== "undefined") {
+    if (typeof window !== "undefined" && DEMO_MODE) {
       if (cust) {
         localStorage.setItem("publishing_customer_session", JSON.stringify(cust))
         if (cust.ageGroup === "kids_3_6") {
@@ -238,6 +284,15 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   ): Promise<{ success: boolean; targetUrl: string }> => {
     setIsLoading(true)
     try {
+      if (!DEMO_MODE) {
+        const response = await fetch("/api/customer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "login", email, password }) })
+        const result = await response.json()
+        if (!response.ok || !result.customer) return { success: false, targetUrl: "" }
+        const user = fromProfile(result.customer, selectedAgeGroup)
+        setCustomer(user)
+        setActiveAgeGroup(user.ageGroup)
+        return { success: true, targetUrl: AGE_GROUP_CONFIGS[user.ageGroup].targetPath }
+      }
       await new Promise((r) => setTimeout(r, 350))
       const found = DEMO_CUSTOMERS.find((c) => c.email.toLowerCase() === email.toLowerCase())
       
@@ -279,6 +334,15 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
   }): Promise<{ success: boolean; targetUrl: string }> => {
     setIsLoading(true)
     try {
+      if (!DEMO_MODE) {
+        const response = await fetch("/api/customer", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "register", ...data }) })
+        const result = await response.json()
+        if (!response.ok || !result.customer) return { success: false, targetUrl: "" }
+        const user = fromProfile(result.customer)
+        setCustomer(user)
+        setActiveAgeGroup(user.ageGroup)
+        return { success: true, targetUrl: AGE_GROUP_CONFIGS[user.ageGroup].targetPath }
+      }
       await new Promise((r) => setTimeout(r, 350))
       const assignedAge = data.ageGroup || "adults_18_plus"
       const newCust: CustomerUser = {
@@ -301,11 +365,15 @@ export function CustomerAuthProvider({ children }: { children: React.ReactNode }
     }
   }
 
-  const logout = () => {
+  const logout = async () => {
+    if (!DEMO_MODE) await fetch("/api/customer", { method: "DELETE" })
     saveCustomer(null)
+    setActiveAgeGroup("adults_18_plus")
+    localStorage.removeItem("safe_kids_mode_active")
   }
 
   const switchDemoCustomer = (customerId: string): AgeGroupType => {
+    if (!DEMO_MODE) return activeAgeGroup
     const found = DEMO_CUSTOMERS.find((c) => c.id === customerId)
     if (found) {
       saveCustomer(found)

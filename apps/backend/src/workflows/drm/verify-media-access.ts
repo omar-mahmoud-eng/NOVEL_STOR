@@ -8,6 +8,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { STORY_MODULE } from "../../modules/story"
 import { SUBSCRIPTION_MODULE } from "../../modules/subscription"
 import { generateDrmPresignedUrl } from "../../utils/s3-drm"
+import { purchasedVariantIds } from "../../utils/media-licenses"
 
 export type VerifyMediaAccessInput = {
   media_id: string
@@ -54,36 +55,22 @@ export const verifyCustomerLicenseStep = createStep(
       throw new Error("Authentication required: You must be logged in to stream full DRM protected content.")
     }
 
-    const orderModule = container.resolve(Modules.ORDER) as any
     const subscriptionService = container.resolve(SUBSCRIPTION_MODULE) as any
 
     // 3. Check for direct variant purchase in customer's order history
     if (input.media.variant_id) {
-      const orders = await orderModule.listOrders({
-        customer_id: input.customer_id,
-      })
-
-      for (const order of orders) {
-        const fullOrder = await orderModule.retrieveOrder(order.id, {
-          relations: ["items"],
-        })
-        const hasPurchasedVariant = fullOrder.items?.some(
-          (item: any) => item.variant_id === input.media.variant_id
-        )
-
-        if (hasPurchasedVariant) {
+      const licensed = await purchasedVariantIds(container, input.customer_id)
+      if (licensed.has(input.media.variant_id)) {
           return new StepResponse({
             authorized: true,
             reason: "direct_purchase",
-            order_id: order.id,
           })
-        }
       }
     }
 
     // 4. Fallback: Check for active VIP Reader & Listener Subscription
     const subCheck = await subscriptionService.isCustomerSubscribed(input.customer_id)
-    if (subCheck.isSubscribed) {
+    if (subCheck.isSubscribed && subCheck.tier?.metadata?.unlimited_library_access === true) {
       return new StepResponse({
         authorized: true,
         reason: "vip_subscription",
@@ -103,7 +90,8 @@ export const verifyCustomerLicenseStep = createStep(
  */
 export const generateStreamTokenStep = createStep(
   "generate-stream-token-step",
-  async (input: { media: any }) => {
+  async (input: { media: any; authorized: boolean }) => {
+    if (!input.authorized) throw new Error("DRM Access Denied")
     const streamUrl = await generateDrmPresignedUrl(
       input.media.private_storage_key,
       60 // 60 seconds strict expiration
@@ -129,13 +117,14 @@ export const verifyMediaAccessWorkflow = createWorkflow(
   function (input: VerifyMediaAccessInput) {
     const mediaDetails = resolveMediaDetailsStep(input)
 
-    verifyCustomerLicenseStep({
+    const license = verifyCustomerLicenseStep({
       media: mediaDetails.media,
       customer_id: input.customer_id,
     })
 
     const streamToken = generateStreamTokenStep({
       media: mediaDetails.media,
+      authorized: license.authorized,
     })
 
     return new WorkflowResponse(streamToken)

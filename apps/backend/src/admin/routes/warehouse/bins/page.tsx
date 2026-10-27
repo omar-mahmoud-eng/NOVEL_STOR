@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table } from "@medusajs/ui"
@@ -18,7 +19,7 @@ const WarehouseBinsPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/warehouse")
+      const res = await adminFetch("/admin/warehouse")
       if (res.ok) {
         const data = await res.json()
         setBins(data.bins || [])

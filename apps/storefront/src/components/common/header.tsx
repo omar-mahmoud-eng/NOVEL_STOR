@@ -46,7 +46,7 @@ export function Header({
     const segments = (pathname || "/").split("/")
     segments[1] = nextLocale
     const nextPath = segments.join("/") || `/${nextLocale}`
-    router.push(nextPath)
+    router.push(nextPath + location.search)
   }
 
   const handleSearchSubmit = (e: React.FormEvent) => {
@@ -484,16 +484,18 @@ export function Header({
     <>
       <header className="sticky top-0 w-full z-50 bg-[#10131c]/95 backdrop-blur-xl border-b border-[#4e463a]/30 shadow-sm transition-all text-[#e0e2ef]">
         {/* Main Header Bar */}
-        <div className="h-20 max-w-[1280px] w-full mx-auto px-4 sm:px-6 flex items-center justify-between gap-4">
+        <div className="h-20 max-w-[1280px] w-full mx-auto px-4 sm:px-6 flex items-center justify-between gap-2 sm:gap-4">
           
           {/* Brand & Realm Switcher */}
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-1 sm:gap-6 min-w-0">
             
             {/* Mobile menu trigger */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="lg:hidden p-2 text-[#d1c5b5] hover:text-[#e0e2ef] rounded-lg"
               aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-navigation"
             >
               {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -501,8 +503,8 @@ export function Header({
             {/* StoryVerse Logo */}
             <Link href={`/${locale}`} className="flex items-center gap-2.5 group">
               <span className="material-symbols-outlined text-[#e6c184] text-[28px]">auto_stories</span>
-              <span className="font-serif font-black text-xl text-[#e6c184] tracking-wide">StoryVerse</span>
-              <span className="text-[10px] font-bold bg-[#93000a]/20 text-[#ffb4ab] px-2 py-0.5 rounded border border-[#ffb4ab]/30">
+              <span className="font-serif font-black text-lg sm:text-xl text-[#e6c184] tracking-wide">StoryVerse</span>
+              <span className="hidden sm:inline text-[10px] font-bold bg-[#93000a]/20 text-[#ffb4ab] px-2 py-0.5 rounded border border-[#ffb4ab]/30">
                 +١٨ المكتبة العامة
               </span>
             </Link>
@@ -535,7 +537,7 @@ export function Header({
           </form>
 
           {/* User Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1 sm:gap-3 shrink-0">
             {/* Language toggle */}
             <button
               onClick={toggleLanguage}
@@ -608,6 +610,16 @@ export function Header({
             </nav>
           </div>
         </div>
+
+        {mobileMenuOpen && <nav id="mobile-navigation" aria-label={isRtl ? "القائمة الرئيسية" : "Main navigation"} className="lg:hidden grid grid-cols-2 gap-2 border-t border-[#4e463a]/30 p-4 bg-[#10131c]">
+          {[
+            ["/books", "الكتب", "Books"], ["/audiobooks", "الكتب الصوتية", "Audiobooks"],
+            ["/genres", "التصنيفات", "Genres"], ["/products", "المقتنيات", "Deluxe editions"],
+            ["/library", "مكتبتي", "My library"], ["/subscriptions", "الاشتراكات", "Subscriptions"],
+            ["/realms/little", "عالم البراعم", "Little realm"], ["/realms/kids", "عالم الأطفال", "Kids realm"],
+            ["/realms/teens", "عالم اليافعين", "Teens realm"], ["/family-hub", "مركز الأسرة", "Family hub"],
+          ].map(([href, ar, en]) => <Link key={href} href={`/${locale}${href}`} onClick={() => setMobileMenuOpen(false)} className="rounded-lg p-3 text-sm hover:bg-[#272a33]">{isRtl ? ar : en}</Link>)}
+        </nav>}
       </header>
 
       {/* Cart Sheet Component */}

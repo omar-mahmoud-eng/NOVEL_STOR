@@ -1,6 +1,7 @@
 import React from "react"
 import { Container, Heading, Text, Badge, Button } from "@medusajs/ui"
 import { ArrowRight, RefreshCw, Sparkles } from "lucide-react"
+import {AdminRequestNotice} from "./request-notice"
 
 export interface NavTab {
   label: string
@@ -18,6 +19,7 @@ interface SubNavProps {
   onRefresh?: () => void
   isLoading?: boolean
   actionButton?: React.ReactNode
+  sampleData?: boolean
 }
 
 export const SubNav: React.FC<SubNavProps> = ({
@@ -29,9 +31,12 @@ export const SubNav: React.FC<SubNavProps> = ({
   onRefresh,
   isLoading,
   actionButton,
+  sampleData,
 }) => {
   return (
     <div className="space-y-4 mb-6">
+      <AdminRequestNotice/>
+      {sampleData && <p role="status" className="rounded-lg border border-amber-400 p-3 text-sm text-amber-700">هذه الشاشة تعرض بيانات توضيحية. لا تستخدمها في قرارات مالية أو تشغيلية حتى ربطها بالسجلات الفعلية.</p>}
       {/* Top Header with Google Stitch Design Hierarchy */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-ui-border-base/70">
         <div>

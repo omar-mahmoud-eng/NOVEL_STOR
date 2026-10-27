@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import Link from "next/link"
+import Link from "@/components/common/realm-link"
 import {
   BookOpen,
   ChevronLeft,
@@ -19,47 +19,27 @@ import {
   Sparkles,
 } from "lucide-react"
 
+import reference from "@/lib/stitch-reading-reference.json"
+import type { StoryBookData } from "@/lib/books-data"
+import { useLocalSetting } from "@/hooks/use-local-setting"
+
 type IllustratedReaderViewProps = {
+  book: StoryBookData
   locale: "ar" | "en"
 }
 
 type ViewMode = "spread" | "slide" | "vertical"
 
-export function IllustratedReaderView({ locale }: IllustratedReaderViewProps) {
+export function IllustratedReaderView({ locale, book }: IllustratedReaderViewProps) {
   const isRtl = locale === "ar"
 
-  const [viewMode, setViewMode] = useState<ViewMode>("spread")
+  const [viewMode, setViewMode] = useLocalSetting<ViewMode>("storyverse.illustrated.mode","spread")
   const [zoomLevel, setZoomLevel] = useState<number>(100)
   const [contrastHigh, setContrastHigh] = useState<boolean>(false)
-  const [currentPage, setCurrentPage] = useState<number>(0)
+  const [currentPage, setCurrentPage] = useLocalSetting<number>(`storyverse.illustrated.${book.id}.page`,0)
 
-  // Illustrated Graphic Novel Panels for "شفرة قصر الحمراء المصورة"
-  const panels = [
-    {
-      pageNumber: 1,
-      title: "لوحة البهو الخالي",
-      caption: "منتصف الليل في بهو السباع، الرياح تطفئ مصابيح الزوار وظل طارق يتسلل نحو العمود الأندلسي.",
-      img: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=1200&q=85",
-    },
-    {
-      pageNumber: 2,
-      title: "نقوش التاج الرخامي",
-      caption: "التقريب المجهري يكشف أرقاماً عربية دقيقة محفورة داخل بتلات الزهرة الرخامية.",
-      img: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=1200&q=85",
-    },
-    {
-      pageNumber: 3,
-      title: "ضوء المصباح الزيتي",
-      caption: "المفتاح البرونزي ينزلق في الشق المخفي أسفل قاعدة الحجر، وصوت صرير حديدي يدوي في الصمت.",
-      img: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1200&q=85",
-    },
-    {
-      pageNumber: 4,
-      title: "سرداب المخطوطات",
-      caption: "درجات تنحدر نحو قبو محكم الإغلاق تفوح منه رائحة شمع العسل والرقوق المحفوظة منذ خمسة قرون.",
-      img: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=1200&q=85",
-    },
-  ]
+  const images = reference.p19_base_1440.images
+  const panels = [0,1,2,3].map(index=>({pageNumber:index+1,title:book.title+" · "+(index+1),caption:book.sampleText[index%book.sampleText.length]||book.description,img:book.handle==="kharaet-al-ramad"?images[index%images.length].src:book.coverUrl}))
 
   const handleZoomIn = () => setZoomLevel((z) => Math.min(150, z + 15))
   const handleZoomOut = () => setZoomLevel((z) => Math.max(80, z - 15))
@@ -67,12 +47,12 @@ export function IllustratedReaderView({ locale }: IllustratedReaderViewProps) {
   return (
     <div className={`min-h-screen ${contrastHigh ? "bg-black" : "bg-[#10131c]"} text-[#e0e2ef] pb-24`}>
       {/* Top Utility Bar (Stitch P19) */}
-      <section className="sticky top-20 z-40 bg-[#181b25]/95 backdrop-blur-md border-b border-[#4e463a]/40 px-4 sm:px-6 py-3 shadow-md">
+      <section className="sticky top-0 z-40 bg-[#181b25]/95 backdrop-blur-md border-b border-[#4e463a]/40 px-4 sm:px-6 py-3 shadow-md">
         <div className="max-w-[1440px] mx-auto flex flex-col xl:flex-row items-center justify-between gap-4">
           {/* Breadcrumb & Title */}
           <div className="flex items-center gap-3 w-full xl:w-auto">
             <Link
-              href={`/${locale}/books/alhambra-code-andalusian-manuscript`}
+              href={`/${locale}/books/${book.handle}`}
               className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#1c1f29] hover:bg-[#272a33] text-xs font-bold text-[#e0e2ef] border border-[#4e463a]/40 transition-colors"
             >
               <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
@@ -81,7 +61,7 @@ export function IllustratedReaderView({ locale }: IllustratedReaderViewProps) {
             <div className="h-4 w-px bg-[#4e463a]/40" />
             <div className="flex items-center gap-2">
               <span className="font-serif text-sm font-black text-[#e6c184]">
-                «شفرة قصر الحمراء: الرواية المصورة (P19)»
+                {book.title} · المشاهد المصورة
               </span>
               <span className="px-2 py-0.5 rounded bg-[#93000a]/20 text-[#ffb4ab] text-[10px] font-bold border border-[#ffb4ab]/30">
                 +١٨ للكبار
@@ -165,7 +145,7 @@ export function IllustratedReaderView({ locale }: IllustratedReaderViewProps) {
       </section>
 
       {/* Main Canvas Area */}
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 overflow-x-auto">
         {/* MODE 1: DUAL BOOK SPREAD (Default Stitch P19) */}
         {viewMode === "spread" && (
           <div
@@ -221,7 +201,7 @@ export function IllustratedReaderView({ locale }: IllustratedReaderViewProps) {
           <div className="max-w-2xl mx-auto space-y-6">
             <div className="relative aspect-[4/3] w-full rounded-3xl overflow-hidden bg-[#0b0e17] border border-[#e6c184]/50 shadow-2xl">
               <img
-                src={panels[currentPage].img}
+                src={panels[Math.min(currentPage,panels.length-1)].img}
                 alt={panels[currentPage].title}
                 className="w-full h-full object-cover"
               />
@@ -286,7 +266,7 @@ export function IllustratedReaderView({ locale }: IllustratedReaderViewProps) {
                 <div className="p-5 text-start">
                   <div className="flex items-center justify-between text-xs text-[#9a8f81] mb-1">
                     <span className="text-[#e6c184] font-bold">لوحة {panel.pageNumber}</span>
-                    <span>شفرة قصر الحمراء المصورة</span>
+                    <span>{book.title}</span>
                   </div>
                   <h4 className="font-serif text-base font-black text-[#e0e2ef]">{panel.title}</h4>
                   <p className="font-serif text-xs text-[#d1c5b5] mt-1 leading-relaxed">

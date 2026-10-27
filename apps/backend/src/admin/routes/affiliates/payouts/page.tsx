@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table } from "@medusajs/ui"
@@ -19,7 +20,7 @@ const AffiliatePayoutsPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/affiliates")
+      const res = await adminFetch("/admin/affiliates")
       if (res.ok) {
         const data = await res.json()
         setReferrals(data.referrals || [])
@@ -35,18 +36,15 @@ const AffiliatePayoutsPage = () => {
     fetchData()
   }, [])
 
-  const pendingPayouts = referrals.filter((r) => r.payout_status !== "paid")
+  const pendingPayouts = referrals.filter((r) => (r.payout_status || r.status) !== "paid")
   const totalPendingAmount = pendingPayouts.reduce((sum, r) => sum + Number(r.commission_amount || 0), 0)
-  const paidPayouts = referrals.filter((r) => r.payout_status === "paid")
+  const paidPayouts = referrals.filter((r) => (r.payout_status || r.status) === "paid")
   const totalPaidAmount = paidPayouts.reduce((sum, r) => sum + Number(r.commission_amount || 0), 0)
 
   const handleBatchPay = () => {
-    setProcessing(true)
-    setTimeout(() => {
-      setProcessing(false)
-      setMsg("تم إنشاء كشف الدفعات البنكية وإرسال إشعارات التحويل للمؤثرين بنجاح!")
-      setTimeout(() => setMsg(""), 4000)
-    }, 1000)
+    const cell=(value:any)=>'"'+String(value??"").replace(/^[=+@-]/," '").replaceAll('"','""')+'"'
+    const rows=[["Order","Affiliate","Amount","Commission","Status"],...pendingPayouts.map(r=>[r.order_id,r.affiliate_name||r.affiliate_id,r.order_amount,r.commission_amount,r.payout_status||r.status])]
+    const url=URL.createObjectURL(new Blob(["\ufeff"+rows.map(row=>row.map(cell).join(",")).join("\r\n")],{type:"text/csv;charset=utf-8"}));const anchor=document.createElement("a");anchor.href=url;anchor.download="pending-commissions.csv";anchor.click();setTimeout(()=>URL.revokeObjectURL(url),1000);setMsg("تم تنزيل كشف المراجعة. الدفع مؤجل ولم يُنفذ تحويل.")
   }
 
   return (
@@ -92,7 +90,7 @@ const AffiliatePayoutsPage = () => {
             disabled={processing || pendingPayouts.length === 0}
           >
             <CreditCard className="w-4 h-4 ml-1.5" />
-            {processing ? "جاري تحويل الدفعات..." : `صرف مستحقات المعلقين ($${totalPendingAmount.toFixed(2)})`}
+            {`تنزيل كشف المستحقات (${pendingPayouts.length})`}
           </Button>
           {msg && <div className="text-[11px] text-emerald-700 font-semibold mt-1.5 text-center">{msg}</div>}
         </Container>
@@ -146,8 +144,8 @@ const AffiliatePayoutsPage = () => {
                     ${Number(ref.commission_amount || 0).toLocaleString()}
                   </Table.Cell>
                   <Table.Cell>
-                    <Badge color={ref.payout_status === "paid" ? "green" : "orange"}>
-                      {ref.payout_status === "paid" ? "تم التحويل" : "معلق"}
+                    <Badge color={(ref.payout_status || ref.status) === "paid" ? "green" : "orange"}>
+                      {(ref.payout_status || ref.status) === "paid" ? "تم التحويل" : "معلق"}
                     </Badge>
                   </Table.Cell>
                   <Table.Cell className="text-xs text-ui-fg-subtle">

@@ -3,6 +3,8 @@
 import React, { useState } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { CustomerAuthProvider } from "@/context/customer-auth-context"
+import { ReadingStateProvider } from "@/context/reading-state-context"
+import { CatalogProvider } from "@/context/catalog-context"
 import { CartProvider } from "@/context/cart-context"
 import { AudioProvider } from "@/context/audio-context"
 import { KidsModeProvider } from "@/context/kids-mode-context"
@@ -25,6 +27,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
       <CustomerAuthProvider>
+        <CatalogProvider>
+        <ReadingStateProvider>
         <KidsModeProvider>
           <CartProvider>
             <AudioProvider>
@@ -33,6 +37,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
             </AudioProvider>
           </CartProvider>
         </KidsModeProvider>
+        </ReadingStateProvider>
+        </CatalogProvider>
       </CustomerAuthProvider>
     </QueryClientProvider>
   )

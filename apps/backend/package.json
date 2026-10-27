@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "medusa develop",
     "build": "medusa build",
-    "start": "medusa start",
+    "start": "node ../../scripts/start-backend.cjs",
     "db:migrate": "medusa db:migrate",
     "db:seed": "medusa exec ./src/scripts/seed.ts",
-    "user:create": "medusa user"
+    "user:create": "medusa user",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1156.0",
@@ -21,18 +22,20 @@
     "@medusajs/ui": "^4.0.7",
     "dotenv": "^16.4.7",
     "lucide-react": "^0.468.0",
+    "nodemailer": "^10.2.1",
     "pg": "^8.13.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "zod": "^3.24.1"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",
+    "@types/nodemailer": "^8.0.2",
     "@types/pg": "^8.11.10",
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "ts-node": "^10.9.2",
-    "typescript": "^5.7.2"
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=20.0.0"

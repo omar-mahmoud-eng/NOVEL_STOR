@@ -1,3 +1,4 @@
+import {adminFetch} from "../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -36,7 +37,7 @@ const HelpdeskPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/helpdesk")
+      const res = await adminFetch("/admin/helpdesk")
       if (res.ok) {
         const data = await res.json()
         setTickets(data.tickets || [])
@@ -62,14 +63,14 @@ const HelpdeskPage = () => {
     if (!selectedTicket || !replyMessage.trim()) return
     setIsSending(true)
     try {
-      const res = await fetch("/admin/helpdesk", {
+      const res = await adminFetch("/admin/helpdesk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ticket_id: selectedTicket.id,
           sender_name: "مدير خدمة العملاء - فريق الدعم",
           message: replyMessage.trim(),
-          new_status: replyStatus,
+          new_new_status: replyStatus,
         }),
       })
       if (res.ok) {

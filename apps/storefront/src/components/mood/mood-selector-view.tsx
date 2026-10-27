@@ -1,7 +1,8 @@
 "use client"
+import { useCatalogBooks } from "@/context/catalog-context"
 
 import React, { useState } from "react"
-import Link from "next/link"
+import Link from "@/components/common/realm-link"
 import { PUBLISHING_BOOKS, StoryBookData } from "@/lib/books-data"
 import {
   Clock,
@@ -26,45 +27,20 @@ type MoodOption = "mystery" | "solitude" | "epic" | "gentle"
 type FormatOption = "all" | "text" | "audio"
 
 export function MoodSelectorView({ locale }: MoodSelectorViewProps) {
+  const PUBLISHING_BOOKS = useCatalogBooks()
   const isRtl = locale === "ar"
 
   const [selectedTime, setSelectedTime] = useState<TimeOption>("15")
   const [selectedMood, setSelectedMood] = useState<MoodOption>("mystery")
   const [selectedFormat, setSelectedFormat] = useState<FormatOption>("all")
 
-  // Filter books dynamically based on choices
-  const getRecommendations = () => {
-    return PUBLISHING_BOOKS.filter((b) => {
-      const text = (b.title + " " + b.description).toLowerCase()
-      if (
-        selectedMood === "mystery" &&
-        !text.includes("شفرة") &&
-        !text.includes("قصر") &&
-        !text.includes("أندلس") &&
-        !text.includes("غموض") &&
-        !text.includes("مخطوط")
-      ) {
-        return false
-      }
-      if (
-        selectedMood === "solitude" &&
-        !text.includes("رمل") &&
-        !text.includes("ذاكرة") &&
-        !text.includes("فلسف") &&
-        !text.includes("عزلة") &&
-        !text.includes("تاريخ")
-      ) {
-        return false
-      }
-      if (selectedMood === "gentle" && b.ageGroup !== "kids_3_6" && b.ageGroup !== "kids_7_12") {
-        return false
-      }
-      return true
-    })
-  }
-
-  const results = getRecommendations()
-  const displayResults = results.length > 0 ? results : PUBLISHING_BOOKS.slice(0, 3)
+  const displayResults = PUBLISHING_BOOKS.filter(book => {
+    if(book.ageGroup!=="adults_18_plus")return false
+    const minutes=book.minutes || Math.max(5,Math.ceil(book.sampleText.join(" ").split(/\s+/).length/160))
+    const genre=book.genre || (book.handle==="kharaet-al-ramad"?"mystery":"historical")
+    const genres = selectedMood==="mystery"?["mystery"]:selectedMood==="solitude"?["drama","classics"]:selectedMood==="gentle"?["classics"]:["historical","adventure","scifi"]
+    return minutes<=Number(selectedTime) && genres.includes(genre)
+  })
 
   return (
     <div className="min-h-screen bg-[#10131c] text-[#e0e2ef] pb-24">
@@ -106,7 +82,7 @@ export function MoodSelectorView({ locale }: MoodSelectorViewProps) {
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Controls Column (5 Cols) */}
-          <aside className="lg:col-span-5 space-y-6 text-start">
+          <aside className="lg:col-span-5 space-y-6 text-start"><label className="original-panel flex items-center justify-between gap-3">الصيغة<select className="original-select" value={selectedFormat} onChange={event=>setSelectedFormat(event.target.value as FormatOption)}><option value="all">نص وصوت</option><option value="text">قراءة</option><option value="audio">استماع للنص</option></select></label>
             <div className="p-6 rounded-3xl bg-[#1c1f29] border border-[#4e463a]/40 shadow-xl space-y-6">
               {/* Filter 1: Time Available */}
               <div className="space-y-3">
@@ -233,6 +209,7 @@ export function MoodSelectorView({ locale }: MoodSelectorViewProps) {
             </div>
 
             <div className="space-y-4">
+              {displayResults.length===0 && <div className="original-panel space-y-3"><p>لا توجد أعمال تطابق هذه الخيارات حاليًا.</p><button className="original-button" onClick={()=>{setSelectedTime("60");setSelectedMood("mystery");setSelectedFormat("all")}}>إعادة ضبط الخيارات</button></div>}
               {displayResults.map((book) => (
                 <article
                   key={book.id}
@@ -263,7 +240,7 @@ export function MoodSelectorView({ locale }: MoodSelectorViewProps) {
 
                     <div className="pt-3 border-t border-[#4e463a]/30 flex flex-wrap items-center gap-2">
                       <Link
-                        href={`/${locale}/reader/${book.handle}`}
+                        href={`/${locale}/${selectedFormat==="audio"?"player":"reader"}/${book.handle}`}
                         className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#e6c184] text-[#422c00] font-bold text-xs hover:bg-[#ffdeaa] transition-colors"
                       >
                         <BookOpen className="w-3.5 h-3.5" />

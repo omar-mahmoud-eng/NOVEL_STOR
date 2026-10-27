@@ -1,33 +1,40 @@
 import type { Metadata } from "next"
-import { Inter, IBM_Plex_Sans_Arabic, Noto_Serif, Noto_Sans_Arabic } from "next/font/google"
+import localFont from "next/font/local"
 import "@/styles/globals.css"
 
-const inter = Inter({
-  subsets: ["latin"],
+const inter = localFont({
+  src: "../assets/fonts/Inter.ttf",
+  weight: "100 900",
   variable: "--font-inter",
   display: "swap",
 })
 
-const ibmPlexArabic = IBM_Plex_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["300", "400", "500", "600", "700"],
+const ibmPlexArabic = localFont({
+  src: [
+    {path:"../assets/fonts/IBMPlexSansArabic-Light.ttf",weight:"300"},
+    {path:"../assets/fonts/IBMPlexSansArabic-Regular.ttf",weight:"400"},
+    {path:"../assets/fonts/IBMPlexSansArabic-Medium.ttf",weight:"500"},
+    {path:"../assets/fonts/IBMPlexSansArabic-SemiBold.ttf",weight:"600"},
+    {path:"../assets/fonts/IBMPlexSansArabic-Bold.ttf",weight:"700"},
+  ],
   variable: "--font-arabic",
   display: "swap",
 })
 
-const notoSansArabic = Noto_Sans_Arabic({
-  subsets: ["arabic"],
-  weight: ["400", "500", "600", "700", "800"],
+const notoSansArabic = localFont({
+  src: "../assets/fonts/NotoSansArabic.ttf",
+  weight: "100 900",
   variable: "--font-noto-sans",
   display: "swap",
 })
 
-const notoSerif = Noto_Serif({
-  subsets: ["latin"],
-  weight: ["400", "600", "700"],
+const notoSerif = localFont({
+  src: "../assets/fonts/NotoNaskhArabic.ttf",
+  weight: "400 700",
   variable: "--font-serif",
   display: "swap",
 })
+const ruqaa = localFont({ src: [{path:"../assets/fonts/ArefRuqaa-Regular.ttf",weight:"400"},{path:"../assets/fonts/ArefRuqaa-Bold.ttf",weight:"700"}], variable: "--font-ruqaa", display: "swap" })
 
 export const metadata: Metadata = {
   title: "StoryVerse | منصة الروايات والأدب العربي الرقمي والصوتي",
@@ -41,17 +48,9 @@ export default function RootLayout({
 }) {
   return (
     <html
-      className={`${inter.variable} ${ibmPlexArabic.variable} ${notoSansArabic.variable} ${notoSerif.variable} h-full antialiased`}
+      className={`${inter.variable} ${ibmPlexArabic.variable} ${notoSansArabic.variable} ${notoSerif.variable} ${ruqaa.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
-      </head>
       <body className="min-h-full flex flex-col font-sans">
         {children}
       </body>

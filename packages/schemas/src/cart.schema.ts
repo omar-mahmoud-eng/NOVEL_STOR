@@ -8,11 +8,12 @@ import { z } from "zod"
 export const AddToCartSchema = z
   .object({
     variant_id: z
-      .string({ required_error: "variant_id is required" })
+      .string({ error: "variant_id is required" })
       .min(1, "variant_id cannot be empty")
-      .regex(/^variant_[a-zA-Z0-9]+$/, "Invalid Medusa variant identifier format"),
+      .max(100)
+      .regex(/^variant_[a-zA-Z0-9_]+$/, "Invalid Medusa variant identifier format"),
     quantity: z
-      .number({ required_error: "quantity is required" })
+      .number({ error: "quantity is required" })
       .int("quantity must be an integer")
       .positive("quantity must be strictly greater than 0")
       .max(100, "Maximum permissible single-item purchase limit is 100 units"),
@@ -23,10 +24,10 @@ export const AddToCartSchema = z
 export const UpdateCartLineItemSchema = z
   .object({
     line_item_id: z
-      .string({ required_error: "line_item_id is required" })
+      .string({ error: "line_item_id is required" })
       .min(1, "line_item_id cannot be empty"),
     quantity: z
-      .number({ required_error: "quantity is required" })
+      .number({ error: "quantity is required" })
       .int("quantity must be an integer")
       .min(0, "quantity cannot be negative")
       .max(100, "Maximum permissible single-item purchase limit is 100 units"),

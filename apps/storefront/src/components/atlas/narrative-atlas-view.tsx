@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useState } from "react"
-import Link from "next/link"
+import Link from "@/components/common/realm-link"
 import {
   MapPin,
   Users,
@@ -108,7 +108,7 @@ export function NarrativeAtlasView({ locale }: NarrativeAtlasViewProps) {
     },
   ]
 
-  const selectedChar = characters.find((c) => c.id === selectedCharacterId) || characters[0]
+  const selectedChar = characters.find((c) => c.id === selectedCharacterId && c.minThreshold <= spoilerThreshold) || characters[0]
 
   return (
     <div className="min-h-screen bg-[#10131c] text-[#e0e2ef] pb-24">
@@ -143,7 +143,7 @@ export function NarrativeAtlasView({ locale }: NarrativeAtlasViewProps) {
                 </span>
               </div>
               <h1 className="font-serif text-3xl sm:text-5xl font-black text-[#e0e2ef] tracking-tight">
-                {isRtl ? "أطلس حكاية «شفرة قصر الحمراء» والشخصيات" : "Alhambra Narrative Atlas & Characters"}
+                {isRtl ? "أطلس حكاية «خرائط الرماد» والشخصيات" : "Maps of Ash Narrative Atlas & Characters"}
               </h1>
               <p className="font-serif text-sm sm:text-base text-[#d1c5b5] mt-3 leading-relaxed">
                 {isRtl
@@ -155,7 +155,7 @@ export function NarrativeAtlasView({ locale }: NarrativeAtlasViewProps) {
             {/* Quick Action */}
             <div className="flex items-center gap-3 shrink-0">
               <Link
-                href={`/${locale}/reader/alhambra-code-andalusian-manuscript`}
+                href={`/${locale}/reader/kharaet-al-ramad`}
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-[#e6c184] text-[#422c00] font-black text-xs hover:bg-[#ffdeaa] transition-colors shadow-lg"
               >
                 <BookOpen className="w-4 h-4" />
@@ -223,8 +223,10 @@ export function NarrativeAtlasView({ locale }: NarrativeAtlasViewProps) {
             <MapPin className="w-4 h-4" />
             <span>خريطة المواقع والأرشيف</span>
           </button>
+          <button className="original-button" aria-pressed={activeTab === "timeline"} onClick={() => setActiveTab("timeline")}>التسلسل الزمني</button>
         </div>
 
+        {activeTab === "timeline" && <ol className="space-y-5">{[{progress:0,title:"الرسالة والخريطة",text:"تصل الخريطة إلى سلمى وتبدأ رحلة البحث."},{progress:20,title:"لقاء عند المرفأ",text:"تتبع سلمى أثر السجلات بمساعدة كمال."},{progress:45,title:"حقيقة الأرشيف",text:"تنكشف صلة حارس المخطوطات بالوثائق المفقودة."},{progress:80,title:"المستودع الثامن",text:"تلتقي المسارات عند مخزن الشمع الأسود."}].map(event=><li className="original-panel space-y-2" key={event.progress}><span className="original-tag">{event.progress}%</span><h2 className="text-xl font-bold">{event.progress<=spoilerThreshold?event.title:"حدث محجوب"}</h2><p>{event.progress<=spoilerThreshold?event.text:"ارفع حد الكشف بعد الوصول لهذا الموضع من الحكاية."}</p></li>)}</ol>}
         {/* TAB 1: CHARACTERS */}
         {activeTab === "characters" && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -245,7 +247,7 @@ export function NarrativeAtlasView({ locale }: NarrativeAtlasViewProps) {
                         ? "bg-[#272a33] border-[#e6c184] shadow-lg cursor-pointer"
                         : "bg-[#1c1f29] border-[#4e463a]/40 hover:border-[#e6c184]/50 cursor-pointer"
                     }`}
-                  >
+                   role="button" tabIndex={0} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();event.currentTarget.click()}}}>
                     <div className="flex items-center gap-4">
                       <div className="relative w-14 h-14 rounded-2xl overflow-hidden bg-[#272a33] shrink-0 border border-[#4e463a]/40">
                         {isUnlocked ? (

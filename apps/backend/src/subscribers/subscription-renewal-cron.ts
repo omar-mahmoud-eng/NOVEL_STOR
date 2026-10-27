@@ -12,8 +12,9 @@ export default async function subscriptionRenewalCronHandler({
 
   try {
     const activeSubs = await subscriptionService.listUserSubscriptions({
-      status: "active",
-    })
+      status: ["active", "past_due"],
+      current_period_end: { $lte: new Date() },
+    }, { take: null })
 
     const now = new Date()
     let renewedCount = 0
@@ -46,6 +47,7 @@ export default async function subscriptionRenewalCronHandler({
     )
   } catch (error) {
     logger.error(`[Worker:SubscriptionRenewal] Critical worker failure: ${error}`)
+    throw error
   }
 }
 

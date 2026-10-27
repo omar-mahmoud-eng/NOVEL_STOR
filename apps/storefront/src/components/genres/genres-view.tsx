@@ -1,7 +1,9 @@
 "use client"
+import { useCatalogBooks } from "@/context/catalog-context"
 
 import React from "react"
-import Link from "next/link"
+import Link from "@/components/common/realm-link"
+import { bookGenre } from "@/components/products/original-catalog"
 import { PUBLISHING_BOOKS } from "@/lib/books-data"
 
 type GenresViewProps = {
@@ -9,6 +11,7 @@ type GenresViewProps = {
 }
 
 export function GenresView({ locale }: GenresViewProps) {
+  const PUBLISHING_BOOKS = useCatalogBooks()
   const isRtl = locale === "ar"
 
   const genresList = [
@@ -88,7 +91,7 @@ export function GenresView({ locale }: GenresViewProps) {
       timeAr: "٣ روايات • ٨ ساعات استماع",
       badgeAr: "مجموعة محققة كاملة",
       descAr: "سلسلة ثلاثية توثق رحلات المراكب الشراعية العمانية نحو زنجبار والهند في القرن الثامن عشر.",
-      books: PUBLISHING_BOOKS.slice(0, 3),
+      books: PUBLISHING_BOOKS.filter(book=>book.ageGroup==="adults_18_plus" && bookGenre(book)==="mystery").slice(0,3),
     },
     {
       titleAr: "ثلاثيات السرد النفسي والذاكرة",
@@ -97,7 +100,7 @@ export function GenresView({ locale }: GenresViewProps) {
       timeAr: "٢ رواية • ٥ ساعات استماع",
       badgeAr: "حصري لـ StoryVerse",
       descAr: "دراسات سردية روائية تبحث في تشظي الهوية الحضرية بين عواصم الشرق والغرب.",
-      books: PUBLISHING_BOOKS.slice(3, 5),
+      books: PUBLISHING_BOOKS.filter(book=>book.ageGroup==="adults_18_plus" && bookGenre(book)==="historical").slice(0,3),
     },
   ]
 
@@ -159,7 +162,7 @@ export function GenresView({ locale }: GenresViewProps) {
                     <span className="material-symbols-outlined text-[24px]">{genre.icon}</span>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-[#272a33] text-[#e6c184] text-[11px] font-mono font-bold">
-                    {genre.count} {isRtl ? "عمل" : "works"}
+                    {PUBLISHING_BOOKS.filter(book=>book.ageGroup==="adults_18_plus" && bookGenre(book)===genre.id).length} {isRtl ? "عمل" : "works"}
                   </span>
                 </div>
 

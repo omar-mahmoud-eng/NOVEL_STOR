@@ -1,3 +1,5 @@
+> Historical handover notes. Claims of complete security or production readiness are superseded by README.md and AUDIT_REPORT.md.
+
 # تقرير التسليم النهائي والتدقيق المعماري الشامل | Phase 5 Production Handover
 
 منصة النشر والروايات الرقمية متعددة الصيغ (**Multi-Format Publishing & Storytelling E-Commerce Platform**) المبنية باستخدام **Medusa.js v2**، **Next.js 15 (App Router)**، **TypeScript**، **PostgreSQL**، **Redis**، و **MinIO (Private S3 DRM Storage)**.

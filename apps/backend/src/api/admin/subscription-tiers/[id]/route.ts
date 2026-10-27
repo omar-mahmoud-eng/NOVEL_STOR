@@ -1,0 +1,7 @@
+import type{MedusaRequest,MedusaResponse}from"@medusajs/framework/http"
+import{z}from"zod"
+import{SUBSCRIPTION_MODULE}from"../../../../modules/subscription"
+import{getDbPool}from"../../../../utils/db"
+const Input=z.object({title:z.string().min(2).max(100),handle:z.string().min(2).max(100).regex(/^[a-z0-9_-]+$/),description:z.string().max(1000).optional(),interval:z.enum(["month","year"]),price_amount:z.number().int().positive(),currency_code:z.string().length(3),book_credits_per_period:z.number().int().min(0),is_active:z.boolean()})
+export async function POST(req:MedusaRequest,res:MedusaResponse){const parsed=Input.safeParse(req.body);if(!parsed.success)return res.status(400).json({message:"Invalid plan",errors:parsed.error.issues});try{const tier=await(req.scope.resolve(SUBSCRIPTION_MODULE)as any).updateSubscriptionTiers({id:req.params.id,...parsed.data});return res.json({tier})}catch{return res.status(400).json({message:"Unable to update plan; check the handle and values"})}}
+export async function DELETE(req:MedusaRequest,res:MedusaResponse){const used=await getDbPool().query(`SELECT id FROM user_subscription WHERE tier_id=$1 AND status='active' AND deleted_at IS NULL LIMIT 1`,[req.params.id]);if(used.rowCount)return res.status(409).json({message:"الخطة مرتبطة باشتراكات قائمة. يمكنك إيقاف عرضها بدل حذفها."});try{await(req.scope.resolve(SUBSCRIPTION_MODULE)as any).deleteSubscriptionTiers(req.params.id);return res.json({deleted:true,id:req.params.id})}catch{return res.status(404).json({message:"Plan not found"})}}

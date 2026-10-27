@@ -5,6 +5,7 @@ import {
   WorkflowResponse,
 } from "@medusajs/framework/workflows-sdk"
 import { Modules } from "@medusajs/framework/utils"
+import { PricingInputSchema, resolveVariantPrice, roundMoney } from "../utils/variant-price"
 
 export type SecureCheckoutWorkflowInput = {
   cart_id: string
@@ -31,38 +32,14 @@ export type ValidatedLineItem = {
 export const validateLineItemsPriceStep = createStep(
   "validate-line-items-price-step",
   async (input: SecureCheckoutWorkflowInput, { container }) => {
-    const productModule = container.resolve(Modules.PRODUCT)
-    const pricingModule = container.resolve(Modules.PRICING)
+    PricingInputSchema.parse(input)
 
     const validatedItems: ValidatedLineItem[] = []
     let totalSubtotal = 0
 
     for (const item of input.items) {
-      // Fetch variant details directly from product module
-      const variant = await productModule.retrieveProductVariant(item.variant_id)
-      if (!variant) {
-        throw new Error(`Product variant with id "${item.variant_id}" does not exist.`)
-      }
-
-      // Fetch authoritative prices from the Medusa Pricing module
-      // Filtering by currency_code and region_id
-      const prices = await pricingModule.listPrices({
-        price_set_id: [variant.id],
-      })
-
-      // Resolve matching price for current currency
-      const activePrice = prices.find(
-        (p) => p.currency_code?.toLowerCase() === input.currency_code.toLowerCase()
-      )
-
-      if (!activePrice || typeof activePrice.amount !== "number") {
-        throw new Error(
-          `No valid pricing configured for variant "${item.variant_id}" in currency "${input.currency_code}".`
-        )
-      }
-
-      const unitPrice = activePrice.amount
-      const subtotal = unitPrice * item.quantity
+      const { variant, amount: unitPrice } = await resolveVariantPrice(container, item.variant_id, input.currency_code, input.region_id, item.quantity)
+      const subtotal = roundMoney(unitPrice * item.quantity)
 
       validatedItems.push({
         variant_id: item.variant_id,
@@ -77,7 +54,7 @@ export const validateLineItemsPriceStep = createStep(
 
     return new StepResponse({
       validatedItems,
-      subtotal: totalSubtotal,
+      subtotal: roundMoney(totalSubtotal),
     })
   }
 )
@@ -96,61 +73,58 @@ export const reserveInventoryStep = createStep(
     { container }
   ) => {
     const inventoryModule = container.resolve(Modules.INVENTORY)
+    const locking = container.resolve(Modules.LOCKING)
+    const query = container.resolve("query")
+    const { data: carts } = await query.graph({ entity: "cart", fields: ["id", "sales_channel_id"], filters: { id: input.cart_id } })
+    if (!carts[0]?.sales_channel_id) throw new Error("Cart sales channel is missing")
+    const { data: channels } = await query.graph({ entity: "sales_channel", fields: ["id", "stock_locations.id"], filters: { id: carts[0].sales_channel_id } })
+    const locations = new Set((channels[0]?.stock_locations || []).map((location: any) => location.id))
+    const { data: variants } = await query.graph({ entity: "product_variant", fields: ["id", "manage_inventory", "allow_backorder", "inventory_items.inventory_item_id", "inventory_items.required_quantity"], filters: { id: input.items.map((item) => item.variant_id) } })
+    const keys = variants.flatMap((variant: any) => variant.manage_inventory ? (variant.inventory_items || []).map((link: any) => link.inventory_item_id) : [])
     const reservationIds: string[] = []
-
-    try {
-      for (const item of input.items) {
-        // Query available inventory level
-        const [inventoryItems] = await inventoryModule.listInventoryItems({
-          sku: item.variant_id,
-        })
-
-        if (!inventoryItems) {
-          continue // If unmanaged inventory, proceed
+    await locking.execute(keys, async () => {
+      try {
+        for (const item of input.items) {
+          const variant = variants.find((value: any) => value.id === item.variant_id)
+          if (!variant) throw new Error("Variant not found")
+          if (!variant.manage_inventory) continue
+          if (!variant.inventory_items?.length) throw new Error("Managed variant has no inventory link")
+          for (const link of variant.inventory_items) {
+            let remaining = item.quantity * (link.required_quantity ?? 1)
+            if (!Number.isSafeInteger(remaining) || remaining <= 0) throw new Error("Invalid reservation quantity")
+            const levels = await inventoryModule.listInventoryLevels({ inventory_item_id: link.inventory_item_id })
+            const eligible = levels.filter((level) => locations.has(level.location_id))
+            for (const level of eligible) {
+              const available = Math.max(0, Number(level.stocked_quantity) - Number(level.reserved_quantity))
+              const quantity = Math.min(remaining, available)
+              if (!quantity) continue
+              const reservation = await inventoryModule.createReservationItems({ inventory_item_id: link.inventory_item_id, location_id: level.location_id, quantity, description: "Checkout reservation for " + input.cart_id })
+              reservationIds.push(reservation.id)
+              remaining -= quantity
+              if (!remaining) break
+            }
+            if (remaining && variant.allow_backorder && eligible[0]) {
+              const reservation = await inventoryModule.createReservationItems({ inventory_item_id: link.inventory_item_id, location_id: eligible[0].location_id, quantity: remaining, allow_backorder: true })
+              reservationIds.push(reservation.id)
+              remaining = 0
+            }
+            if (remaining) throw new Error("Insufficient stock for " + item.title)
+          }
         }
-
-        const levels = await inventoryModule.listInventoryLevels({
-          inventory_item_id: inventoryItems.id,
-        })
-
-        const totalStock = levels.reduce(
-          (acc, lvl) => acc + (lvl.stocked_quantity - lvl.reserved_quantity),
-          0
-        )
-
-        if (totalStock < item.quantity) {
-          throw new Error(
-            `Insufficient stock for item "${item.title}". Requested: ${item.quantity}, Available: ${totalStock}`
-          )
-        }
-
-        // Create atomic reservation
-        const [reservation] = await inventoryModule.createReservationItems([
-          {
-            inventory_item_id: inventoryItems.id,
-            location_id: levels[0].location_id,
-            quantity: item.quantity,
-            description: `Checkout lock for cart ${input.cart_id}`,
-          },
-        ])
-
-        reservationIds.push(reservation.id)
+      } catch (error) {
+        if (reservationIds.length) await inventoryModule.deleteReservationItems(reservationIds)
+        throw error
       }
-
-      return new StepResponse({ reservationIds }, reservationIds)
-    } catch (error) {
-      // Compensation: release any already acquired reservations
-      if (reservationIds.length > 0) {
-        await inventoryModule.deleteReservationItems(reservationIds)
-      }
-      throw error
-    }
+    })
+    return new StepResponse({ reservationIds }, reservationIds)
   },
   // Compensation function triggered automatically on subsequent step failure
   async (reservationIds, { container }) => {
     if (!reservationIds || reservationIds.length === 0) return
     const inventoryModule = container.resolve(Modules.INVENTORY)
-    await inventoryModule.deleteReservationItems(reservationIds)
+    const reservations = await inventoryModule.listReservationItems({ id: reservationIds })
+    const keys = [...new Set(reservations.map((reservation) => reservation.inventory_item_id))]
+    await container.resolve(Modules.LOCKING).execute(keys, () => inventoryModule.deleteReservationItems(reservationIds))
   }
 )
 
@@ -169,15 +143,21 @@ export const calculateTaxesAndTotalsStep = createStep(
     { container }
   ) => {
     const taxModule = container.resolve(Modules.TAX)
-
-    // Retrieve active tax rate for the region
+    const region = await container.resolve(Modules.REGION).retrieveRegion(input.region_id, { relations: ["countries"] })
+    const countryCode = region.countries?.[0]?.iso_2
+    if (!countryCode) throw new Error("No tax country configured for region")
+    const taxRegions = await taxModule.listTaxRegions({ country_code: countryCode })
+    const taxRegion = taxRegions.find((value) => !value.province_code)
+    if (!taxRegion) throw new Error("Tax region is not configured")
     const taxRates = await taxModule.listTaxRates({
-      tax_region_id: input.region_id,
+      tax_region_id: taxRegion.id,
     })
 
-    const defaultTaxRate = taxRates.length > 0 ? (taxRates[0].rate || 0) : 15 // Standard 15% VAT default
-    const taxTotal = Math.round(input.subtotal * (defaultTaxRate / 100))
-    const total = input.subtotal + taxTotal
+    const defaultRate = taxRates.find((rate) => rate.is_default)
+    if (!defaultRate) throw new Error("Default tax rate is not configured")
+    const defaultTaxRate = Number(defaultRate.rate ?? 0)
+    const taxTotal = roundMoney(input.subtotal * (defaultTaxRate / 100))
+    const total = roundMoney(input.subtotal + taxTotal)
 
     return new StepResponse({
       subtotal: input.subtotal,

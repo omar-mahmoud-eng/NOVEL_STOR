@@ -40,7 +40,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     validated = UpdateReviewSchema.parse(req.body)
   } catch (err: any) {
-    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.issues })
   }
 
   try {

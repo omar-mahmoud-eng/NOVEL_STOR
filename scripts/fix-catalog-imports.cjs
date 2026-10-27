@@ -1,0 +1,1 @@
+const fs=require('fs'),path=require('path');for(const name of ['books','reader','player']){const p=path.join('apps/storefront/src/app/[locale]/(main)',name,'[handle]/page.tsx');let s=fs.readFileSync(p,'utf8');if(!s.includes('import { getReadingBook }'))s='import { getReadingBook } from "@/lib/catalog-server"\n'+s;fs.writeFileSync(p,s)}

@@ -1,25 +1,11 @@
+import { getReadingBook } from "@/lib/catalog-server"
+export const dynamic = "force-dynamic"
+import { realmBase, realmForAge } from "@/lib/realms"
 import React from "react"
-import { notFound } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import { isValidLocale, defaultLocale, Locale } from "@/lib/i18n"
-import { getBookByHandle, getAllBooks } from "@/lib/books-data"
 import { ParchmentReaderView } from "@/components/reader/parchment-reader-view"
 
-export async function generateStaticParams() {
-  const books = getAllBooks()
-  const locales = ["ar", "en"]
-  const params: Array<{ locale: string; handle: string }> = []
-
-  for (const locale of locales) {
-    for (const book of books) {
-      params.push({ locale, handle: book.handle })
-      if (book.id !== book.handle) {
-        params.push({ locale, handle: book.id })
-      }
-    }
-  }
-
-  return params
-}
 
 export async function generateMetadata({
   params,
@@ -27,7 +13,7 @@ export async function generateMetadata({
   params: Promise<{ locale: string; handle: string }>
 }) {
   const { handle } = await params
-  const book = getBookByHandle(handle)
+  const book = await getReadingBook(handle)
   if (!book) {
     return { title: "القارئ الرقمي | StoryVerse" }
   }
@@ -46,10 +32,13 @@ export default async function ReaderPage({
   const { locale, handle } = await params
   const validLocale = isValidLocale(locale) ? (locale as Locale) : defaultLocale
 
-  const book = getBookByHandle(handle)
+  const book = await getReadingBook(handle)
   if (!book) {
     notFound()
   }
+
+  const realm = realmForAge(book.ageGroup)
+  if (realm !== "originals") redirect(realmBase(validLocale, realm) + "/reader/" + book.handle)
 
   return <ParchmentReaderView book={book} locale={validLocale} />
 }

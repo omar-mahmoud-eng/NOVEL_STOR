@@ -1,6 +1,6 @@
 import React from "react"
 import { isValidLocale, defaultLocale, Locale } from "@/lib/i18n"
-import { CustomerLibraryView } from "@/components/library/customer-library-view"
+import { ReadingHub } from "@/components/library/reading-hub"
 
 export const metadata = {
   title: "مكتبتي الرقمية المؤمنة | قارئ الكتب والمشغل الصوتي",
@@ -18,7 +18,7 @@ export default async function LibraryPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <CustomerLibraryView locale={validLocale} />
+      <ReadingHub locale={validLocale} />
     </div>
   )
 }

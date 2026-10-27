@@ -1,18 +1,29 @@
 "use client"
+import {PublishedShelf} from "@/components/realms/published-shelf"
+import { useCatalogBooks } from "@/context/catalog-context"
 
 import React, { useState } from "react"
-import Link from "next/link"
+import Link from "@/components/common/realm-link"
+import { PUBLISHING_BOOKS } from "@/lib/books-data"
+import { useRouter } from "next/navigation"
+import { useReadingState } from "@/context/reading-state-context"
+
 
 type KidsRealmViewProps = {
   locale: "ar" | "en"
 }
 
 export function KidsRealmView({ locale }: KidsRealmViewProps) {
+  const PUBLISHING_BOOKS = useCatalogBooks()
+  const publishedBooks = useCatalogBooks()
   const isRtl = locale === "ar"
-  const [activeLevel, setActiveLevel] = useState<number>(2) // 1 = مبتدئ, 2 = متوسط, 3 = متقدم
-  const [savedBooks, setSavedBooks] = useState<Record<string, boolean>>({
-    lighthouse: true,
-  })
+  const { state, updateEntry, updateSettings } = useReadingState()
+  const activeLevel = state.kids.level
+  const featured=PUBLISHING_BOOKS.find(book=>book.id==="book_kids_01")!
+  const progress=state.kids.entries.book_kids_01?Math.round(((state.kids.entries.book_kids_01.furthest||0)+1)/(featured?.sampleText.length || 1)*100):0
+  const setActiveLevel = (level:number) => updateSettings("kids",{level,fontSize:level===1?26:level===2?22:20})
+  const aliases:Record<string,string> = {lighthouse:"book_kids_01",k_lighthouse:"book_kids_01",k_palm_valley:"book_kids_02",k_blue_garden:"book_kids_03",k_friends_compass:"book_kids_04",k_observatory_train:"book_kids_05",k_house_of_wisdom:"book_kids_06",k_quiet_library:"book_kids_07",k_sand_ship:"book_kids_08"}
+  const savedBooks = Object.fromEntries(Object.entries(aliases).map(([alias,id])=>[alias,!!state.kids.entries[id]?.saved]))
   const [vocabModalOpen, setVocabModalOpen] = useState(false)
   const [selectedWord, setSelectedWord] = useState<{
     word: string
@@ -20,9 +31,7 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
     example: string
   } | null>(null)
 
-  const toggleSave = (id: string) => {
-    setSavedBooks((prev) => ({ ...prev, [id]: !prev[id] }))
-  }
+  const toggleSave = (alias:string) => {const id=aliases[alias] || alias; updateEntry("kids",id,{saved:!state.kids.entries[id]?.saved})}
 
   const sampleWords = [
     {
@@ -47,6 +56,7 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
     setVocabModalOpen(true)
   }
 
+  if (!publishedBooks.some(book=>book.id==="book_kids_01")) return <PublishedShelf realm="kids" locale={locale}/>
   return (
     <div className="w-full min-h-screen bg-[#F8FAF9] text-[#111C1A] py-8 sm:py-12 relative overflow-hidden font-sans">
       {/* Subtle ambient coastal glows */}
@@ -100,7 +110,7 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
                 </span>
                 <div className="flex flex-col">
                   <span className="text-base font-bold text-slate-900">
-                    {isRtl ? "مرحبًا بك يا زيد في عالم المغامرات 🌟" : "Welcome Zayd to the World of Adventures 🌟"}
+                    {isRtl ? "مرحبًا بك في عالم المغامرات 🌟" : "Welcome to the World of Adventures 🌟"}
                   </span>
                   <span className="text-xs text-slate-500">
                     {isRtl
@@ -195,10 +205,10 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
                         <span className="text-slate-600">
                           {isRtl ? "التقدم في هذا الفصل" : "Chapter Progress"}
                         </span>
-                        <span className="text-emerald-700 font-mono">٤٠٪</span>
+                        <span className="text-emerald-700 font-mono">{progress}%</span>
                       </div>
                       <div className="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
-                        <div className="h-full bg-emerald-600 rounded-full transition-all duration-500" style={{ width: "40%" }} />
+                        <div className="h-full bg-emerald-600 rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
                       </div>
                     </div>
                   </div>
@@ -264,13 +274,13 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
                   <div className="absolute top-1/2 left-4 right-4 h-1.5 -translate-y-1/2 bg-slate-200 rounded-full" />
                   <div
                     className="absolute top-1/2 right-4 h-1.5 -translate-y-1/2 bg-amber-500 rounded-full"
-                    style={{ width: "55%" }}
+                    style={{ width: `${progress}%` }}
                   />
 
                   {/* Node 1: Completed */}
                   <div className="relative flex flex-col items-center gap-1 z-10">
                     <div className="w-10 h-10 rounded-full bg-emerald-600 text-white flex items-center justify-center shadow-sm">
-                      <span className="material-symbols-outlined text-[20px]">check</span>
+                      <span className="material-symbols-outlined text-[20px]">{progress>0?"check":"flag"}</span>
                     </div>
                     <span className="text-[11px] text-slate-800 font-bold">
                       {isRtl ? "شاطئ الصدف" : "Seashell Beach"}
@@ -627,7 +637,7 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
           <div
             onClick={() => openVocab(sampleWords[0])}
             className="flex-1 bg-white rounded-2xl p-6 shadow-sm border border-emerald-100 flex items-start gap-4 cursor-pointer hover:shadow-md transition-shadow group"
-          >
+           role="button" tabIndex={0} onKeyDown={event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();event.currentTarget.click()}}}>
             <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-700 group-hover:text-white transition-colors">
               <span className="material-symbols-outlined text-[26px]">spellcheck</span>
             </div>
@@ -637,8 +647,8 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                 {isRtl
-                  ? "المس أي كلمة غامضة أثناء قراءتك ليظهر لك معناها برسوم لطيفة ومثال ممتع دون مغادرة الصفحة."
-                  : "Tap any challenging word while reading to discover its meaning with friendly illustrations and examples."}
+                  ? "اضغط الكلمات المميزة أثناء القراءة لتكتشف معناها ومثالًا عليها دون مغادرة الحكاية."
+                  : "Tap highlighted words while reading to explore their meanings and examples."}
               </p>
               <span className="text-xs text-emerald-700 font-bold mt-1">
                 {isRtl ? "تسهيل المفردات الصعبة 💡 (جرب الضغط هنا)" : "Simplify Challenging Words 💡 (Try it)"}
@@ -660,9 +670,9 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
                   ? "أسئلة تأمل ممتعة في نهاية كل فصل تشجع خيالك: «لو كنت مكان البطل، ما القرار الذي ستختاره؟» بلا درجات."
                   : "Reflective imaginative questions at the end of every chapter encouraging creative thinking without scores."}
               </p>
-              <span className="text-xs text-amber-800 font-bold mt-1">
+              <Link href={`/${locale}/realms/kids/detective/book_kids_01`} className="text-xs text-amber-800 font-bold mt-1 underline">
                 {isRtl ? "تأمل حر بدون امتحانات ✨" : "Free Reflection Without Tests ✨"}
-              </span>
+              </Link>
             </div>
           </div>
         </section>
@@ -718,6 +728,7 @@ export function KidsRealmView({ locale }: KidsRealmViewProps) {
           </div>
         </div>
       )}
+      <PublishedShelf realm="kids" locale={locale}/>
     </div>
   )
 }

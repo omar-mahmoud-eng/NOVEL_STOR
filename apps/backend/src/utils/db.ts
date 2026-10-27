@@ -1,12 +1,11 @@
-import { Pool } from "pg"
+import { Pool, type PoolClient } from "pg"
 
 let pool: Pool | null = null
 
 export function getDbPool(): Pool {
   if (!pool) {
-    const connStr =
-      process.env.DATABASE_URL ||
-      "postgres://medusa_admin:SuperSecureDbPassword2026!@localhost:5432/medusa_db"
+    const connStr = process.env.DATABASE_URL
+    if (!connStr) throw new Error("DATABASE_URL is required")
 
     pool = new Pool({
       connectionString: connStr,
@@ -20,4 +19,19 @@ export function getDbPool(): Pool {
     })
   }
   return pool
+}
+
+export async function withTransaction<T>(action: (client: PoolClient) => Promise<T>): Promise<T> {
+  const client = await getDbPool().connect()
+  try {
+    await client.query("BEGIN")
+    const result = await action(client)
+    await client.query("COMMIT")
+    return result
+  } catch (error) {
+    await client.query("ROLLBACK")
+    throw error
+  } finally {
+    client.release()
+  }
 }

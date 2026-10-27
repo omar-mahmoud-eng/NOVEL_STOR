@@ -1,3 +1,4 @@
+import {adminFetch} from "../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Input } from "@medusajs/ui"
@@ -71,7 +72,7 @@ export function ReaderCrmPage() {
   const fetchCrmData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/crm")
+      const res = await adminFetch("/admin/crm")
       if (res.ok) {
         const json = await res.json()
         setData(json)
@@ -167,7 +168,7 @@ export function ReaderCrmPage() {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -199,7 +200,7 @@ export function ReaderCrmPage() {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -215,7 +216,7 @@ export function ReaderCrmPage() {
       })
 
       if (res.ok) {
-        setActionSuccessMsg(`تم إرسال رسالة ${dispatchChannel.toUpperCase()} وحفظها في سجل التواصل بنجاح!`)
+        setActionSuccessMsg("تم حفظ مسودة الرسالة. يلزم ربط مزود مراسلات للإرسال.")
         setTimeout(() => setActionSuccessMsg(null), 4000)
         await fetchCrmData()
       }
@@ -231,7 +232,7 @@ export function ReaderCrmPage() {
     if (!selectedCustomer) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -257,7 +258,7 @@ export function ReaderCrmPage() {
     if (!selectedCustomer) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -284,7 +285,7 @@ export function ReaderCrmPage() {
     if (!selectedCustomer) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

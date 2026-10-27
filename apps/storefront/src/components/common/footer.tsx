@@ -52,7 +52,7 @@ export function Footer({
             <div className="flex items-center gap-3 text-[11px] text-[#6D5C37] font-semibold mt-1">
               <span>{isRtl ? "إشراف وتوجيه المحتوى: آمن تماماً وبدون إعلانات" : "100% Ad-Free & Curated"}</span>
               <span>•</span>
-              <span>{isRtl ? "جميع الحقوق محفوظة © ٢٠٢٥" : "© 2025 StoryVerse Little"}</span>
+              <span>{isRtl ? "جميع الحقوق محفوظة © ٢٠٢٦" : "© 2025 StoryVerse Little"}</span>
             </div>
           </div>
         </div>
@@ -93,7 +93,7 @@ export function Footer({
             </Link>
             <span className="w-1 h-1 rounded-full bg-slate-300" />
             <span className="text-slate-400 font-normal">
-              {isRtl ? "© ٢٠٢٥ عالم StoryVerse للأطفال" : "© 2025 StoryVerse Kids"}
+              {isRtl ? "© ٢٠٢٦ عالم StoryVerse للأطفال" : "© 2025 StoryVerse Kids"}
             </span>
           </div>
         </div>
@@ -141,7 +141,7 @@ export function Footer({
           <div className="flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
             <span>
               {isRtl
-                ? "© ٢٠٢٥ StoryVerse عالم الناشئة. جميع الحقوق محفوظة للمحتوى الأدبي النقي."
+                ? "© ٢٠٢٦ StoryVerse عالم الناشئة. جميع الحقوق محفوظة للمحتوى الأدبي النقي."
                 : "© 2025 StoryVerse Young Adults. All rights reserved."}
             </span>
             <div className="flex items-center gap-2">
@@ -188,10 +188,10 @@ export function Footer({
               </div>
               <div>
                 <h4 className="font-bold text-sm text-[#e0e2ef]">
-                  {isRtl ? "شحن ورقي خليجي سريع" : "Express Regional Delivery"}
+                  {isRtl ? "توصيل النسخ الورقية" : "Express Regional Delivery"}
                 </h4>
                 <p className="text-xs text-[#d1c5b5] mt-0.5">
-                  {isRtl ? "توصيل آمن لباب البيت خلال 24-48 ساعة" : "24-48 hours directly to your door"}
+                  {isRtl ? "خيارات التوصيل حسب عنوان الطلب" : "24-48 hours directly to your door"}
                 </p>
               </div>
             </div>
@@ -202,10 +202,10 @@ export function Footer({
               </div>
               <div>
                 <h4 className="font-bold text-sm text-[#e0e2ef]">
-                  {isRtl ? "حماية بث صوتي وتشفير DRM" : "Anti-Piracy DRM Stream"}
+                  {isRtl ? "وصول محمي للملفات الخاصة" : "Anti-Piracy DRM Stream"}
                 </h4>
                 <p className="text-xs text-[#d1c5b5] mt-0.5">
-                  {isRtl ? "استماع نقي بدون انقطاع وبأعلى دقة" : "High-fidelity lossless streaming"}
+                  {isRtl ? "روابط مؤقتة بعد التحقق من الترخيص" : "High-fidelity lossless streaming"}
                 </p>
               </div>
             </div>
@@ -216,10 +216,10 @@ export function Footer({
               </div>
               <div>
                 <h4 className="font-bold text-sm text-[#e0e2ef]">
-                  {isRtl ? "ضمان الاستبدال للنسخ الورقية" : "Replacement Guarantee"}
+                  {isRtl ? "دعم طلبات النسخ الورقية" : "Replacement Guarantee"}
                 </h4>
                 <p className="text-xs text-[#d1c5b5] mt-0.5">
-                  {isRtl ? "استبدال فوري لأي نسخة متضررة مجاناً" : "Instant free swap for damaged copies"}
+                  {isRtl ? "تواصل مع الدعم لمراجعة الطلب" : "Instant free swap for damaged copies"}
                 </p>
               </div>
             </div>
@@ -230,10 +230,10 @@ export function Footer({
               </div>
               <div>
                 <h4 className="font-bold text-sm text-[#e0e2ef]">
-                  {isRtl ? "سرد صوتي درامي بأصوات كبار المعلقين" : "Cinematic Voiceover"}
+                  {isRtl ? "الاستماع للنص المتاح" : "Cinematic Voiceover"}
                 </h4>
                 <p className="text-xs text-[#d1c5b5] mt-0.5">
-                  {isRtl ? "تجسيد صوتي حي للشخصيات والمشاهد" : "Full cast dramatic audio experience"}
+                  {isRtl ? "بصوت الجهاز أو ملفات الراوي المتاحة" : "Full cast dramatic audio experience"}
                 </p>
               </div>
             </div>
@@ -287,8 +287,8 @@ export function Footer({
               {isRtl ? "الضمان والخصوصية" : "Trust & Compliance"}
             </h5>
             <ul className="space-y-2 text-xs text-[#d1c5b5]">
-              <li><Link href={`/${locale}/about#privacy`} className="hover:text-[#e0e2ef]">ميثاق حماية خصوصية الطفل (COPPA)</Link></li>
-              <li><Link href={`/${locale}/about#security`} className="hover:text-[#e0e2ef]">تشفير البيانات والمدفوعات الآمنة</Link></li>
+              <li><Link href={`/${locale}/about#privacy`} className="hover:text-[#e0e2ef]">خصوصية الأسرة والأطفال</Link></li>
+              <li><Link href={`/${locale}/about#security`} className="hover:text-[#e0e2ef]">حماية الحساب والوصول</Link></li>
               <li><Link href={`/${locale}/about#terms`} className="hover:text-[#e0e2ef]">شروط الاستخدام والخدمة</Link></li>
               <li><Link href={`/${locale}/about#contact`} className="hover:text-[#e0e2ef]">تواصل مع إدارة النشر</Link></li>
             </ul>
@@ -300,7 +300,7 @@ export function Footer({
             <span className="material-symbols-outlined text-[#e6c184] text-[18px]">auto_stories</span>
             <span className="font-serif text-[#e6c184] font-bold">StoryVerse Publishing</span>
             <span>—</span>
-            <span>جميع الحقوق محفوظة © ٢٠٢٥</span>
+            <span>جميع الحقوق محفوظة © ٢٠٢٦</span>
           </div>
           <p className="text-center sm:text-end">
             منصة النشر الرقمي والصوتي العربي الفاخر • مصممة وفق أحدث معايير تجربة القراءة العالمية

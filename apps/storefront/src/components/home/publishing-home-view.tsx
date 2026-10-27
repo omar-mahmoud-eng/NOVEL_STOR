@@ -1,45 +1,29 @@
 "use client"
+import { useCatalogBooks } from "@/context/catalog-context"
+import {NativeProductShelf} from "@/components/products/native-product-shelf"
+import {PublishedShelf} from "@/components/realms/published-shelf"
 
 import React, { useState } from "react"
-import Link from "next/link"
-import { useAudio } from "@/context/audio-context"
+import Link from "@/components/common/realm-link"
+import { useRouter } from "next/navigation"
+import { useReadingState } from "@/context/reading-state-context"
+
 
 type PublishingHomeViewProps = {
   locale: "ar" | "en"
 }
 
 export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
+  const publishedBooks = useCatalogBooks()
   const isRtl = locale === "ar"
-  const { playTrack, togglePlayPause, currentTrack, isPlaying } = useAudio()
-  const [bookmarkedList, setBookmarkedList] = useState<Record<string, boolean>>({})
+  const router = useRouter()
+  const { state, updateEntry } = useReadingState()
+  const aliases: Record<string,string> = { ash_maps_hero: "kharaet-al-ramad", city_between_pages: "city-between-pages", window_harbor: "window-on-the-harbour", hours_sand: "sand-hours-philosophical-solitude", heirs_sea: "heirs-of-the-sea" }
+  const bookmarkedList = Object.fromEntries(Object.entries(aliases).map(([alias,id])=>[alias,!!state.originals.entries[id]?.saved]))
+  const toggleBookmark = (alias:string,e:React.MouseEvent) => { e.preventDefault(); const id=aliases[alias] || alias.replaceAll("_","-"); updateEntry("originals",id,{saved:!state.originals.entries[id]?.saved}) }
+  const handleHeroAudioPlay = (e:React.MouseEvent) => { e.preventDefault(); router.push(`/${locale}/player/kharaet-al-ramad`) }
 
-  const toggleBookmark = (id: string, e: React.MouseEvent) => {
-    e.preventDefault()
-    setBookmarkedList((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }))
-  }
-
-  const handleHeroAudioPlay = (e: React.MouseEvent) => {
-    e.preventDefault()
-    const trackId = "ash_maps_audiobook"
-    if (currentTrack?.id === trackId && isPlaying) {
-      togglePlayPause()
-      return
-    }
-
-    playTrack({
-      id: trackId,
-      title: isRtl ? "خرائط الرماد (الفصل الأول)" : "Maps of Ash (Chapter 1)",
-      author: isRtl ? "كاتب تجريبي" : "Experimental Author",
-      narrator: isRtl ? "سرد صوتي متقن" : "Studio Master Narration",
-      coverUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuB06F4O57ag02xQBM9cGtDYKXo0lQMYywpThdkD9VESWaMVglMPApb1mQSmU6dm4WP6_HAzS4mxKCDqBLePPLeEY3ysugMTcPqUDxKnoby4Cj_-JKyh-I9OH3qHVpOUXNrnUyQR7PlJKgOjfiCl3VipLcy5dkIGH05wK1HSMZu4yJ9RTUA3_d8NbFCFuDVmPhpsyExZtlsZfRO6o3ElY7tatNgkBep8fShB3h_pulgP2rFKbwgUriqO",
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    })
-  }
-
+  if (!publishedBooks.some(book=>book.id==="kharaet-al-ramad")) return <PublishedShelf realm="originals" locale={locale}/>
   return (
     <div className="w-full bg-[#10131c] text-[#e0e2ef] selection:bg-[#c8a56b] selection:text-[#533a0a]">
       {/* =========================================================================
@@ -72,7 +56,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
               <span className="material-symbols-outlined text-[15px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                 verified
               </span>
-              {isRtl ? "عمل مكتمل" : "Completed Work"}
+              {isRtl ? "معاينة للقراءة" : "Reading preview"}
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#272a33] text-[#d1c5b5] text-xs font-semibold">
               <span className="material-symbols-outlined text-[15px]">auto_stories</span>
@@ -80,7 +64,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
             </span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-[#1c1f29] text-[#cdc6b8] text-xs font-semibold">
               <span className="material-symbols-outlined text-[15px]">timer</span>
-              {isRtl ? "٣ فصول • الفصل الأول ~٨ دقائق" : "3 Chapters • Ch 1 ~8 mins"}
+              {isRtl ? "٣ مقاطع متاحة للقراءة" : "3 available reading sections"}
             </span>
           </div>
 
@@ -106,7 +90,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
           {/* Interactive Call-to-Actions */}
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <Link
-              href={`/${locale}/reader/samsem-the-bunny-adventure`}
+              href={`/${locale}/reader/kharaet-al-ramad`}
               className="inline-flex items-center gap-2 px-6 py-3.5 rounded-lg bg-[#e6c184] text-[#422c00] font-bold text-sm shadow-lg shadow-[#e6c184]/15 hover:bg-[#ffdeaa] transition-all transform hover:-translate-y-0.5"
             >
               <span className="material-symbols-outlined text-[20px]" style={{ fontVariationSettings: "'FILL' 1" }}>
@@ -123,9 +107,9 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
               <span className="material-symbols-outlined text-[20px] text-[#e6c184] group-hover:scale-110 transition-transform">
                 headphones
               </span>
-              <span>{isRtl ? "استمع إلى النسخة الصوتية المتقنة" : "Listen to Studio Audio"}</span>
+              <span>{isRtl ? "استمع للنص بصوت الجهاز" : "Listen to Studio Audio"}</span>
               <span className="text-[11px] px-2 py-0.5 rounded bg-[#32343e] text-[#e6c184] font-bold">
-                {isRtl ? "٢٤ دقيقة" : "24 mins"}
+                {isRtl ? "النص المتاح" : "24 mins"}
               </span>
             </button>
 
@@ -172,7 +156,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
               </p>
               <p className="text-xs text-[#d1c5b5] mt-0.5">
                 {isRtl
-                  ? "جميع الأعمال الروائية متاحة للقراءة الفورية مجاناً دون قيود تسجيل أو حجب فصول."
+                  ? "الفصول التعريفية متاحة للمعاينة. الإصدارات الكاملة تتطلب شراءً أو اشتراكًا يغطي المحتوى."
                   : "All literary masterpieces are openly accessible without forced registration walls."}
               </p>
             </div>
@@ -264,7 +248,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   </p>
                 </div>
                 <div className="pt-2 flex items-center justify-between text-xs font-bold text-[#e6c184]">
-                  <Link href={`/${locale}/reader/samsem-the-bunny-adventure`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/reader/city-between-pages`} className="inline-flex items-center gap-1 group-hover:underline">
                     <span>اقرأ القصة</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
@@ -313,7 +297,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   </p>
                 </div>
                 <div className="pt-2 flex items-center justify-between text-xs font-bold text-[#e6c184]">
-                  <Link href={`/${locale}/reader/where-did-my-shiny-star-go`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/reader/window-on-the-harbour`} className="inline-flex items-center gap-1 group-hover:underline">
                     <span>اقرأ القصة</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
@@ -362,7 +346,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   </p>
                 </div>
                 <div className="pt-2 flex items-center justify-between text-xs font-bold text-[#e6c184]">
-                  <Link href={`/${locale}/reader/secret-spaceship-emerald-planet`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/reader/sand-hours-philosophical-solitude`} className="inline-flex items-center gap-1 group-hover:underline">
                     <span>اقرأ القصة</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
@@ -411,7 +395,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   </p>
                 </div>
                 <div className="pt-2 flex items-center justify-between text-xs font-bold text-[#e6c184]">
-                  <Link href={`/${locale}/books/samsem-the-bunny-adventure`} className="inline-flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/books/heirs-of-the-sea`} className="inline-flex items-center gap-1 group-hover:underline">
                     <span>اقرأ القصة</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
@@ -473,7 +457,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                 </p>
               </div>
               <Link
-                href={`/${locale}/reader/samsem-the-bunny-adventure`}
+                href={`/${locale}/reader/tree-of-names`}
                 className="pt-2 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e0e2ef]"
               >
                 <span>اقرأ الآن</span>
@@ -500,7 +484,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                 </p>
               </div>
               <Link
-                href={`/${locale}/reader/where-did-my-shiny-star-go`}
+                href={`/${locale}/reader/dawn-cafe`}
                 className="pt-2 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e0e2ef]"
               >
                 <span>اقرأ الآن</span>
@@ -527,7 +511,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                 </p>
               </div>
               <Link
-                href={`/${locale}/reader/secret-spaceship-emerald-planet`}
+                href={`/${locale}/reader/late-light`}
                 className="pt-2 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e0e2ef]"
               >
                 <span>اقرأ الآن</span>
@@ -554,7 +538,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                 </p>
               </div>
               <Link
-                href={`/${locale}/reader/samsem-the-bunny-adventure`}
+                href={`/${locale}/reader/between-two-letters`}
                 className="pt-2 flex items-center justify-between text-xs font-bold text-[#9a8f81] group-hover:text-[#e0e2ef]"
               >
                 <span>اقرأ الآن</span>
@@ -616,12 +600,12 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   أسرار عائلة غادرت فجأة وتركت مكتبة تحتوي على سجلات بأسماء جميع سكان القرية.
                 </p>
                 <div className="mt-4 flex items-center justify-between text-xs font-bold">
-                  <Link href={`/${locale}/reader/where-did-my-shiny-star-go`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/reader/house-at-the-end`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
                     <span>ابدأ</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
                   <span className="flex items-center gap-1 text-[#9a8f81] text-[11px]">
-                    <span className="material-symbols-outlined text-[14px]">visibility</span> ٤٫٢ ألف قراءة
+                    <span className="material-symbols-outlined text-[14px]">visibility</span> نص متاح
                   </span>
                 </div>
               </div>
@@ -651,12 +635,12 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   يوميات حقيقية لكاتب متجول جمع أحاديث عابرة مع غرباء في محطات القطار المهجورة.
                 </p>
                 <div className="mt-4 flex items-center justify-between text-xs font-bold">
-                  <Link href={`/${locale}/reader/secret-spaceship-emerald-planet`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/reader/passersby-notebook-daily-notes`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
                     <span>ابدأ</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
                   <span className="flex items-center gap-1 text-[#9a8f81] text-[11px]">
-                    <span className="material-symbols-outlined text-[14px]">visibility</span> ٣٫٨ ألف قراءة
+                    <span className="material-symbols-outlined text-[14px]">visibility</span> نص متاح
                   </span>
                 </div>
               </div>
@@ -686,12 +670,12 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   ملحمة تدور في القرن الثامن عشر بين حرفيي النحاس وصراعهم مع قوافل التجارة القادمة.
                 </p>
                 <div className="mt-4 flex items-center justify-between text-xs font-bold">
-                  <Link href={`/${locale}/reader/samsem-the-bunny-adventure`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/reader/seasons-of-copper`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
                     <span>ابدأ</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
                   <span className="flex items-center gap-1 text-[#9a8f81] text-[11px]">
-                    <span className="material-symbols-outlined text-[14px]">visibility</span> ٥٫١ ألف قراءة
+                    <span className="material-symbols-outlined text-[14px]">visibility</span> نص متاح
                   </span>
                 </div>
               </div>
@@ -721,12 +705,12 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                   عودة غير متوقعة بعد أربعين عاماً تكشف حقيقة الرسائل المتبادلة بين أخوين في قارتين.
                 </p>
                 <div className="mt-4 flex items-center justify-between text-xs font-bold">
-                  <Link href={`/${locale}/reader/where-did-my-shiny-star-go`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
+                  <Link href={`/${locale}/reader/returning-traveler`} className="text-[#e6c184] flex items-center gap-1 group-hover:underline">
                     <span>ابدأ</span>
                     <span className="material-symbols-outlined text-[16px]">{isRtl ? "west" : "east"}</span>
                   </Link>
                   <span className="flex items-center gap-1 text-[#9a8f81] text-[11px]">
-                    <span className="material-symbols-outlined text-[14px]">visibility</span> ٣٫١ ألف قراءة
+                    <span className="material-symbols-outlined text-[14px]">visibility</span> نص متاح
                   </span>
                 </div>
               </div>
@@ -751,7 +735,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
                 بوابات العوالم السردية في StoryVerse
               </h2>
               <p className="text-xs sm:text-sm text-[#d1c5b5] mt-1 max-w-2xl">
-                عوالم قراءة مستقلة تماماً ومصممة بدقة لتناسب الفئات العمرية والاهتمامات، مع فصل صارم للمحتوى ومسارات تحكم أسرية معتمدة.
+                عوالم قراءة بمحتوى وتنقل ورفوف مستقلة لكل فئة عمرية، وأدوات محلية لمرافقة الأسرة.
               </p>
             </div>
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#1c1f29] text-[#d1c5b5] text-xs font-bold border border-[#4e463a]/30">
@@ -893,7 +877,7 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
             <span className="material-symbols-outlined text-[#e6c184] text-[18px]">info</span>
             <span>
               {isRtl
-                ? "نظام الفصل الآمن: الانتقال إلى عوالم الناشئة والأطفال يضمن بيئة آمنة تخلو تماماً من أدب الكبار (+١٨)، ولا يمكن للأطفال الانتقال إلى المكتبة العامة إلا بإذن حساب الوصي."
+                ? "تعرض منصات الناشئة والأطفال والبراعم فهارسها وأدواتها الخاصة. تغيير المنصة من مساحة الصغار يمر ببوابة أهل محلية، وليست نظام تحقق من الهوية."
                 : "Safe separation system: Transitions ensure complete protection for minor tiers."}
             </span>
           </div>
@@ -902,100 +886,9 @@ export function PublishingHomeView({ locale }: PublishingHomeViewProps) {
         {/* -----------------------------------------------------------------------
             SHELF 5: Deluxe Physical Editions & Manuscripts (المقتنيات الملكية المطبوعة)
            ----------------------------------------------------------------------- */}
-        <section className="flex flex-col gap-6">
-          <div className="flex items-baseline justify-between border-b border-[#4e463a]/30 pb-4">
-            <div className="flex items-center gap-3">
-              <span className="w-2.5 h-2.5 rounded-xs bg-[#c8a56b]" />
-              <h2 className="font-serif text-2xl font-bold text-[#e0e2ef] tracking-wide">
-                {isRtl ? "خزانة المقتنيات الملكية والطبعات الفاخرة" : "Deluxe Physical Collector Editions"}
-              </h2>
-              <span className="text-[#d1c5b5] text-xs hidden sm:inline mr-2">
-                {isRtl ? "مجلدات جلدية مرقمة، صناديق خشب صندل، وخرائط مختومة بالشمع" : "Numbered collector box sets & wax seals"}
-              </span>
-            </div>
-            <Link
-              href={`/${locale}/products`}
-              className="group inline-flex items-center gap-1 text-[#e6c184] hover:text-[#ffdeaa] text-xs font-bold transition-colors"
-            >
-              <span>{isRtl ? "استعراض المعرض الكامل (٦)" : "Explore Collector Gallery (6)"}</span>
-              <span className="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">
-                {isRtl ? "arrow_left_alt" : "arrow_right_alt"}
-              </span>
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Item 1 */}
-            <div className="p-5 rounded-2xl bg-[#1c1f29] border border-[#e6c184]/30 flex flex-col justify-between group hover:border-[#e6c184] transition-all">
-              <div>
-                <div className="flex items-center justify-between mb-3 text-xs font-bold">
-                  <span className="px-2.5 py-0.5 rounded bg-[#e6c184]/20 text-[#e6c184]">صندوق مقتنيات ملكي</span>
-                  <span className="text-[#ffdeaa]">ر.س 450.00</span>
-                </div>
-                <h3 className="font-serif text-lg font-bold text-[#e0e2ef] mb-1">شفرة قصر الحمراء</h3>
-                <p className="text-xs text-[#d1c5b5] leading-relaxed">
-                  طبعة مذهبة بجلد طبيعي فاخر، حواف أوراق من رقائق الذهب عيار 24، مع خريطة أندلسية حريرية مختومة بالشمع الأحمر.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-[#4e463a]/30 flex items-center justify-between">
-                <span className="text-[11px] text-[#9a8f81]">متبقي 14 نسخة فقط</span>
-                <Link
-                  href={`/${locale}/products/alhambra-royal-collector-box`}
-                  className="px-3 py-1.5 rounded-lg bg-[#e6c184] text-[#422c00] text-xs font-bold hover:bg-[#ffdeaa] transition-colors"
-                >
-                  اقتنِ نسختك
-                </Link>
-              </div>
-            </div>
-
-            {/* Item 2 */}
-            <div className="p-5 rounded-2xl bg-[#1c1f29] border border-[#e6c184]/30 flex flex-col justify-between group hover:border-[#e6c184] transition-all">
-              <div>
-                <div className="flex items-center justify-between mb-3 text-xs font-bold">
-                  <span className="px-2.5 py-0.5 rounded bg-[#e6c184]/20 text-[#e6c184]">صندوق خشب صندل</span>
-                  <span className="text-[#ffdeaa]">ر.س 680.00</span>
-                </div>
-                <h3 className="font-serif text-lg font-bold text-[#e0e2ef] mb-1">ثلاثية الأرشيف المفقود</h3>
-                <p className="text-xs text-[#d1c5b5] leading-relaxed">
-                  صندوق خشب صندل محفور يدوياً يتضمن الثلاثية الكاملة مع شهادة ترقيم موقعة من المؤلف وقلم حبر نحاسي كلاسيكي.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-[#4e463a]/30 flex items-center justify-between">
-                <span className="text-[11px] text-[#9a8f81]">متبقي 6 نسخ فقط</span>
-                <Link
-                  href={`/${locale}/products/andalusian-archive-trilogy-box`}
-                  className="px-3 py-1.5 rounded-lg bg-[#e6c184] text-[#422c00] text-xs font-bold hover:bg-[#ffdeaa] transition-colors"
-                >
-                  اقتنِ نسختك
-                </Link>
-              </div>
-            </div>
-
-            {/* Item 3 */}
-            <div className="p-5 rounded-2xl bg-[#1c1f29] border border-[#e6c184]/30 flex flex-col justify-between group hover:border-[#e6c184] transition-all">
-              <div>
-                <div className="flex items-center justify-between mb-3 text-xs font-bold">
-                  <span className="px-2.5 py-0.5 rounded bg-[#e6c184]/20 text-[#e6c184]">تجليد سلطاني عريض</span>
-                  <span className="text-[#ffdeaa]">ر.س 390.00</span>
-                </div>
-                <h3 className="font-serif text-lg font-bold text-[#e0e2ef] mb-1">أطلس خرائط الرماد</h3>
-                <p className="text-xs text-[#d1c5b5] leading-relaxed">
-                  مجلد قياس سلطاني عريض متضمن بوصلة نحاسية وخرائط يدوية مفصلة للمدن المفقودة مع هوامش مذهبة.
-                </p>
-              </div>
-              <div className="mt-4 pt-3 border-t border-[#4e463a]/30 flex items-center justify-between">
-                <span className="text-[11px] text-[#9a8f81]">متبقي 19 نسخة</span>
-                <Link
-                  href={`/${locale}/products/coastal-ash-maps-collector-atlas`}
-                  className="px-3 py-1.5 rounded-lg bg-[#e6c184] text-[#422c00] text-xs font-bold hover:bg-[#ffdeaa] transition-colors"
-                >
-                  اقتنِ نسختك
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
+        <NativeProductShelf locale={locale}/>
       </div>
+      <PublishedShelf realm="originals" locale={locale}/>
     </div>
   )
 }

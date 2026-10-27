@@ -64,6 +64,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     }
 
     return () => {
+      if (timerTimeoutRef.current) clearTimeout(timerTimeoutRef.current)
       if (audioRef.current) {
         audioRef.current.pause()
         audioRef.current.src = ""
@@ -74,6 +75,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const playTrack = useCallback((track: AudioTrack) => {
     if (!audioRef.current) return
     setCurrentTrack(track)
+    setCurrentTime(0)
+    setDuration(0)
     audioRef.current.src = track.audioUrl
     audioRef.current.playbackRate = playbackRate
     audioRef.current
@@ -87,17 +90,19 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     if (isPlaying) {
       audioRef.current.pause()
     } else {
-      audioRef.current.play().then(() => setIsPlaying(true))
+      audioRef.current.play().then(() => setIsPlaying(true)).catch((error) => { setIsPlaying(false); console.error("Audio playback error:", error) })
     }
   }
 
   const seek = (seconds: number) => {
-    if (!audioRef.current) return
-    audioRef.current.currentTime = seconds
-    setCurrentTime(seconds)
+    if (!audioRef.current || !Number.isFinite(seconds)) return
+    const target = Math.max(0, Math.min(seconds, Number.isFinite(audioRef.current.duration) ? audioRef.current.duration : seconds))
+    audioRef.current.currentTime = target
+    setCurrentTime(target)
   }
 
   const setSpeed = (rate: number) => {
+    if (!Number.isFinite(rate) || rate < 0.25 || rate > 4) return
     setPlaybackRate(rate)
     if (audioRef.current) {
       audioRef.current.playbackRate = rate
@@ -122,6 +127,8 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   }
 
   const closePlayer = () => {
+    if (timerTimeoutRef.current) clearTimeout(timerTimeoutRef.current)
+    setSleepTimer(null)
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.src = ""
@@ -129,6 +136,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     setCurrentTrack(null)
     setIsPlaying(false)
     setCurrentTime(0)
+    setDuration(0)
   }
 
   return (

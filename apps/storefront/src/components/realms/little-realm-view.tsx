@@ -1,62 +1,34 @@
 "use client"
+import { useCatalogBooks } from "@/context/catalog-context"
+import {PublishedShelf} from "@/components/realms/published-shelf"
 
 import React, { useState } from "react"
-import Link from "next/link"
-import { useAudio } from "@/context/audio-context"
+import Link from "@/components/common/realm-link"
+import { useRouter } from "next/navigation"
+import { useReadingState } from "@/context/reading-state-context"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { useNarration } from "@/hooks/use-narration"
 
 type LittleRealmViewProps = {
   locale: "ar" | "en"
 }
 
 export function LittleRealmView({ locale }: LittleRealmViewProps) {
+  const publishedBooks = useCatalogBooks()
   const isRtl = locale === "ar"
-  const { playTrack, currentTrack, isPlaying, togglePlayPause } = useAudio()
+  const router = useRouter()
+  const narration = useNarration()
   const [selectedMode, setSelectedMode] = useState<number>(2) // 2 = اقرأ معي
   const [audioPromptPlaying, setAudioPromptPlaying] = useState(false)
   const [showPinModal, setShowPinModal] = useState(false)
   const [pinInput, setPinInput] = useState("")
   const [pinError, setPinError] = useState(false)
 
-  const handleAudioInstruction = () => {
-    setAudioPromptPlaying(true)
-    playTrack({
-      id: "little_audio_instruction",
-      title: isRtl ? "الإرشادات الصوتية لـ واحة البراعم" : "Audio Guide for Little Explorers",
-      author: isRtl ? "مرشد StoryVerse الهادئ" : "StoryVerse Gentle Guide",
-      narrator: isRtl ? "صوت لطيف ومطمئن" : "Gentle Voice",
-      coverUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuBxb208hW12gFg2tY5GSLbhYE7jeHSp7HDqQSr1e4SJK323JCyNHkcX4-a1z7HP8_6vFUK_rSpS7ZbAAqX1ooqYWzqo_aKCr6ke5F6uzsRoMMKjr-KJT-tjqx7Fa4sLj1o75aAlAwHHjb5C4uuUAIi-b1Larx0rdSJEEEB-OzYuvFpba44vMQsH9O6t1zNxdf_wj0WfdqBkRrccN1ZUYBvdgaDs5-5LS-mShyh5qo5H0iKXhsC30xHj",
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    })
-    setTimeout(() => {
-      setAudioPromptPlaying(false)
-    }, 4000)
-  }
+  const handleAudioInstruction = () => narration.speak(isRtl ? "اختر حكاية. يمكنك قراءتها مع أسرتك، أو سماع النص بصوت الجهاز، أو اختيار طريق الحكاية." : "Choose a story to read together, listen to the text, or choose a story path.",1,locale)
+  const handlePlayStory = (storyId:string,title:string,coverUrl:string) => router.push(`/${locale}/realms/little/player/${storyId==="story_nono_umbrella"?"book_little_01":"book_little_04"}`)
+  const handleVerifyPin = (event:React.FormEvent) => {event.preventDefault(); const answer=pinInput.replace(/[٠-٩]/g,c=>String("٠١٢٣٤٥٦٧٨٩".indexOf(c))); if(answer==="25")router.push(`/${locale}/family-hub`);else setPinError(true)}
 
-  const handlePlayStory = (storyId: string, title: string, coverUrl: string) => {
-    if (currentTrack?.id === storyId && isPlaying) {
-      togglePlayPause()
-      return
-    }
-
-    playTrack({
-      id: storyId,
-      title: `${title} (حكاية صوتية)`,
-      author: "StoryVerse Little",
-      narrator: "سرد قصصي هادئ",
-      coverUrl: coverUrl,
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
-    })
-  }
-
-  const handleVerifyPin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (pinInput === "1234" || pinInput.length === 4) {
-      window.location.href = `/${locale}/family-hub`
-    } else {
-      setPinError(true)
-    }
-  }
-
+  if (!publishedBooks.some(book=>book.id==="book_little_01")) return <PublishedShelf realm="little" locale={locale}/>
   return (
     <div className="w-full min-h-screen bg-[#FFF8F4] text-[#2B231E] py-8 sm:py-12 relative overflow-hidden font-sans">
       {/* Subtle decorative ambient glow backdrops */}
@@ -144,7 +116,7 @@ export function LittleRealmView({ locale }: LittleRealmViewProps) {
               >
                 <span className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
                   <span className="material-symbols-outlined text-[24px]">
-                    {audioPromptPlaying ? "graphic_eq" : "volume_up"}
+                    {narration.speaking ? "graphic_eq" : "volume_up"}
                   </span>
                 </span>
                 <span className="text-sm sm:text-base font-bold">
@@ -247,7 +219,7 @@ export function LittleRealmView({ locale }: LittleRealmViewProps) {
 
                 <div className="pt-4 flex flex-wrap items-center gap-3">
                   <Link
-                    href={`/${locale}/reader/book_little_01`}
+                    href={`/${locale}/realms/little/${selectedMode===1?"player":selectedMode===3?"illustrated":selectedMode===4?"words":selectedMode===5?"interactive":"reader"}/book_little_01`}
                     className="min-h-[56px] flex-1 px-6 rounded-full bg-[#7B563E] text-white hover:bg-[#60432F] transition-all flex items-center justify-center gap-2 shadow-[0_8px_20px_rgba(123,86,62,0.22)] active:scale-95 font-bold text-sm sm:text-base"
                   >
                     <span className="material-symbols-outlined text-[22px]">menu_book</span>
@@ -265,7 +237,7 @@ export function LittleRealmView({ locale }: LittleRealmViewProps) {
                     className="min-h-[56px] flex-1 px-6 rounded-full bg-[#D8E6DF] text-[#1E3E32] hover:bg-[#b8d4c7] transition-all flex items-center justify-center gap-2 shadow-sm active:scale-95 font-bold text-sm sm:text-base"
                   >
                     <span className="material-symbols-outlined text-[22px]">
-                      {currentTrack?.id === "story_nono_umbrella" && isPlaying
+                      {false
                         ? "pause_circle"
                         : "play_circle"}
                     </span>
@@ -359,7 +331,7 @@ export function LittleRealmView({ locale }: LittleRealmViewProps) {
                     className="min-h-[50px] w-full px-4 rounded-full bg-[#D8E6DF] text-[#1E3E32] hover:bg-[#4A6458] hover:text-white transition-all flex items-center justify-center gap-2 active:scale-95 font-bold text-sm shadow-sm"
                   >
                     <span className="material-symbols-outlined text-[20px]">
-                      {currentTrack?.id === "story_moon_goodnight" && isPlaying
+                      {false
                         ? "pause_circle"
                         : "volume_up"}
                     </span>
@@ -398,7 +370,7 @@ export function LittleRealmView({ locale }: LittleRealmViewProps) {
                 </div>
                 <div className="pt-2">
                   <Link
-                    href={`/${locale}/reader/book_little_03`}
+                    href={`/${locale}/reader/book_little_04`}
                     className="min-h-[50px] w-full px-4 rounded-full bg-[#FFDBCB] text-[#7B563E] hover:bg-[#7B563E] hover:text-white transition-all flex items-center justify-center gap-2 active:scale-95 font-bold text-sm shadow-sm"
                   >
                     <span className="material-symbols-outlined text-[20px]">auto_stories</span>
@@ -468,76 +440,8 @@ export function LittleRealmView({ locale }: LittleRealmViewProps) {
         </aside>
       </div>
 
-      {/* PIN Verification Modal */}
-      {showPinModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#F3E7DE] text-right space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between">
-              <span className="w-12 h-12 rounded-2xl bg-[#D8E6DF] text-[#1E3E32] flex items-center justify-center text-2xl">
-                🛡️
-              </span>
-              <button
-                onClick={() => {
-                  setShowPinModal(false)
-                  setPinInput("")
-                  setPinError(false)
-                }}
-                className="w-8 h-8 rounded-full bg-neutral-100 hover:bg-neutral-200 flex items-center justify-center text-neutral-500"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div>
-              <h3 className="text-xl font-bold text-[#2B231E]">
-                {isRtl ? "تَأْكِيدُ دُخُولِ وَلِيِّ الأَمْرِ" : "Parent Verification"}
-              </h3>
-              <p className="text-xs text-[#5A4B42] mt-1">
-                {isRtl
-                  ? "لِحِمَايَةِ خُصُوصِيَّةِ الصَّغِيرِ، يُرْجَى إِدْخَالُ رَمْزِ المُرُورِ العَائِلِيِّ (الافتراضي: 1234)"
-                  : "Please enter your 4-digit family PIN to proceed (default: 1234)"}
-              </p>
-            </div>
-
-            <form onSubmit={handleVerifyPin} className="space-y-4">
-              <input
-                type="password"
-                maxLength={4}
-                value={pinInput}
-                onChange={(e) => {
-                  setPinInput(e.target.value)
-                  setPinError(false)
-                }}
-                placeholder="••••"
-                className="w-full text-center text-2xl tracking-[0.5em] py-3 rounded-xl border border-neutral-300 focus:outline-none focus:ring-2 focus:ring-[#7B563E]"
-                autoFocus
-              />
-
-              {pinError && (
-                <p className="text-xs text-red-600 font-bold text-center">
-                  {isRtl ? "رمز المرور غير صحيح. جرب 1234" : "Incorrect PIN. Try 1234"}
-                </p>
-              )}
-
-              <div className="flex items-center gap-3">
-                <button
-                  type="submit"
-                  className="flex-1 min-h-[48px] rounded-xl bg-[#7B563E] text-white hover:bg-[#60432F] font-bold text-sm transition-all shadow-md"
-                >
-                  {isRtl ? "تَأْكِيدُ المُرُورِ" : "Confirm Entry"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowPinModal(false)}
-                  className="px-4 min-h-[48px] rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold text-sm"
-                >
-                  {isRtl ? "إِلْغَاء" : "Cancel"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      <Dialog open={showPinModal} onOpenChange={setShowPinModal}><DialogContent className="bg-white text-[#2b231e]" dir={isRtl?"rtl":"ltr"}><DialogHeader><DialogTitle>{isRtl?"بوابة الأهل":"Parent gate"}</DialogTitle></DialogHeader><p>{isRtl?"ما ناتج 17 + 8؟ هذه خطوة محلية للمرافقة وليست إثبات هوية.":"What is 17 + 8? A local gate, not identity verification."}</p><form className="space-y-4" onSubmit={handleVerifyPin}><label className="block">{isRtl?"الإجابة":"Answer"}<input autoFocus required inputMode="numeric" className="w-full mt-2 p-3 rounded-xl border" value={pinInput} onChange={event=>{setPinInput(event.target.value);setPinError(false)}}/></label>{pinError&&<p role="alert" className="text-red-700">{isRtl?"الإجابة غير صحيحة. حاول مرة أخرى.":"Incorrect answer. Please retry."}</p>}<button type="submit" className="family-button">{isRtl?"متابعة":"Continue"}</button></form></DialogContent></Dialog>
+      <PublishedShelf realm="little" locale={locale}/>
     </div>
   )
 }

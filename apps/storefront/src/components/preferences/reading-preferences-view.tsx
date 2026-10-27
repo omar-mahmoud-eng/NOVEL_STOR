@@ -1,7 +1,8 @@
 "use client"
 
-import React, { useState } from "react"
-import Link from "next/link"
+import React, { useState, useEffect } from "react"
+import { useReadingState } from "@/context/reading-state-context"
+import Link from "@/components/common/realm-link"
 import {
   Sliders,
   Type,
@@ -23,14 +24,24 @@ type ReadingPreferencesViewProps = {
 
 export function ReadingPreferencesView({ locale }: ReadingPreferencesViewProps) {
   const isRtl = locale === "ar"
+  const { state, ready, updateSettings } = useReadingState()
 
   const [themeMode, setThemeMode] = useState<"dark-ink" | "parchment" | "contrast">("dark-ink")
   const [fontFamily, setFontFamily] = useState<"serif" | "sans" | "ruqah">("serif")
   const [fontSize, setFontSize] = useState<"sm" | "md" | "lg">("md")
   const [noDMsEnabled, setNoDMsEnabled] = useState<boolean>(true)
   const [savedNotification, setSavedNotification] = useState<boolean>(false)
+  useEffect(() => {
+    if (!ready) return
+    const settings = state.originals
+    setThemeMode(settings.theme === "night" ? "dark-ink" : settings.theme === "contrast" ? "contrast" : "parchment")
+    setFontFamily(settings.fontFamily === "sans" ? "sans" : settings.fontFamily === "ruqah" ? "ruqah" : "serif")
+    setFontSize(settings.fontSize <= 18 ? "sm" : settings.fontSize >= 26 ? "lg" : "md")
+    setNoDMsEnabled(settings.quiet)
+  }, [ready])
 
   const handleSave = () => {
+    updateSettings("originals", { theme: themeMode === "dark-ink" ? "night" : themeMode === "contrast" ? "contrast" : "paper", fontFamily, fontSize: fontSize === "sm" ? 18 : fontSize === "lg" ? 28 : 22, quiet: noDMsEnabled })
     setSavedNotification(true)
     setTimeout(() => setSavedNotification(false), 3000)
   }
@@ -171,7 +182,7 @@ export function ReadingPreferencesView({ locale }: ReadingPreferencesViewProps) 
                   : "bg-[#181b25] border-[#4e463a]/30 text-[#cdc6b8]"
               }`}
             >
-              <span className="font-serif font-black text-base block mb-1">Noto Serif Arabic</span>
+              <span className="font-serif font-black text-base block mb-1">Noto Naskh Arabic</span>
               <span className="text-[11px] text-[#9a8f81]">للأدب الرفيع والروايات التراثية</span>
             </button>
 
@@ -195,7 +206,7 @@ export function ReadingPreferencesView({ locale }: ReadingPreferencesViewProps) 
                   : "bg-[#181b25] border-[#4e463a]/30 text-[#cdc6b8]"
               }`}
             >
-              <span className="font-serif font-bold text-base block mb-1">خط الرقعة المطبعي</span>
+              <span className="font-serif font-bold text-base block mb-1">خط عارف رقعة</span>
               <span className="text-[11px] text-[#9a8f81]">للنصوص الشعرية والومضات</span>
             </button>
           </div>
@@ -231,20 +242,21 @@ export function ReadingPreferencesView({ locale }: ReadingPreferencesViewProps) 
             <div className="flex items-center justify-between p-4 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/30">
               <div>
                 <span className="font-bold text-sm text-[#e0e2ef] block">
-                  تشفير محلي لتفضيلات المطالعة (Zero Tracking)
+                  حفظ تفضيلات المطالعة على هذا الجهاز
                 </span>
                 <span className="text-xs text-[#9a8f81]">
                   سرعة قراءتك والصفحات التي تتوقف عندها لا تُشارك مع أي طرف خارجي
                 </span>
               </div>
               <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold text-xs">
-                سيادي مشفر
+                حفظ محلي
               </span>
             </div>
           </div>
         </div>
 
         {/* Save Bar */}
+        <section className="p-6 rounded-3xl bg-[#1c1f29] border border-[#4e463a]/40 space-y-5"><h2 className="font-bold text-lg">{isRtl ? "حجم النص والمعاينة" : "Text size and preview"}</h2><div className="flex gap-3">{(["sm", "md", "lg"] as const).map((size) => <button key={size} className="original-button" aria-pressed={fontSize === size} onClick={() => setFontSize(size)}>{size === "sm" ? "صغير" : size === "md" ? "متوسط" : "كبير"}</button>)}</div><p style={{ fontSize: fontSize === "sm" ? 18 : fontSize === "lg" ? 28 : 22,fontFamily:fontFamily==="ruqah"?"var(--font-ruqaa)":fontFamily==="sans"?"var(--font-arabic)":"var(--font-serif)" }} className="leading-loose">وقفت سلمى عند نافذة الأرشيف، تتأمل الخريطة التي عادت بعد غياب طويل.</p><label className="flex items-center gap-3"><input type="checkbox" checked={noDMsEnabled} onChange={(event) => setNoDMsEnabled(event.target.checked)} />{isRtl ? "تفعيل وقت الهدوء" : "Enable quiet time"}</label></section>
         <div className="flex items-center justify-between pt-4">
           <Link href={`/${locale}`} className="text-xs font-bold text-[#9a8f81] hover:text-[#e0e2ef]">
             العودة للمكتبة

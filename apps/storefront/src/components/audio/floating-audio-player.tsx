@@ -1,7 +1,7 @@
 "use client"
 
 import React from "react"
-import Image from "next/image"
+import Image from "@/components/ui/media-image"
 import { useAudio } from "@/context/audio-context"
 import {
   Play,

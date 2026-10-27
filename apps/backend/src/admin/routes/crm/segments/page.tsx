@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -27,14 +28,14 @@ const AudienceSegmentsPage = () => {
   const [name, setName] = useState("")
   const [criteria, setCriteria] = useState("")
   const [description, setDescription] = useState("")
-  const [destination, setDestination] = useState("Klaviyo VIP & Meta Custom Audiences")
+  const [destination, setDestination] = useState("غير مربوط")
   const [feedback, setFeedback] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const fetchSegments = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/crm")
+      const res = await adminFetch("/admin/crm")
       if (res.ok) {
         const json = await res.json()
         setSegments(json.segments || [])
@@ -56,7 +57,7 @@ const AudienceSegmentsPage = () => {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -84,8 +85,7 @@ const AudienceSegmentsPage = () => {
   }
 
   const handleTriggerCampaign = (segName: string) => {
-    setFeedback(`تم تفعيل إرسال حملة مخصصة وفورية إلى شريحة [${segName}] بنجاح!`)
-    setTimeout(() => setFeedback(""), 4000)
+    window.location.assign("/app/marketing/campaigns?audience="+encodeURIComponent(segName))
   }
 
   return (
@@ -93,7 +93,7 @@ const AudienceSegmentsPage = () => {
       <SubNav
         parentTitle="Reader CRM 360°"
         currentTitle="شرائح وتصنيف الجمهور السلوكية الديناميكية | Dynamic Audience Segments"
-        description="بناء شرائح الجمهور السلوكية، معايير التصفية التلقائية، والمزامنة المباشرة مع مسارات التسويق والولاء"
+        description="تعريف شرائح الجمهور وحفظ وصفها؛ ربط التنفيذ بمزود تسويق لم يُفعّل."
         icon={Filter}
         tabs={crmTabs}
         onRefresh={fetchSegments}
@@ -177,10 +177,10 @@ const AudienceSegmentsPage = () => {
         {/* Add Segment Form */}
         <Container className="p-5 h-fit bg-ui-bg-base border border-ui-border-base shadow-xs">
           <Heading level="h2" className="text-base font-bold text-ui-fg-base mb-1">
-            إنشاء شريحة ديناميكية جديدة
+            إنشاء تعريف شريحة جديدة
           </Heading>
           <Text className="text-xs text-ui-fg-subtle mb-4">
-            تحديد قواعد استهداف دقيقة لحصر القراء حسب نمط القراءة وتفعيل الأتمتة
+            حفظ وصف الجمهور وقواعده المقترحة. التنفيذ والمزامنة يحتاجان ربط مزود؛ لا تُرسل رسائل من هنا.
           </Text>
 
           <form onSubmit={handleCreate} className="space-y-4 text-xs">
@@ -223,6 +223,7 @@ const AudienceSegmentsPage = () => {
                 onChange={(e) => setDestination(e.target.value)}
                 className="w-full h-8 px-2 text-xs rounded-lg border border-ui-border-base bg-ui-bg-field text-ui-fg-base"
               >
+                <option value="غير مربوط">غير مربوط بمزود</option>
                 <option value="Klaviyo VIP & Meta Custom Audiences">Klaviyo VIP & Meta Custom Audiences</option>
                 <option value="WhatsApp Broadcast Channel">WhatsApp Broadcast Channel</option>
                 <option value="Audio Drip Email Sequence">Audio Drip Email Sequence</option>
@@ -236,7 +237,7 @@ const AudienceSegmentsPage = () => {
               className="w-full mt-2 text-xs gap-1.5"
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>{isSubmitting ? "جارِ الحفظ في DB..." : "حفظ الشريحة وتفعيل الرصد"}</span>
+              <span>{isSubmitting ? "جارِ الحفظ..." : "حفظ تعريف الشريحة"}</span>
             </Button>
           </form>
         </Container>

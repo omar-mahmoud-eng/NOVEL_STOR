@@ -8,13 +8,17 @@
     "packages/*"
   ],
   "scripts": {
-    "dev": "npm run dev --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present",
+    "dev": "node scripts/dev.cjs",
+    "build": "npm run build --workspace=@enterprise/schemas && npm run build --workspace=@enterprise/backend && npm run build --workspace=@enterprise/storefront",
+    "lint": "npm run typecheck",
     "clean": "npm run clean --workspaces --if-present",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "node --test tests/regression.test.cjs",
+    "test:smoke": "node tests/smoke.cjs",
+    "test:ui": "node tests/ui-operational.cjs"
   },
   "keywords": [
     "medusa-v2",
@@ -33,6 +37,18 @@
   },
   "devDependencies": {
     "playwright": "^1.64.1",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "zod": "^4.6.7",
+    "lodash": "^4.18.1",
+    "postcss": "^8.5.31",
+    "postcss-selector-parser": "^7.1.7",
+    "ajv@>=7": "^8.18.0",
+    "bullmq": {
+      "uuid": "^11.1.1"
+    },
+    "@graphql-tools/utils": "^13.1.3"
   }
 }

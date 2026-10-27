@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -13,7 +14,7 @@ const warehouseTabs = [
 const StockMovementsPage = () => {
   const [movements, setMovements] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [movementType, setMovementType] = useState("inbound_po")
+  const [movementType, setMovementType] = useState("purchase_order")
   const [sku, setSku] = useState("NOVEL-DESERT-HC")
   const [quantity, setQuantity] = useState<number>(50)
   const [fromLoc, setFromLoc] = useState("المورد: مطابع الشرق الأوسط")
@@ -26,7 +27,7 @@ const StockMovementsPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/warehouse")
+      const res = await adminFetch("/admin/warehouse")
       if (res.ok) {
         const data = await res.json()
         setMovements(data.movements || [])
@@ -47,7 +48,7 @@ const StockMovementsPage = () => {
     if (!sku || !quantity || !refNumber) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/warehouse", {
+      const res = await adminFetch("/admin/warehouse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -85,6 +86,7 @@ const StockMovementsPage = () => {
         isLoading={loading}
       />
 
+      <Text className="text-sm text-ui-fg-subtle">هذا سجل تدقيق يدوي. تعديل المخزون القابل للبيع يتم من <a className="underline" href="/app/inventory">مخزون Medusa</a>.</Text>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Movements Table */}
         <Container className="lg:col-span-2 p-0 overflow-hidden">
@@ -113,7 +115,7 @@ const StockMovementsPage = () => {
             </Table.Header>
             <Table.Body>
               {movements.map((mov) => {
-                const isInbound = mov.movement_type?.includes("inbound")
+                const isInbound = ["purchase_order", "inbound_po", "inbound"].includes(mov.movement_type)
                 return (
                   <Table.Row key={mov.id}>
                     <Table.Cell>
@@ -160,9 +162,9 @@ const StockMovementsPage = () => {
                 value={movementType}
                 onChange={(e) => setMovementType(e.target.value)}
               >
-                <option value="inbound_po">توريد من المطبعة (Inbound PO)</option>
-                <option value="transfer">تحويل بين مستودعين (Transfer)</option>
-                <option value="outbound_fulfillment">صرف طلبات شحن (Outbound)</option>
+                <option value="purchase_order">توريد من المطبعة (Inbound PO)</option>
+                <option value="inter_transfer">تحويل بين مستودعين (Transfer)</option>
+                <option value="order_pick">صرف طلبات شحن (Outbound)</option>
                 <option value="inventory_adjustment">تسوية جردية (Adjustment)</option>
               </select>
             </div>

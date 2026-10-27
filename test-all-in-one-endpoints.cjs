@@ -1,3 +1,4 @@
+require("./scripts/project-env.cjs")
 const http = require('http');
 
 async function testAll() {
@@ -5,7 +6,7 @@ async function testAll() {
   const loginRes = await fetch('http://localhost:9000/auth/user/emailpass', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: 'admin@enterprise-ecommerce.com', password: 'AdminP@ssw0rd2026!' })
+    body: JSON.stringify({ email: 'admin@enterprise-ecommerce.com', password: (process.env.TEST_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD) })
   });
 
   const loginData = await loginRes.json();

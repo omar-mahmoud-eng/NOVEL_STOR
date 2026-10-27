@@ -2,8 +2,10 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { STORY_MODULE } from "../../../modules/story"
 import { SUBSCRIPTION_MODULE } from "../../../modules/subscription"
+import { purchasedVariantIds } from "../../../utils/media-licenses"
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
+  res.setHeader("Cache-Control", "private, no-store")
   const customerId = (req as any).auth_context?.actor_id || (req as any).user?.customer_id
 
   if (!customerId) {
@@ -13,7 +15,6 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     })
   }
 
-  const orderModule = req.scope.resolve(Modules.ORDER) as any
   const storyService = req.scope.resolve(STORY_MODULE) as any
   const subscriptionService = req.scope.resolve(SUBSCRIPTION_MODULE) as any
 
@@ -21,25 +22,11 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const subCheck = await subscriptionService.isCustomerSubscribed(customerId)
 
   // 2. Query orders for the customer
-  const orders = await orderModule.listOrders({
-    customer_id: customerId,
-  })
-
-  const purchasedVariantIds = new Set<string>()
-  for (const order of orders) {
-    const fullOrder = await orderModule.retrieveOrder(order.id, {
-      relations: ["items"],
-    })
-    for (const item of fullOrder.items || []) {
-      if (item.variant_id) {
-        purchasedVariantIds.add(item.variant_id)
-      }
-    }
-  }
+  const licensedVariants = await purchasedVariantIds(req.scope, customerId)
 
   // 3. Resolve digital media assets associated with purchased variants
   const libraryItems: any[] = []
-  for (const variantId of purchasedVariantIds) {
+  for (const variantId of licensedVariants) {
     const mediaList = await storyService.listDigitalMedias({
       variant_id: variantId,
     })

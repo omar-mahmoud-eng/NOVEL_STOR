@@ -1,3 +1,4 @@
+import {adminFetch} from "../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -40,7 +41,7 @@ const AffiliatesPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/affiliates")
+      const res = await adminFetch("/admin/affiliates")
       if (res.ok) {
         const data = await res.json()
         setAffiliates(data.affiliates || [])
@@ -63,7 +64,7 @@ const AffiliatesPage = () => {
     if (!name || !email || !couponCode) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/affiliates", {
+      const res = await adminFetch("/admin/affiliates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -1,11 +1,12 @@
 "use client"
 
 import React, { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
+import Link from "@/components/common/realm-link"
+import Image from "@/components/ui/media-image"
 import { useKidsMode } from "@/context/kids-mode-context"
 import { useAudio } from "@/context/audio-context"
 import { useCart } from "@/context/cart-context"
+import { medusaClient } from "@/lib/medusa-client"
 import { formatCurrency } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -59,6 +60,7 @@ export function PublishingCatalogView({
   const [selectedGenre, setSelectedGenre] = useState<string>("all")
   const [addingId, setAddingId] = useState<string | null>(null)
   const [justAddedId, setJustAddedId] = useState<string | null>(null)
+  const [purchaseError, setPurchaseError] = useState<string | null>(null)
 
   const isRtl = locale === "ar"
 
@@ -114,10 +116,18 @@ export function PublishingCatalogView({
     e.preventDefault()
     e.stopPropagation()
     setAddingId(bookId)
+    setPurchaseError(null)
     try {
-      await addItem(variantId, 1)
+      const book = initialBooks.find((value) => value.id === bookId)
+      const product = book && await medusaClient.getPricedProduct(book.handle)
+      const variant = product?.variants?.find((value: any) => value.sku?.endsWith("-PAPERBACK"))
+      if (!variant?.id) throw new Error(locale === "ar" ? "هذا الإصدار غير متاح للشراء حاليًا." : "This edition is unavailable for purchase.")
+      await addItem(variant.id, 1)
       setJustAddedId(bookId)
       setTimeout(() => setJustAddedId(null), 1500)
+    } catch (error) {
+      setPurchaseError((error as any).message || "Unable to add to cart")
+      console.error("Unable to add book to cart", error)
     } finally {
       setAddingId(null)
     }
@@ -125,6 +135,7 @@ export function PublishingCatalogView({
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-7xl space-y-8">
+        {purchaseError && <p role="alert" className="text-destructive">{purchaseError}</p>}
       {/* Stitch Header Banner */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-[#4e463a]/40">
         <div>

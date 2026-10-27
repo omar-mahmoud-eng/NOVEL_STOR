@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -58,7 +59,7 @@ const Customer360Page = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/crm")
+      const res = await adminFetch("/admin/crm")
       if (res.ok) {
         const json = await res.json()
         setData(json)
@@ -109,7 +110,7 @@ const Customer360Page = () => {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -143,7 +144,7 @@ const Customer360Page = () => {
 
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -173,7 +174,7 @@ const Customer360Page = () => {
     if (!selectedCustomer) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/crm", {
+      const res = await adminFetch("/admin/crm", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -3,6 +3,9 @@ import { getDbPool } from "../../../../utils/db"
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const { tracking_number } = req.params
+  const customerId = (req as any).auth_context?.actor_id
+  if (!customerId) return res.status(401).json({ code: "UNAUTHORIZED", message: "Authentication required." })
+  res.setHeader("Cache-Control", "private, no-store")
   const pool = getDbPool()
 
   try {
@@ -24,9 +27,10 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
       FROM fulfillment_tracking ft
       JOIN "order" o ON o.id = ft.order_id
       LEFT JOIN order_address oa ON oa.id = o.shipping_address_id
-      WHERE ft.tracking_number = $1 OR o.custom_display_id = $1
+      WHERE (ft.tracking_number = $1 OR o.custom_display_id = $1)
+        AND o.customer_id = $2 AND o.deleted_at IS NULL AND ft.deleted_at IS NULL
       LIMIT 1`,
-      [tracking_number]
+      [tracking_number, customerId]
     )
 
     if (result.rows.length === 0) {

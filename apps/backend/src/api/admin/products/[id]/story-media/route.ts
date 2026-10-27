@@ -1,0 +1,36 @@
+import type {MedusaRequest,MedusaResponse}from"@medusajs/framework/http"
+import{Modules}from"@medusajs/framework/utils"
+import{z}from"zod"
+import{randomUUID}from"node:crypto"
+import{HeadObjectCommand}from"@aws-sdk/client-s3"
+import{getDbPool}from"../../../../../utils/db"
+import{s3Client,validateStorageKey}from"../../../../../utils/s3-drm"
+const Media=z.object({id:z.string().optional(),title:z.string().trim().min(1).max(250),format:z.enum(["ebook_epub","ebook_pdf","audio_mp3","audio_m4b","audio_hls"]),variant_id:z.string().nullable().optional(),chapter_number:z.number().int().min(1).max(1000),duration_seconds:z.number().int().min(0).nullable().optional(),private_storage_key:z.string().min(1).max(1024),is_sample:z.boolean().default(false),mime_type:z.string().max(100).default("application/octet-stream")})
+const Input=z.object({age_group:z.enum(["kids_3_6","kids_7_12","teens_13_17","adults_18_plus"]),author_name:z.string().trim().min(2).max(150),narrator_name:z.string().trim().max(150).default(""),media:z.array(Media).max(100)})
+async function details(req:MedusaRequest){
+ const product=await(req.scope.resolve(Modules.PRODUCT)as any).retrieveProduct(req.params.id,{relations:["variants"]})
+ const pool=getDbPool(),variants=product.variants||[]
+ const found=await pool.query(`SELECT * FROM digital_media WHERE variant_id=ANY($1::text[]) AND deleted_at IS NULL ORDER BY chapter_number,id`,[variants.map((item:any)=>item.id)])
+ const metadataId=product.metadata?.story_metadata_id||found.rows[0]?.story_metadata_id
+ const metadata=metadataId?(await pool.query(`SELECT sm.*,a.name AS author_name,n.name AS narrator_name FROM story_metadata sm LEFT JOIN author a ON a.id=sm.author_id LEFT JOIN narrator n ON n.id=sm.narrator_id WHERE sm.id=$1 AND sm.deleted_at IS NULL`,[metadataId])).rows[0]:null
+ const media=metadataId?(await pool.query(`SELECT * FROM digital_media WHERE story_metadata_id=$1 AND deleted_at IS NULL ORDER BY chapter_number,id`,[metadataId])).rows:found.rows
+ return{product,variants,metadata,media}
+}
+export async function GET(req:MedusaRequest,res:MedusaResponse){
+ try{const data=await details(req);const media=await Promise.all(data.media.map(async(item:any)=>{let available=false;try{await s3Client.send(new HeadObjectCommand({Bucket:process.env.S3_BUCKET||"publishing-private-media",Key:validateStorageKey(item.private_storage_key)}));available=true}catch{}return{...item,available}}));return res.json({product_id:data.product.id,age_group:data.metadata?.age_group||data.product.metadata?.age_group||"adults_18_plus",author_name:data.metadata?.author_name||data.product.metadata?.author_name||"",narrator_name:data.metadata?.narrator_name||"",variants:data.variants.map((item:any)=>({id:item.id,title:item.title})),media})}catch{return res.status(404).json({message:"Product not found"})}
+}
+export async function POST(req:MedusaRequest,res:MedusaResponse){
+ const input=Input.safeParse(req.body);if(!input.success)return res.status(400).json({message:"Invalid story metadata",errors:input.error.issues})
+ let data;try{data=await details(req)}catch{return res.status(404).json({message:"Product not found"})}
+ const value=input.data,variantIds=new Set(data.variants.map((item:any)=>item.id)),owned=new Map(data.media.map((item:any)=>[item.id,item]))
+ try{for(const item of value.media){validateStorageKey(item.private_storage_key);if(item.id&&!owned.has(item.id))throw Error("Media does not belong to this product");if(item.variant_id&&!variantIds.has(item.variant_id))throw Error("Variant does not belong to this product");if(!item.is_sample&&!item.variant_id)throw Error("Protected media requires a product variant");const previous:any=item.id?owned.get(item.id):null;if(!previous||previous.private_storage_key!==item.private_storage_key)await s3Client.send(new HeadObjectCommand({Bucket:process.env.S3_BUCKET||"publishing-private-media",Key:item.private_storage_key}))}}catch{return res.status(400).json({message:"راجع ملكية النسخة، وارفع الملف إلى التخزين الخاص قبل حفظه."})}
+ const client=await getDbPool().connect()
+ try{await client.query("BEGIN");await client.query(`SELECT id FROM product WHERE id=$1 AND deleted_at IS NULL FOR UPDATE`,[data.product.id]);
+ async function contributor(table:"author"|"narrator",name:string){if(!name)return null;const found=await client.query(`SELECT id FROM ${table} WHERE name=$1 AND deleted_at IS NULL LIMIT 1`,[name]);if(found.rowCount)return found.rows[0].id;const id=`${table}_${randomUUID()}`;await client.query(`INSERT INTO ${table} (id,name,created_at,updated_at${table==="author"?",royalty_percentage":""}) VALUES ($1,$2,now(),now()${table==="author"?",0":""})`,[id,name]);return id}
+ const authorId=await contributor("author",value.author_name),narratorId=await contributor("narrator",value.narrator_name),metadataId=data.metadata?.id||`story_metadata_${randomUUID()}`
+ await client.query(`INSERT INTO story_metadata (id,age_group,language,author_id,narrator_id,created_at,updated_at) VALUES ($1,$2,'ar',$3,$4,now(),now()) ON CONFLICT (id) DO UPDATE SET age_group=$2,author_id=$3,narrator_id=$4,updated_at=now()`,[metadataId,value.age_group,authorId,narratorId])
+ await client.query(`UPDATE product SET metadata=COALESCE(metadata,'{}'::jsonb)||$2::jsonb,updated_at=now() WHERE id=$1`,[data.product.id,JSON.stringify({story_metadata_id:metadataId,age_group:value.age_group,author_name:value.author_name,narrator_name:value.narrator_name})])
+ const retained:string[]=[];for(const item of value.media){const id=item.id||`digital_media_${randomUUID()}`;retained.push(id);await client.query(`INSERT INTO digital_media (id,story_metadata_id,variant_id,format,title,chapter_number,duration_seconds,private_storage_key,mime_type,is_sample,created_at,updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,now(),now()) ON CONFLICT(id) DO UPDATE SET variant_id=$3,format=$4,title=$5,chapter_number=$6,duration_seconds=$7,private_storage_key=$8,mime_type=$9,is_sample=$10,updated_at=now()`,[id,metadataId,item.variant_id||null,item.format,item.title,item.chapter_number,item.duration_seconds??null,item.private_storage_key,item.mime_type,item.is_sample])}
+ await client.query(`UPDATE digital_media SET deleted_at=now(),updated_at=now() WHERE story_metadata_id=$1 AND NOT(id=ANY($2::text[])) AND deleted_at IS NULL`,[metadataId,retained]);await client.query("COMMIT");return res.json({success:true,story_metadata_id:metadataId,media_count:retained.length})
+ }catch{await client.query("ROLLBACK");return res.status(500).json({message:"Unable to save story metadata. No changes committed."})}finally{client.release()}
+}

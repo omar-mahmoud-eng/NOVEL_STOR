@@ -1,8 +1,8 @@
 "use client"
 
 import React, { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
+import Link from "@/components/common/realm-link"
+import Image from "@/components/ui/media-image"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/context/cart-context"

@@ -1,0 +1,13 @@
+node_modules
+**/node_modules
+.git
+.env
+**/.env*
+**/.next
+**/.medusa
+**/dist
+scratch
+stitch_export
+*.zip
+tests/screenshots
+**/*.log

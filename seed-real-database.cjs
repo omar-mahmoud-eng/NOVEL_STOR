@@ -1,6 +1,7 @@
+require("./scripts/project-env.cjs")
 const { Client } = require("pg")
 
-const connectionString = process.env.DATABASE_URL || "postgres://medusa_admin:SuperSecureDbPassword2026!@localhost:5432/medusa_db"
+const connectionString = process.env.DATABASE_URL || process.env.DATABASE_URL
 
 async function seedDatabase() {
   const client = new Client({ connectionString })

@@ -1,6 +1,7 @@
+require("./scripts/project-env.cjs")
 const { Client } = require("pg");
 
-const DATABASE_URL = process.env.DATABASE_URL || "postgres://medusa_admin:SuperSecureDbPassword2026!@localhost:5432/medusa_db";
+const DATABASE_URL = process.env.DATABASE_URL || process.env.DATABASE_URL;
 
 async function run() {
   const client = new Client({ connectionString: DATABASE_URL });
@@ -178,6 +179,10 @@ async function run() {
   console.log("All 12 enterprise tables created successfully.");
 
   // Clear existing to avoid duplicate conflicts upon re-runs
+  if (process.env.ALLOW_DESTRUCTIVE_DEMO_RESET !== "true" || process.env.NODE_ENV === "production") {
+    console.log("Schema prepared. Demo reset and fabricated business metrics skipped.");
+    await client.end(); return;
+  }
   await client.query(`
     TRUNCATE TABLE marketing_campaigns, cart_abandonment_automations, product_reviews,
       loyalty_accounts, loyalty_rewards, affiliates, affiliate_referrals,

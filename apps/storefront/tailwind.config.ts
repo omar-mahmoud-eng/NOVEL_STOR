@@ -18,6 +18,7 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "serif"],
         arabic: ["var(--font-arabic)", "system-ui", "sans-serif"],
       },
       colors: {

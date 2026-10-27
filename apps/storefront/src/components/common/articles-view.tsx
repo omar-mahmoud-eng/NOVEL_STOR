@@ -1,0 +1,9 @@
+"use client"
+import {useEffect,useState} from "react"
+import Link from "next/link"
+type Article={id:string;title:string;slug:string;excerpt:string;content:string;author_name:string;category:string;cover_image:string}
+export function ArticlesView({locale,slug}:{locale:"ar"|"en";slug?:string}){
+ const [articles,setArticles]=useState<Article[]>([]),[loading,setLoading]=useState(true),[error,setError]=useState("")
+ useEffect(()=>{setLoading(true);fetch(`/api/medusa/store/articles${slug?`?slug=${encodeURIComponent(slug)}`:""}`,{cache:"no-store"}).then(async response=>{if(!response.ok)throw Error("تعذر تحميل المقالات");setArticles((await response.json()).articles)}).catch(error=>setError(error.message)).finally(()=>setLoading(false))},[slug])
+ return <div className="original-reading-page"><div className="original-reading-width space-y-7 py-10"><Link className="original-button" href={`/${locale}/articles`}>مجلة StoryVerse</Link><h1 className="text-3xl font-bold">{slug?articles[0]?.title||"المقال":"مجلة القراءة والنشر"}</h1>{loading&&<p role="status">جارٍ التحميل…</p>}{error&&<p role="alert">{error}</p>}{!loading&&!articles.length&&<p>لا توجد مقالات منشورة هنا.</p>}<div className={slug?"space-y-5":"grid sm:grid-cols-2 gap-6"}>{articles.map(article=><article key={article.id} className="original-panel space-y-5"><img src={article.cover_image} alt="" className="rounded-xl w-full max-h-72 object-cover"/><h2 className="text-2xl font-bold"><Link href={`/${locale}/articles/${article.slug}`}>{article.title}</Link></h2><p className="text-sm">{article.author_name} · {article.category}</p><p className="leading-10 whitespace-pre-wrap">{slug?article.content:article.excerpt}</p>{!slug&&<Link className="original-button" href={`/${locale}/articles/${article.slug}`}>اقرأ المقال</Link>}</article>)}</div></div></div>
+}

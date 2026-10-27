@@ -18,7 +18,7 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       pool.query(`
         SELECT 
           COUNT(*) as total_orders,
-          342850.00 as gross_revenue
+          (SELECT COALESCE(SUM(captured_amount), 0) FROM payment_collection WHERE currency_code = 'sar' AND deleted_at IS NULL) as gross_revenue
         FROM "order"
         WHERE deleted_at IS NULL
       `),
@@ -81,49 +81,11 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       `),
     ])
 
-    // Recent activity stream
-    const recentActivity = [
-      {
-        id: "act_1",
-        type: "order",
-        title: "طلب شراء جديد مكتمل عبر ميزة الباقات",
-        subtitle: "رواية شفرة قصر الحمراء + النسخة الصوتية | ر.س 68.00",
-        timestamp: new Date(Date.now() - 4 * 60 * 1000).toISOString(),
-        status: "success",
-      },
-      {
-        id: "act_2",
-        type: "marketing",
-        title: "استرداد سلة متروكة تلقائياً عبر WhatsApp",
-        subtitle: "العميل: طارق المنصور | تم تطبيق كود SAVE10 بنجاح",
-        timestamp: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-        status: "info",
-      },
-      {
-        id: "act_3",
-        type: "review",
-        title: "تقييم 5 نجوم جديد من مشترٍ موثق",
-        subtitle: "سارة الشمري علقت على 'أطياف بغداد القديمة'",
-        timestamp: new Date(Date.now() - 42 * 60 * 1000).toISOString(),
-        status: "warning",
-      },
-      {
-        id: "act_4",
-        type: "loyalty",
-        title: "ترقية عميل إلى الفئة الذهبية VIP",
-        subtitle: "د. ماجد بن سلطان تجاوز 2,500 نقطة ولاء",
-        timestamp: new Date(Date.now() - 95 * 60 * 1000).toISOString(),
-        status: "success",
-      },
-      {
-        id: "act_5",
-        type: "warehouse",
-        title: "استلام دفعة توريد ورقية بمستودع الرياض",
-        subtitle: "تم تخزين 150 نسخة في الرف RUH-A1-04",
-        timestamp: new Date(Date.now() - 140 * 60 * 1000).toISOString(),
-        status: "info",
-      },
-    ]
+    const activity = await pool.query(`SELECT id, 'order' as type,
+      COALESCE(custom_display_id, display_id::text, id) as title,
+      status as subtitle, created_at as timestamp, 'info' as status
+      FROM "order" WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 6`)
+    const recentActivity = activity.rows
 
     return res.status(200).json({
       metrics: {
@@ -139,14 +101,14 @@ export const GET = async (_req: MedusaRequest, res: MedusaResponse) => {
       recentActivity,
       systemHealth: {
         status: "operational",
-        uptime: "99.98%",
+        uptime_seconds: Math.floor(process.uptime()),
         database: "PostgreSQL 16 Healthy",
-        cache: "Redis 7 Active",
-        drmEngine: "Active (Token Expiry 60s)",
-        bundlePricing: "Authoritative (Zero Tamper)",
+        cache: "not_verified",
+        drmEngine: "configured",
+        bundlePricing: "custom_workflow_available",
       },
     })
   } catch (error: any) {
-    return res.status(500).json({ error: error.message })
+    return res.status(500).json({ code: "METRICS_UNAVAILABLE", message: "Unable to load operational metrics" })
   }
 }

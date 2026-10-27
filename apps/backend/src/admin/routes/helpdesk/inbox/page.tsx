@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Input } from "@medusajs/ui"
@@ -11,6 +12,8 @@ const helpdeskTabs = [
 ]
 
 const TicketInboxPage = () => {
+  const [templates,setTemplates]=useState<any[]>([])
+  useEffect(()=>{adminFetch("/admin/operational-definitions/canned-replies").then(response=>response.json()).then(data=>setTemplates(data.items)).catch(()=>{})},[])
   const [tickets, setTickets] = useState<any[]>([])
   const [messages, setMessages] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
@@ -23,7 +26,7 @@ const TicketInboxPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/helpdesk")
+      const res = await adminFetch("/admin/helpdesk")
       if (res.ok) {
         const data = await res.json()
         setTickets(data.tickets || [])
@@ -43,6 +46,7 @@ const TicketInboxPage = () => {
     fetchData()
   }, [])
 
+  useEffect(()=>{if(selectedTicket){const latest=tickets.find(ticket=>ticket.id===selectedTicket.id);if(latest)setSelectedTicket(latest)}},[tickets])
   const currentMessages = messages.filter((m) => m.ticket_id === selectedTicket?.id)
 
   const handleSendReply = async (e: React.FormEvent) => {
@@ -50,17 +54,17 @@ const TicketInboxPage = () => {
     if (!selectedTicket || !replyMessage.trim()) return
     setIsSending(true)
     try {
-      const res = await fetch("/admin/helpdesk", {
+      const res = await adminFetch("/admin/helpdesk", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ticket_id: selectedTicket.id,
           message: replyMessage,
-          status: replyStatus,
+          new_status: replyStatus,
         }),
       })
       if (res.ok) {
-        setFeedback("تم إرسال الرد وتحديث حالة التذكرة بنجاح!")
+        setFeedback("حُفظ الرد في التذكرة وتحدّثت حالتها.")
         setReplyMessage("")
         setTimeout(() => setFeedback(""), 3500)
         fetchData()
@@ -190,7 +194,8 @@ const TicketInboxPage = () => {
 
               {/* Reply Form */}
               <form onSubmit={handleSendReply} className="pt-3 border-t border-ui-border-base space-y-3">
-                <textarea
+                <select aria-label="قالب الرد" className="w-full border rounded p-2" value="" onChange={event=>{const template=templates.find(item=>item.id===event.target.value);if(template)setReplyMessage(template.body)}}><option value="">اختيار رد جاهز…</option>{templates.map(template=><option key={template.id} value={template.id}>{template.title}</option>)}</select>
+                  <textarea
                   className="w-full text-xs p-3 rounded-lg border border-ui-border-base bg-ui-bg-base text-ui-fg-base focus:outline-none focus:ring-1 focus:ring-sky-500"
                   rows={3}
                   placeholder="اكتب رد الدعم الفني هنا مباشرة..."

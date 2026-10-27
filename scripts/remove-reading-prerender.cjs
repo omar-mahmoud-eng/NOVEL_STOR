@@ -1,0 +1,2 @@
+const fs=require('node:fs'),path=require('node:path');
+for(const view of['books','reader','player']){const file=path.resolve(__dirname,`../apps/storefront/src/app/[locale]/(main)/${view}/[handle]/page.tsx`);let source=fs.readFileSync(file,'utf8');source=source.replace(/export async function generateStaticParams\(\) \{[\s\S]*?\n\}\n/,"").replace('import { getBookByHandle, getAllBooks } from "@/lib/books-data"\n',"");fs.writeFileSync(file,source)}

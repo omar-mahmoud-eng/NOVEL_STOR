@@ -2,6 +2,9 @@ import React from "react"
 import { isValidLocale, defaultLocale, Locale } from "@/lib/i18n"
 import { PUBLISHING_BOOKS } from "@/lib/books-data"
 import { PublishingCatalogView, StoryBook } from "@/components/products/publishing-catalog-view"
+import { OriginalCatalog } from "@/components/products/original-catalog"
+import { redirect } from "next/navigation"
+import { realmBase, realmForAge } from "@/lib/realms"
 
 export const metadata = {
   title: "مكتبة الروايات والقصص لجميع الأعمار | منصة النشر المتكاملة",
@@ -14,12 +17,13 @@ export default async function BooksCatalogPage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>
-  searchParams?: Promise<{ age?: string }>
+  searchParams?: Promise<{ age?: string; q?: string; genre?: string; category?: string }>
 }) {
   const { locale } = await params
   const validLocale = isValidLocale(locale) ? (locale as Locale) : defaultLocale
   const resolvedSearchParams = searchParams ? await searchParams : undefined
   const initialAge = resolvedSearchParams?.age || "all"
+  if (initialAge !== "all" && realmForAge(initialAge) !== "originals") redirect(`${realmBase(validLocale, realmForAge(initialAge))}/books`)
 
   const formattedBooks: StoryBook[] = PUBLISHING_BOOKS.map((b) => ({
     id: b.id,
@@ -41,11 +45,7 @@ export default async function BooksCatalogPage({
 
   return (
     <div className="min-h-screen bg-background">
-      <PublishingCatalogView
-        initialBooks={formattedBooks}
-        locale={validLocale}
-        initialAge={initialAge}
-      />
+      <OriginalCatalog locale={validLocale} query={resolvedSearchParams?.q} genre={resolvedSearchParams?.genre || resolvedSearchParams?.category} />
     </div>
   )
 }

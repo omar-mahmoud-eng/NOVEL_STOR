@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -14,34 +15,34 @@ const tierDefinitions = [
   {
     key: "bronze",
     name: "برونزي (Bronze Starter)",
-    threshold: "0 نقطة / $0 إنفاق",
-    multiplier: "1.0x نقاط",
+    threshold: "ترقية يدوية؛ قواعد تلقائية غير مفعّلة",
+    multiplier: "بدون مضاعفة تلقائية",
     badgeColor: "grey" as const,
-    perks: ["كسب نقطة لكل دولار", "هدية ترحيبية 50 نقطة", "وصول للعروض العامة"],
+    perks: ["الفئة المسجلة في الحساب", "لا تُطبق خصومات أو منح تلقائية"],
   },
   {
     key: "silver",
     name: "فضي (Silver Reader)",
-    threshold: "500 نقطة / $150 إنفاق",
-    multiplier: "1.25x نقاط",
+    threshold: "ترقية يدوية؛ قواعد تلقائية غير مفعّلة",
+    multiplier: "بدون مضاعفة تلقائية",
     badgeColor: "blue" as const,
-    perks: ["مضاعف نقاط 1.25x", "شحن مجاني على الطلبات فوق $50", "معاينة الروايات قبل النشر"],
+    perks: ["الفئة المسجلة في الحساب", "لا تُطبق خصومات أو منح تلقائية"],
   },
   {
     key: "gold",
     name: "ذهبي (Gold Bibliophile)",
-    threshold: "1,500 نقطة / $500 إنفاق",
-    multiplier: "1.5x نقاط",
+    threshold: "ترقية يدوية؛ قواعد تلقائية غير مفعّلة",
+    multiplier: "بدون مضاعفة تلقائية",
     badgeColor: "orange" as const,
-    perks: ["مضاعف نقاط 1.5x", "خصم دائم 10% على الكتب الصوتية", "شحن سريع مجاني لجميع الطلبات"],
+    perks: ["الفئة المسجلة في الحساب", "لا تُطبق خصومات أو منح تلقائية"],
   },
   {
     key: "platinum",
     name: "بلاتيني (Platinum Luminary)",
-    threshold: "3,500 نقطة / $1,200 إنفاق",
-    multiplier: "2.0x نقاط",
+    threshold: "ترقية يدوية؛ قواعد تلقائية غير مفعّلة",
+    multiplier: "بدون مضاعفة تلقائية",
     badgeColor: "purple" as const,
-    perks: ["مضاعف نقاط 2.0x", "كتاب صوتي شهري مجاناً", "دعوة لجلسات توقيع حصرية مع الروائيين", "مدير حساب VIP مخصص"],
+    perks: ["الفئة المسجلة في الحساب", "لا تُطبق خصومات أو منح تلقائية"],
   },
 ]
 
@@ -52,7 +53,7 @@ const LoyaltyTiersPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/loyalty")
+      const res = await adminFetch("/admin/loyalty")
       if (res.ok) {
         const json = await res.json()
         setData(json)

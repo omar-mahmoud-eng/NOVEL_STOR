@@ -1,36 +1,28 @@
 "use client"
+import { useCatalogBooks } from "@/context/catalog-context"
 
 import React from "react"
-import Link from "next/link"
+import Link from "@/components/common/realm-link"
 import { PUBLISHING_BOOKS, StoryBookData } from "@/lib/books-data"
-import { useAudio } from "@/context/audio-context"
+import { useRouter } from "next/navigation"
+import { useReadingState } from "@/context/reading-state-context"
+
 
 type AudiobooksViewProps = {
   locale: "ar" | "en"
 }
 
 export function AudiobooksView({ locale }: AudiobooksViewProps) {
+  const PUBLISHING_BOOKS = useCatalogBooks()
   const isRtl = locale === "ar"
-  const { playTrack, currentTrack, isPlaying, togglePlayPause } = useAudio()
+  const router = useRouter()
+  const currentTrack: {id:string} | null = null as any
+  const isPlaying = false
 
-  const audiobooks = PUBLISHING_BOOKS.filter((b) => b.hasAudioSample)
+  const audiobooks = PUBLISHING_BOOKS.filter((b) => b.ageGroup === "adults_18_plus")
   const featured = audiobooks[0] || PUBLISHING_BOOKS[0]
 
-  const handlePlay = (book: StoryBookData) => {
-    if (currentTrack?.id === `audio_${book.id}` && isPlaying) {
-      togglePlayPause()
-      return
-    }
-
-    playTrack({
-      id: `audio_${book.id}`,
-      title: book.title,
-      author: book.author.name,
-      narrator: book.narrator?.name,
-      coverUrl: book.coverUrl,
-      audioUrl: book.sampleAudioUrl || "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    })
-  }
+  const handlePlay = (book:StoryBookData) => router.push(`/${locale}/player/${book.handle}`)
 
   return (
     <div className="w-full bg-[#10131c] text-[#e0e2ef] min-h-screen py-10 relative overflow-hidden">
@@ -64,15 +56,15 @@ export function AudiobooksView({ locale }: AudiobooksViewProps) {
             <div className="flex-1 space-y-4 text-start">
               <div className="flex flex-wrap items-center gap-2">
                 <span className="px-3 py-1 rounded-full bg-[#e6c184]/15 text-[#e6c184] text-xs font-bold border border-[#e6c184]/30">
-                  {isRtl ? "إنتاج استوديو كامل (Studio Master)" : "Full Studio Cast"}
+                  {isRtl ? "قراءة النص بصوت الجهاز" : "Device text narration"}
                 </span>
                 <span className="px-3 py-1 rounded-full bg-[#272a33] text-[#d1c5b5] text-xs font-mono font-bold">
-                  {isRtl ? `بصوت: ${featured.narrator?.name}` : `Narrated by ${featured.narrator?.name}`}
+                  {isRtl ? "صوت الجهاز المتاح" : "Available device voice"}
                 </span>
               </div>
 
               <h1 className="font-serif text-3xl sm:text-5xl font-black text-[#e0e2ef] leading-tight">
-                {featured.title} (النسخة الصوتية الكاملة)
+                {featured.title} (القراءة المسموعة)
               </h1>
 
               <p className="text-xs sm:text-sm text-[#d1c5b5] leading-relaxed max-w-2xl">

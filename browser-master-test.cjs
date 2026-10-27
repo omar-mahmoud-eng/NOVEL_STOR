@@ -1,3 +1,4 @@
+require("./scripts/project-env.cjs")
 const { chromium } = require('playwright');
 const path = require('path');
 const fs = require('fs');
@@ -146,7 +147,7 @@ async function runBrowserAudit() {
       await emailInput.fill('admin@enterprise-ecommerce.com');
       const passInput = await page.$('input[type="password"], input[name="password"]');
       if (passInput) {
-        await passInput.fill('AdminP@ssw0rd2026!');
+        await passInput.fill((process.env.TEST_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD));
       }
       const submitBtn = await page.$('button[type="submit"]');
       if (submitBtn) {

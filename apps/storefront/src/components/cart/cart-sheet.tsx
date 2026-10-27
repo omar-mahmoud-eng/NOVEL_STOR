@@ -1,8 +1,8 @@
 "use client"
 
 import React from "react"
-import Link from "next/link"
-import Image from "next/image"
+import Link from "@/components/common/realm-link"
+import Image from "@/components/ui/media-image"
 import {
   Sheet,
   SheetContent,
@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { useCart } from "@/context/cart-context"
-import { formatCurrency } from "@/lib/utils"
+import { formatMedusaCurrency as formatCurrency } from "@/lib/utils"
 import {
   ShoppingBag,
   Plus,
@@ -32,19 +32,15 @@ export function CartSheet({
   locale: "ar" | "en"
   dict: any
 }) {
-  const { cart, isOpen, setIsOpen, updateQuantity, removeItem, isLoading } = useCart()
+  const { cart, isOpen, setIsOpen, updateQuantity, removeItem, isLoading, error } = useCart()
 
   const isRtl = locale === "ar"
   const items = cart?.items || []
   const subtotal = cart?.subtotal || 0
-  const taxTotal = cart?.tax_total || Math.round(subtotal * 0.15)
-  const total = cart?.total || subtotal + taxTotal
+  const taxTotal = cart?.tax_total ?? 0
+  const total = cart?.total ?? 0
   const currency = cart?.currency_code || "SAR"
 
-  // Free shipping threshold: 150 SAR (15000 cents)
-  const freeShippingThreshold = 15000
-  const freeShippingProgress = Math.min(100, Math.round((subtotal / freeShippingThreshold) * 100))
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - subtotal)
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -52,6 +48,7 @@ export function CartSheet({
         side={isRtl ? "left" : "right"}
         className="flex flex-col w-full sm:max-w-lg p-0 bg-background border-border/80 shadow-2xl"
       >
+        {error && <p role="alert" className="p-4 text-destructive">{error}</p>}
         {/* Header */}
         <SheetHeader className="p-6 border-b border-border/70 flex flex-row items-center justify-between bg-card/60 backdrop-blur-md">
           <div className="flex items-center gap-2.5">
@@ -73,32 +70,7 @@ export function CartSheet({
           </span>
         </SheetHeader>
 
-        {/* Free Shipping Progress Indicator */}
-        <div className="px-6 py-3 bg-amber-500/5 border-b border-amber-500/15">
-          <div className="flex items-center justify-between text-xs font-bold mb-1.5">
-            <div className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300">
-              <Truck className="w-3.5 h-3.5" />
-              <span>
-                {remainingForFreeShipping === 0
-                  ? locale === "ar"
-                    ? "تهانينا! مؤهل للشحن الإقليمي المجاني 🚚"
-                    : "Congratulations! Free Regional Shipping unlocked!"
-                  : locale === "ar"
-                  ? `أضف ${formatCurrency(remainingForFreeShipping, currency, locale)} للحصول على شحن مجاني`
-                  : `Add ${formatCurrency(remainingForFreeShipping, currency, locale)} for Free Shipping`}
-              </span>
-            </div>
-            <span className="font-mono text-[11px] text-amber-600 dark:text-amber-400">
-              {freeShippingProgress}%
-            </span>
-          </div>
-          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-            <div
-              className="h-full stitch-gold-gradient transition-all duration-500 rounded-full"
-              style={{ width: `${freeShippingProgress}%` }}
-            />
-          </div>
-        </div>
+        <p className="px-6 py-4 border-b text-sm">{locale==="ar"?"الشحن والضريبة حسب خيارات الطلب. الدفع مؤجل في هذه المرحلة.":"Shipping and tax depend on the order options. Payments are currently deferred."}</p>
 
         {/* Content Body */}
         <div className="flex-1 overflow-y-auto p-6 space-y-4">
@@ -149,7 +121,7 @@ export function CartSheet({
                           {item.title}
                         </h4>
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.id).catch(() => {})}
                           className="text-muted-foreground hover:text-destructive transition-colors p-1"
                           title={dict.cart.remove}
                           disabled={isLoading}
@@ -168,7 +140,7 @@ export function CartSheet({
                       {/* Quantity Controller */}
                       <div className="flex items-center border border-border/80 rounded-xl bg-muted/30">
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.id, item.quantity - 1).catch(() => {})}
                           disabled={isLoading || item.quantity <= 1}
                           className="p-1.5 hover:bg-muted transition-colors disabled:opacity-40 rounded-s-xl"
                         >
@@ -176,7 +148,7 @@ export function CartSheet({
                         </button>
                         <span className="px-3 text-xs font-mono font-bold">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.id, item.quantity + 1).catch(() => {})}
                           disabled={isLoading}
                           className="p-1.5 hover:bg-muted transition-colors disabled:opacity-40 rounded-e-xl"
                         >
@@ -211,7 +183,7 @@ export function CartSheet({
               <div className="flex justify-between text-muted-foreground text-xs">
                 <span>{dict.cart.estimated_shipping}</span>
                 <span className="text-emerald-600 font-bold">
-                  {remainingForFreeShipping === 0 ? dict.cart.free_shipping : formatCurrency(2500, currency, locale)}
+                  {cart?.shipping_methods?.length ? formatCurrency(cart.shipping_total || 0, currency, locale) : locale === "ar" ? "يُحدد عند تجهيز الطلب" : "Calculated with order options"}
                 </span>
               </div>
               <div className="flex justify-between font-black text-base pt-3 border-t border-border/70 text-foreground">

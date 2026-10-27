@@ -23,6 +23,12 @@ export function formatCurrency(
   }
 }
 
+// Medusa v2 exposes monetary amounts in the currency's major unit.
+// Static editorial fixtures above retain their original minor-unit convention.
+export function formatMedusaCurrency(amount: number, currencyCode = "SAR", locale: "ar" | "en" = "ar"): string {
+  return new Intl.NumberFormat(locale === "ar" ? "ar-SA" : "en-US", { style: "currency", currency: currencyCode.toUpperCase() }).format(amount)
+}
+
 export function formatDate(dateString: string | Date, locale: "ar" | "en" = "ar"): string {
   const date = typeof dateString === "string" ? new Date(dateString) : dateString
   return new Intl.DateTimeFormat(locale === "ar" ? "ar-SA" : "en-US", {

@@ -1,11 +1,13 @@
 "use client"
 
-import React, { useState } from "react"
-import Link from "next/link"
+import React, { useState, useEffect } from "react"
+import { formatMedusaCurrency } from "@/lib/utils"
+import Link from "@/components/common/realm-link"
 import { useRouter } from "next/navigation"
 import {
   useCustomerAuth,
   DEMO_CUSTOMERS,
+  DEMO_MODE,
   AGE_GROUP_CONFIGS,
   AgeGroupType,
 } from "@/context/customer-auth-context"
@@ -41,9 +43,10 @@ import {
 type CustomerAccountPortalProps = {
   locale: "ar" | "en"
   dict: any
+  initialTab?: "login" | "register"
 }
 
-export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalProps) {
+export function CustomerAccountPortal({ locale, dict, initialTab = "login" }: CustomerAccountPortalProps) {
   const router = useRouter()
   const {
     customer,
@@ -56,7 +59,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
     setActiveAgeGroup,
   } = useCustomerAuth()
 
-  const [authTab, setAuthTab] = useState<"login" | "register">("login")
+  const [authTab, setAuthTab] = useState<"login" | "register">(initialTab)
 
   // Selected age group for login & registration routing
   const [selectedAgeGroup, setSelectedAgeGroup] = useState<AgeGroupType>("adults_18_plus")
@@ -73,6 +76,22 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
   const [regFormat, setRegFormat] = useState<"paperback" | "ebook" | "audiobook" | "hybrid">("hybrid")
 
   const [authError, setAuthError] = useState<string | null>(null)
+  const [realOrders, setRealOrders] = useState<Array<{ id: string; date: string; status: string; statusAr: string; carrier: string; trackingNumber: string; total: string; items: string[] }>>([])
+  const [orderError, setOrderError] = useState("")
+  useEffect(() => {
+    setRealOrders([])
+    setOrderError("")
+    if (!customer || DEMO_MODE) return
+    const controller = new AbortController()
+    fetch("/api/medusa/store/orders?limit=50", { cache: "no-store", signal: controller.signal })
+      .then(async (response) => { if (!response.ok) throw new Error("Unable to load orders"); return response.json() })
+      .then(({ orders }) => setRealOrders((orders || []).map((order: any) => ({ id: order.id,
+        date: new Date(order.created_at).toLocaleDateString(locale === "ar" ? "ar-SA" : "en-US"), status: order.status, statusAr: order.status,
+        carrier: "", trackingNumber: "", total: formatMedusaCurrency(order.total, order.currency_code, locale),
+        items: (order.items || []).map((item: any) => `${item.title} × ${item.quantity}`) }))))
+      .catch((error) => { if (error.name !== "AbortError") setOrderError(locale === "ar" ? "تعذر تحميل سجل الطلبات." : "Unable to load order history.") })
+    return () => controller.abort()
+  }, [customer?.id, locale])
   const isRtl = locale === "ar"
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -83,8 +102,11 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
       return
     }
     const result = await login(loginEmail.trim(), loginPassword, selectedAgeGroup)
+      .catch(() => ({ success: false, targetUrl: "" }))
     if (result.success && result.targetUrl) {
       router.push(`/${locale}${result.targetUrl}`)
+    } else {
+      setAuthError(locale === "ar" ? "تعذر تسجيل الدخول. راجع البريد الإلكتروني وكلمة المرور." : "Unable to sign in. Check your email and password.")
     }
   }
 
@@ -98,12 +120,15 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
     const result = await register({
       name: regName.trim(),
       email: regEmail.trim(),
+      password: regPassword,
       phone: regPhone.trim(),
       ageGroup: selectedAgeGroup,
       preferredFormat: regFormat,
-    })
+    }).catch(() => ({ success: false, targetUrl: "" }))
     if (result.success && result.targetUrl) {
       router.push(`/${locale}${result.targetUrl}`)
+    } else {
+      setAuthError(locale === "ar" ? "تعذر إنشاء الحساب. راجع البيانات وكلمة المرور (٨ أحرف على الأقل)." : "Unable to register. Check your details and password (at least 8 characters).")
     }
   }
 
@@ -115,7 +140,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
   }
 
   // Sample order history for display
-  const pastOrders = [
+  const pastOrders = DEMO_MODE ? [
     {
       id: "ORD-01HQ8976AB",
       date: "2026-10-24",
@@ -139,7 +164,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
       total: "SAR 45.00",
       items: ["مغامرة الأرنب الصغير سمسم في الغابة السحرية (نسخة ورقية)"],
     },
-  ]
+  ] : realOrders
 
   // If customer is NOT logged in: Show Stitch P12 Login / Register form + Demo Customer Switcher
   if (!customer) {
@@ -166,8 +191,8 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
             </h1>
             <p className="font-serif text-xs text-[#d1c5b5] mt-1.5 leading-relaxed">
               {locale === "ar"
-                ? "فضاء أدبي مستقل للقراء البالغين والأوصياء يتيح حفظ التقدم، والمزامنة السحابية للمخطوطات، وحماية المحتوى الفلسفي والنصوص الناضجة غير المقتطعة."
-                : "A sovereign literary space for adult readers with offline DRM synchronization and zero behavioral tracking."}
+                ? "حساب للقراء البالغين والأوصياء. يبقى تقدم القراءة والمفضلة والملاحظات على هذا الجهاز لكل حساب."
+                : "An account for adult readers and guardians. Reading progress, saved stories, and notes remain on this device per account."}
             </p>
           </div>
 
@@ -182,12 +207,13 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
               </span>
               <p className="text-[11px] text-[#cdc6b8] leading-relaxed">
                 {locale === "ar"
-                  ? "التسجيل المباشر متاح حصراً لمن أتموا ثمانية عشر عاماً (+١٨). يتم ضبط صلاحيات الأطفال والناشئة بحماية PIN من داخل مركز الأسرة (Family Hub)."
-                  : "Direct registration is strictly for adults (18+). Child profiles are managed with PIN security under guardian oversight in Family Hub."}
+                  ? "التسجيل لولي الأمر أو القارئ البالغ. اختر منصة القراءة المناسبة؛ ملفات الأطفال المحلية تُدار من مركز الأسرة. بوابة الأهل ليست إثبات هوية."
+                  : "Registration is for an adult or guardian. Choose the reading platform; local child profiles are managed in the Family Hub. The parent gate does not verify identity."}
               </p>
             </div>
           </div>
 
+          <Link className="text-sm text-[#e6c184] underline block mb-5" href={`/${locale}/forgot-password`}>{locale==="ar"?"نسيت كلمة المرور؟":"Forgot password?"}</Link>
           {/* Age Group Selector Card Grid */}
           <div className="mb-6">
             <label className="block text-xs font-bold text-[#e0e2ef] mb-2 text-start">
@@ -279,7 +305,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
                   {locale === "ar" ? "البريد الإلكتروني:" : "Email Address:"}
                 </label>
                 <Input
-                  type="email"
+                  type="email" aria-label={locale==="ar"?"البريد الإلكتروني":"Email address"}
                   required
                   placeholder="name@example.com"
                   value={loginEmail}
@@ -293,7 +319,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
                   {locale === "ar" ? "كلمة المرور:" : "Password:"}
                 </label>
                 <Input
-                  type="password"
+                  type="password" aria-label={locale==="ar"?"كلمة المرور":"Password"}
                   required
                   placeholder="••••••••"
                   value={loginPassword}
@@ -346,7 +372,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
                   {locale === "ar" ? "البريد الإلكتروني:" : "Email Address:"}
                 </label>
                 <Input
-                  type="email"
+                  type="email" aria-label={locale==="ar"?"البريد الإلكتروني":"Email address"}
                   required
                   placeholder="reader@example.com"
                   value={regEmail}
@@ -355,6 +381,12 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-foreground mb-1.5" htmlFor="register-password">
+                  {locale === "ar" ? "كلمة المرور:" : "Password:"}
+                </label>
+                <Input id="register-password" type="password" aria-label={locale==="ar"?"كلمة المرور":"Password"} autoComplete="new-password" required minLength={8} value={regPassword} onChange={(e) => setRegPassword(e.target.value)} />
+              </div>
               <div>
                 <label className="block text-xs font-bold text-foreground mb-1.5">
                   {locale === "ar" ? "رقم الجوال للتوصيل:" : "Mobile Number:"}
@@ -416,7 +448,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
           )}
 
           {/* Quick Demo Customer Switcher Bar */}
-          <div className="mt-8 pt-6 border-t border-border">
+          {DEMO_MODE && <div className="mt-8 pt-6 border-t border-border">
             <span className="block text-center text-xs font-bold text-muted-foreground mb-3">
               {locale === "ar"
                 ? "⚡ أو اختر شخصية قارئ تجريبية للانتقال الفوري المباشر لقسمها:"
@@ -452,7 +484,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
                 )
               })}
             </div>
-          </div>
+          </div>}
         </div>
       </div>
     )
@@ -622,7 +654,7 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
         </div>
 
         {/* Card 3: Switch Demo User Testing Bar */}
-        <div className="stitch-card rounded-3xl p-6 bg-card border border-border/80 shadow-xs flex flex-col justify-between">
+        {DEMO_MODE && <div className="stitch-card rounded-3xl p-6 bg-card border border-border/80 shadow-xs flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-bold text-muted-foreground flex items-center gap-1.5">
@@ -656,11 +688,12 @@ export function CustomerAccountPortal({ locale, dict }: CustomerAccountPortalPro
               </button>
             ))}
           </div>
-        </div>
+        </div>}
       </div>
 
       {/* Order History Section */}
       <div className="space-y-4">
+        {orderError && <p role="alert" className="text-destructive">{orderError}</p>}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Package className="w-5 h-5 text-primary" />

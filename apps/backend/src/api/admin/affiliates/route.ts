@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
@@ -49,10 +50,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     validated = CreateAffiliateSchema.parse(req.body)
   } catch (err: any) {
-    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.issues })
   }
 
-  const id = `aff_${Date.now()}`
+  const id = `aff_${randomUUID()}`
   try {
     const insertRes = await pool.query(
       `INSERT INTO affiliates (id, name, email, channel_name, coupon_code, commission_rate, status)
@@ -63,6 +64,7 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     return res.status(201).json({ affiliate: insertRes.rows[0] })
   } catch (error: any) {
     console.error("[Affiliates POST Error]", error)
+    if(error.code==="23505")return res.status(409).json({code:"DUPLICATE_AFFILIATE",message:"البريد أو كود الإحالة مسجل بالفعل."})
     return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to create affiliate." })
   }
 }

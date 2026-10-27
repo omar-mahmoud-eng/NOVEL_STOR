@@ -1,0 +1,3 @@
+import type { MedusaRequest,MedusaResponse } from "@medusajs/framework/http"
+import { getDbPool } from "../../../utils/db"
+export async function GET(req:MedusaRequest,res:MedusaResponse){const slug=typeof req.query.slug==="string"?req.query.slug:null;const result=await getDbPool().query(`SELECT id,title,slug,excerpt,content,author_name,category,cover_image,meta_title,meta_description,published_at FROM cms_articles WHERE status='published' AND ($1::text IS NULL OR slug=$1) ORDER BY published_at DESC LIMIT 100`,[slug]);res.setHeader("Cache-Control","no-store");return res.json({articles:result.rows,count:result.rowCount})}

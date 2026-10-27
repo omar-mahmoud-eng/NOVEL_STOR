@@ -1,4 +1,8 @@
+import reference from "./stitch-reading-reference.json"
+
 export type StoryBookData = {
+  sectionImages?: string[]
+  product_id?: string | null
   id: string
   title: string
   handle: string
@@ -23,6 +27,9 @@ export type StoryBookData = {
   defaultVariantId: string
   isbn: string
   language: string
+  genre?: string
+  minutes?: number
+  editorialOnly?: boolean
   pageCount: number
   audioDuration: string
   publicationDate: string
@@ -81,27 +88,27 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "على ظهره رسم صغير لمرفأ تعرفه؛ مرفأ هُدم قبل أن تُولد، لكن رائحة ملحه ورماد أخشابه بقيت عالقة في ذاكرة كل من لمس أوراقه المسودة بحبر الكركندي.",
       "همست في سرها: كيف يُمحى حي كامل من سجلات البلدية بينما تظل ظلال مناراته ساطعة في عيون البحارة القدامى؟",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "03:40",
     audioChapters: [
       {
         id: "chap_ramad_01",
         title: "الفصل الأول: أختام الساحل القديم",
         duration: "42:15",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_ramad_02",
         title: "الفصل الثاني: المرفأ الذي اختفى من الخرائط",
         duration: "48:30",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_ramad_03",
         title: "الفصل الثالث: رماد الوثيقة الزرقاء",
         duration: "39:10",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -146,21 +153,21 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "خَرَجَ نُونُو إِلَى حَدِيقَةِ المَنْزِلِ بِخُطُوَاتٍ رَشِيقَةٍ. «طَقْ.. طَقْ.. طَقْ!»، كَانَتْ قَطَرَاتُ المَطَرِ تَهْبِطُ عَلَى قِمَّةِ المِظَلَّةِ كَأَنَّهَا تَعْزِفُ لَحْنًا سَعِيدًا.\n\nوَفَجْأَةً، لَمَحَ عُصْفُورًا صَغِيرًا مُبَلَّلَ الرِّيشِ يَقِفُ تَحْتَ غُصْنِ شَجَرَةِ التُّوتِ.",
       "مَدَّ نُونُو يَدَهُ بِالمِظَلَّةِ الصَّفْرَاءِ فَوْقَ العُصْفُورِ، وَقَالَ بِصَوْتٍ دَافِئٍ: «تَعَالَ يَا صَدِيقِي، هُنَا مَكَانٌ جَافٌّ وَآمِنٌ لَنَا نَحْنُ الاثْنَيْنِ!»\n\nزَقْزَقَ العُصْفُورُ فَرِحًا، وَعَلِمَ نُونُو أَنَّ أَجْمَلَ الأَوْقَاتِ هِيَ الَّتِي نَتَشَارَكُ فِيهَا مَعَ مَنْ نُحِبُّ.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:10",
     audioChapters: [
       {
         id: "chap_l01_01",
         title: "الجزء الأول: قطرات المطر السعيدة",
         duration: "04:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_l01_02",
         title: "الجزء الثاني: العصفور تحت المظلة",
         duration: "04:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -200,15 +207,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "عِنْدَمَا يَمِيلُ قُرْصُ الشَّمْسِ إِلَى الغُرُوبِ، تَتَجَمَّعُ الغُيُومُ الوَرْدِيَّةُ فِي سَمَاءِ المَسَاءِ كَأَنَّهَا قِطَعٌ مِنَ القُطْنِ النَّاعِمِ.\n\nكَانَتْ هُنَاكَ غَيْمَةٌ صَغِيرَةٌ اسْمُهَا «نَسْمَة»، تُحِبُّ أَنْ تَطُوفَ حَوْلَ أَسِرَّةِ الصِّغَارِ الهَادِئَةِ.",
       "تَهْمِسُ نَسْمَةُ فِي أُذُنِ الأَطْفَالِ: «أَغْمِضُوا عُيُونَكُمُ الجَمِيلَةَ... فَقَدْ جَاءَ وَقْتُ الرَّاحَةِ وَالأَحْلَامِ السَّعِيدَةِ».\n\nتَنَفَّسَ الصَّغِيرُ هُدُوءًا، وَغَرِقَ فِي نَوْمٍ عَمِيقٍ وَآمِنٍ.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:00",
     audioChapters: [
       {
         id: "chap_l02_01",
         title: "حكاية ما قبل النوم: وسادة الغيمة",
         duration: "05:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -248,15 +255,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "فِي صَبَاحِ يَوْمٍ رَبِيعِيٍّ مُشْرِقٍ، كَانَ الأَرْنَبُ الصَّغِيرُ «سَمْسَم» يَجْرِي فَرِحًا بَيْنَ تِلَالِ الأَعْشَابِ الخَضْرَاءِ.\n\nوَفَجْأَةً، رَأَى شَيْئًا بُرْتُقَالِيًّا كَبِيرًا يَبْرُزُ مِنَ الأَرْضِ النَّدِيَّةِ!",
       "شَدَّ سَمْسَمُ بِكُلِّ قُوَّتِهِ: «هَيَّا... هَيَّا!»، فَخَرَجَتْ جَزَرَةٌ عِمْلَاقَةٌ تَلْمَعُ تَحْتَ ضَوْءِ الشَّمْسِ.\n\nقَالَ سَمْسَمُ فِي نَفْسِهِ: «هَذِهِ جَزَرَةٌ كَبِيرَةٌ جِدًّا عَلَيَّ وَحْدِي، سَأُنَادِي أَصْدِقَائِي لِنَحْتَفِلَ مَعًا!»",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:15",
     audioChapters: [
       {
         id: "chap_l03_01",
         title: "حكاية الأرنب والجزرة المقرمشة",
         duration: "06:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -300,21 +307,21 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "وقف زيد على قمة درجات المنارة الحجرية الملتوية، وكان رذاذ البحر المالح يلامس وجنتيه بينما تضرب الأمواج قاعدة البرج الشاهق.\n\nكان الجد سالم يتفقد زجاج العدسة الدوارة الضخمة، ويشير بيده نحو الأفق البعيد: «انظر يا زيد، السفن لا ترى جدران المنارة في الظلام، بل ترى الأمل الذي يرسله هذا الشعاع»!",
       "فجأة، انقطع صوت المحرك الصغير الذي يدير العدسة، وساد صمت مهيب لا يقطعه سوى هبوب الرياح.\n\nأدرك زيد أن أمامه دقائق معدودة لإعادة تدوير التروس يدوياً قبل أن تقترب سفينة الإمداد من صخور الشعب المرجانية!",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:30",
     audioChapters: [
       {
         id: "chap_k01_01",
         title: "الفصل الأول: صعود الدرج الملتوي",
         duration: "12:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_k01_02",
         title: "الفصل الثاني: شعاع في العاصفة",
         duration: "13:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -347,15 +354,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "عثرت سارة في مكتبة جدها القديمة على رقاقة جلدية مرسوم عليها مسار الفلج المائي الممتد من سفوح الجبل حتى قلب الواحة.\n\nكانت هناك علامة نجمية حمراء عند منعطف الصخرة الرمادية لم تكن موجودة في الخرائط الحديثة!",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:15",
     audioChapters: [
       {
         id: "chap_k02_01",
         title: "مسار الفلج العتيق",
         duration: "20:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -388,15 +395,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "في الليالي المقمرة، كان سور الحديقة القديمة ينبض ببريق أزرق خافت، لا يراه سوى من يقترب بهدوء تام دون إثارة جلبة.\n\nقرر فارس وفاطمة معرفة سبب هذا الوهج الحيوي قبل موعد حصاد الشتاء.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:20",
     audioChapters: [
       {
         id: "chap_k03_01",
         title: "الزهور القمرية المتوهجة",
         duration: "22:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -429,15 +436,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "انطفأت شاشة الجهاز اللوحي وسط التخييم الجبلي، وبدا أن العودة إلى المخيم أصبحت صعبة مع هبوط الضباب.\n\nابتسم عمر وأخرج بوصلة نحاسية قديمة أهداها له جده: «لا تقلقوا، النجم القطبي فوقنا مباشرة، والبوصلة لا تحتاج إلى شاحن كهربائي!»",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:40",
     audioChapters: [
       {
         id: "chap_k04_01",
         title: "دليل النجوم والرياح",
         duration: "28:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -470,15 +477,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "تحرك القطار الجبلي الصغير عبر ممر الضباب نحو قمة الجبل الأخضر، حيث تنتظرهم القبة الفضية للمرصد العملاق.\n\nكان تلسكوب المرصد موجهًا نحو سديم الجبار المشتعل بألوان البنفسج والذهب.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:25",
     audioChapters: [
       {
         id: "chap_k05_01",
         title: "الرحلة الليلية نحو القمة الفلكية",
         duration: "26:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -511,15 +518,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "في قاعة الهندسة والميكانيكا داخل بيت الحكمة، وقف أحمد مندهشًا أمام مجسم ساعة الفيل المائية للجزري.\n\nكانت التماثيل النحاسية تتحرك بدقة مذهلة تسجل مرور الدقائق بواسطة تدفق الماء وكرات البرونز الساقطة في الصنج.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:35",
     audioChapters: [
       {
         id: "chap_k06_01",
         title: "أسرار المهندسين والعلماء",
         duration: "30:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -552,15 +559,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "سقطت من ديوان المتنبي العتيق بطاقة استعارة صفراء كُتبت بخط كوفي أنيق يعود لعام 1954.\n\nكان على ظهر البطاقة شطر بيت شعري مبتور، ورمز يشير إلى الممر السابع في خزانة المراجع النادرة.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:10",
     audioChapters: [
       {
         id: "chap_k07_01",
         title: "البطاقة المنسية في ديوان الشعر",
         duration: "21:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -593,15 +600,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "في الصباح الباكر، عندما كانت الرمال باردة وناعمة كالحرير، قام راشد وسالم بتثبيت الأشرعة القماشية على هيكل الزلاجة الخشبية الخفيفة.\n\nوما إن هبت نسمات الصباح حتى انطلقت المركبة الشراعية تمخر أمواج الرمال وكأنها تبحر في بحر من الذهب الصافي!",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:20",
     audioChapters: [
       {
         id: "chap_k08_01",
         title: "الإبحار فوق التلال الذهبية",
         duration: "24:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -645,21 +652,21 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "كانت القبة الشفافة للمحطة المدارية تعكس حافة الأرض المنحنية بضوء فيروزي باهر، بينما ظلت شاشات التحليل الطيفي تسجل نبضات كهرومغناطيسية شاذة تأتي من مدار مهجور.\n\nلم تكن الإشارات ضوضاء كونية عشوائية؛ بل كانت مقاطع صوتية متراكبة تتبع نغمات المقامات الموسيقية القديمة!",
       "كتبت ليان في سجل الملاحظات اليومي: «إذا كان المدار يعكس ما نرسله، فمن الذي يرد على تساؤلاتنا بنصوص دقيقة كُتبت قبل أن يغادر أول رائد فضاء كوكب الأرض؟»",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "03:15",
     audioChapters: [
       {
         id: "chap_t01_01",
         title: "الفصل الأول: انعكاس على الحافة المدارية",
         duration: "35:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_t01_02",
         title: "الفصل الثاني: أصداء المقامات في الفراغ",
         duration: "40:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -692,15 +699,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "في الطابق السفلي لمعهد الأرشيف الرقمي، وجد حسام خزانة مصنوعة من سبيكة التيتانيوم لم تُفتح منذ نصف قرن.\n\nعندما نجح في فك شفرتها الثنائية، ظهرت رسالة فيديو موجزة: «إلى من يقرأ هذا في المستقبل... لقد تركنا لكم المفتاح في المكان الأكثر وضوحًا»!",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:50",
     audioChapters: [
       {
         id: "chap_t02_01",
         title: "كبسولة تحت الرخام",
         duration: "45:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -733,15 +740,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "كانت الأرقام المصفوفة في هوامش كتاب الزيج الإيلخاني تبدو كجداول حسابات روتينية لحركات كوكب زحل، ولكن إعادة رسمها بنظام الإحداثيات القطبية أظهرت خريطة ثلاثية الأبعاد لسراديب المرصد القديم!",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "03:00",
     audioChapters: [
       {
         id: "chap_t03_01",
         title: "حسابات زحل والسر المكتوم",
         duration: "50:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -774,15 +781,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "«عزيزي النجم البعيد، إن الضوء الذي أراه منك الليلة غادر سطحك قبل آلاف السنين، فهل تصلك كلماتي هذه عندما أكون أنا نفسي قد صرت جزءًا من الغبار النجمي؟»",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:45",
     audioChapters: [
       {
         id: "chap_t04_01",
         title: "نداء عبر الملايين من الأميال",
         duration: "35:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -815,15 +822,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "لم تكن الخريطة تُقرأ بالضوء العادي؛ بل كانت الخطوط تظهر فقط عند تعريض الورقة القديمة لظلال أعمدة المعبد عند الظهيرة الدقيقة في يوم الانقلاب الشتوي.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "03:10",
     audioChapters: [
       {
         id: "chap_t05_01",
         title: "ظلال الانقلاب الشتوي",
         duration: "55:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -857,15 +864,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "كانت شبكات صيد الضباب الحريرية تمتد بين قمم الجبال مثل أجنحة فراشات عملاقة، تصطاد رطوبة السحب وتحولها إلى شلالات من الماء العذب النقي يغذي الحدائق المعلقة.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "03:00",
     audioChapters: [
       {
         id: "chap_t06_01",
         title: "حصاد الندى بين السحاب",
         duration: "45:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -898,15 +905,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "كلما سخنت الورقة بجوار جمر الموقد، ظهرت خطوط الحبر الخفي لتحكي قصة هروب مكتبة ابن حزم من ألسنة اللهب في قرطبة.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:30",
     audioChapters: [
       {
         id: "chap_t07_01",
         title: "أحبار سرية في أزقة قرطبة",
         duration: "40:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -939,15 +946,15 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
     sampleText: [
       "كان صفير القطار يتردد بين الأخاديد الصخرية الحمراء، وفي كل محطة مهجورة، كان ناظر المحطة العجوز يسلم السائق رسالة جديدة دون أن ينطق بكلمة واحدة.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:40",
     audioChapters: [
       {
         id: "chap_t08_01",
         title: "صفير القطار في وادي الأخاديد",
         duration: "35:00",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -991,27 +998,27 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "قال سمسم في نفسه: 'اليوم يوم غير عادي! لقد سمعت أمي تقول إن زهور البنفسج قد تفتحت عند النبع الرقراق، وأنا أريد أن أجمع باقة عطرة لأهديها لها قبل غروب الشمس!'.\n\nوهكذا ارتدى سمسم سترته الزرقاء الجميلة، وحمل سلته الصغيرة، وانطلق يقفز بمرح عبر المروج الخضراء.",
       "وفجأة، توقف سمسم متعجبًا! خلف شجرة السنديان العتيقة، رأى وميضًا ذهبيًا ساطعًا يلمع بين أوراق الشجر المتساقطة...\n\nترى ما هذا السر العجيب الذي يختبئ في قلب الغابة؟ هل يجرؤ سمسم الصغير على الاقتراب؟",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:15",
     audioChapters: [
       {
         id: "chap_samsem_01",
         title: "الفصل 1: استيقاظ سمسم وصباح الغابة السعيدة",
         duration: "08:12",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_samsem_02",
         title: "الفصل 2: السر خلف شجرة السنديان العتيقة",
         duration: "07:45",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_samsem_03",
         title: "الفصل 3: عودة الأصدقاء والاحتفال الكبير",
         duration: "08:03",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -1050,27 +1057,27 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "أطلت نور من نافذة غرفتها الصغيرة بعد أن ارتدت منامتها الدافئة. كانت السماء زرقاء داكنة مرصعة بآلاف النجوم اللامعة.\n\nلكن نور لاحظت أن نجمتها المفضلة 'لوزة'، التي كانت تومض دائماً فوق شجرة الليمون، ليست في مكانها المعتاد!",
       "همست نور بصوت حنون: 'أين ذهبتِ يا لوزة؟ هل تشعرين بالبرد؟ أم هل تلعبين معي لعبة الغميضة بين الغيوم؟'.\n\nوفي تلك اللحظة بالذات، انزلقت نسمة هواء لطيفة من النافذة محملة ببريق فضي عجيب، همس في أذنها: 'اصعدي معي يا نور، سنذهب معاً في رحلة بين السحب لنبحث عنها!'",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "01:45",
     audioChapters: [
       {
         id: "chap_star_01",
         title: "الفصل 1: اختفاء لوزة والنافذة المفتوحة",
         duration: "06:15",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_star_02",
         title: "الفصل 2: التحليق فوق بساط الغيوم الفضية",
         duration: "05:50",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_star_03",
         title: "الفصل 3: العناق النجمي وحلم النوم السعيد",
         duration: "06:12",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -1109,27 +1116,27 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "كانت الشاشات الخضراء داخل مقصورة القيادة تومض بإيقاع منتظم، بينما جلس زياد وزميلته ريم يتأملان الرموز الرياضية الغريبة المنقوشة على لوحة التحكم.\n\nقال زياد بصوت خافت: 'هل تصدقين أننا بالفعل على بعد ملايين الكيلومترات من الأرض؟ انظري عبر النافذة الرئيسية!'.",
       "امتدت أمام أعينهم لوحة كونية لا مثيل لها: كوكب كروي هائل يسطع بلون زمردي متوهج تحيط به ثلاث حلقات فضية رقيقة تدور ببطء مذهل.\n\nفجأة، انطلق صوت جهاز الاستقبال الآلي: 'تنبيه! جاذبية الحلقات تسحب المسبار... عليكم اتخاذ القرار في غضون تسعين ثانية!'.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:30",
     audioChapters: [
       {
         id: "chap_space_01",
         title: "الفصل 1: الاكتشاف في قبو المرصد المهجور",
         duration: "22:15",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_space_02",
         title: "الفصل 2: الإقلاع الصامت واختراق الغلاف الجوي",
         duration: "25:40",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_space_03",
         title: "الفصل 3: مدار كوكب الزمرد والأسرار المشفرة",
         duration: "28:10",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -1168,27 +1175,27 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "هبت رياح الشمال الغربي محملة برائحة الملح والعنبر، بينما وقفت السفينة 'الظافرة' تشق أمواج الخليج الهادرة بمقدمتها الخشبية الصلبة المصنوعة من خشب الساج الهندي.\n\nفتح القبطان الشاب راشد الصندوق النحاسي القديم، واستخرج رقعة من جلد الغزال رُسمت عليها خريطة مجهولة المعالم.",
       "قال البحار العجوز خميس وهو يشير بإصبعه الخشن إلى رمز الجمجمة المحاطة بأغصان الزيتون: 'يا بني، هذه ليست خريطة كنز من الذهب والياقوت... هذه خريطة علم الفلك السري الذي حكم به أجدادنا خطوط الملاحة حين كانت البوصلة لغزاً لا يعرفه سوانا!'.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "02:50",
     audioChapters: [
       {
         id: "chap_treasure_01",
         title: "الفصل 1: رياح الشمال في ميناء مسقط",
         duration: "24:10",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_treasure_02",
         title: "الفصل 2: لغز الأسطرلاب المفقود في جزيرة سقطرى",
         duration: "28:35",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_treasure_03",
         title: "الفصل 3: العاصفة ومواجهة حراس الشعب المرجانية",
         duration: "32:15",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -1227,27 +1234,27 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "في بهو الأسود بقصر الحمراء، حين انسحب آخر فوج سياحي وانطفأت الأضواء الكاشفة، بقي طارق معلقًا بنظره عند التاج الرخامي للعمود الثاني عشر.\n\nلم تكن النقوش الهندسية مجرد زينة فنية كما اعتقد العالم طوال خمسمائة عام؛ بل كانت تشفيراً رياضياً دقيقاً يتطابق مع معادلات الخوارزمي في حساب المثلثات.",
       "سحب طارق مفكرته الجلدية، وقارن الرموز المنقوشة بصفحة المخطوطة المصورة التي أرسلها له جده قبل اختفائه الغامض في إشبيلية.\n\nهمس في سرّه: 'الحروف المائلة لا تشير إلى بيت الشعر المعتاد... إنها تشير إلى سرداب أسفل ساحة البركة!'.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "03:10",
     audioChapters: [
       {
         id: "chap_alhambra_01",
         title: "الفصل 1: ظلال بهو الأسود",
         duration: "32:10",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_alhambra_02",
         title: "الفصل 2: الرسالة المشفرة من إشبيلية",
         duration: "29:45",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_alhambra_03",
         title: "الفصل 3: السرداب المفقود تحت الرخام",
         duration: "35:12",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3",
+        audioUrl: "",
       },
     ],
   },
@@ -1286,52 +1293,165 @@ export const PUBLISHING_BOOKS: StoryBookData[] = [
       "تهادت مياه دجلة بهدوء تحت جسر القوارب العتيق، حاملة على تموجاتها الفضية انعكاس مشاعل قصر الخلد ودور الوراقين على الضفة الشرقية.\n\nكان يحيى الورّاق يمسح حبر الكركندي عن أنامله المتعبة، ويحدق في رقعة من ورق الكاغد السمرقندي النادر الذي وصل للتو مع قافلة الحرير.",
       "قال له رفيقه أبو حيان وهو يغلق صندوق الكتب المجلدة بالجلد القرطبي: 'يا يحيى، الأنباء الواردة من الشمال تنبئ بعاصفة، ووالي المدينة يطالب بتسليم فهرس خزانة دار الحكمة قبل فجر الغد!'.\n\nرفع يحيى رأسه، ونظر إلى آلاف المخطوطات المرصوفة بعناية: 'المعرفة ليست ملكاً لسلطان يا أبا حيان... المعرفة روح الخلود، ومن يبذل روحه لحفظها لا يخشى فناء الأجساد'.",
     ],
-    hasAudioSample: true,
-    sampleAudioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+    hasAudioSample: false,
+    sampleAudioUrl: "",
     sampleAudioDuration: "03:45",
     audioChapters: [
       {
         id: "chap_baghdad_01",
         title: "الفصل 1: ليلة الوراقين على ضفاف دجلة",
         duration: "44:20",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_baghdad_02",
         title: "الفصل 2: أسرار بيت الحكمة وخزانة المأمون",
         duration: "48:15",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3",
+        audioUrl: "",
       },
       {
         id: "chap_baghdad_03",
         title: "الفصل 3: رسائل القوافل ومؤامرة البلاط",
         duration: "52:40",
-        audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3",
+        audioUrl: "",
       },
     ],
   },
 ]
 
+// Editorial previews supplied by the Stitch UI. Each card has its own identity.
+const editorialStories = [
+  {
+    "id": "city-between-pages",
+    "title": "مدينة بين صفحتين",
+    "handle": "city-between-pages",
+    "description": "تتبع رحلة وثائق مفقودة في أزقة المدن القديمة وما تركته الحرب في طيات المخطوطات القديمة.",
+    "genre": "mystery",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuD50OVqqeGGPnfRyCEn3m5s-OsNrQeKwcaozNHiqqYK2DKxiH84GMZTIZWyJcALgyTu-Ip2TZ2CQRSGroRmrZ_P4hGR26ML7eqePzqZLhiiI6JgS15MB91zF5e9jcVwgbn0RiBn0m2pHEFnOj9NjJ-JJHkfnyAbgmQQjqlbKEtaa-QR-0ubDICxxkEXf_YjqNMeTS-y0D90CFYK8BVPP2BSNahi3aCQVAMiEUmnI9Ye94t0ZZ49A538"
+  },
+  {
+    "id": "window-on-the-harbour",
+    "title": "نافذة على المرفأ",
+    "handle": "window-on-the-harbour",
+    "description": "حوارات ليلية بين حارس منارة متقاعد وباحث يبحث عن سفينة غارقة منذ عام ١٩٤٠.",
+    "genre": "mystery",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuB_bjx8q8FG1J8etA1DiXKSbsyPQMCrn-5wcj4a1DxPUEzMKUyN6Hni0rLZOD3VWY-12bJ4bTAo_nvZg_ZY9PvBevgyfsCfauTaEhLG61Mx7l6rKH5XSoprDY1gw7-XlBAVZe-V9CM_yrlLkhZlFazdhCPZuTxVJRShypUmYmbAiB_sDS2iuzlMwPyPWvrPnMRYtHcjV2XT91d_x7cd8EpQYRRxGxWDfXr2PeXGvAT5z7vHZkM0wZzk"
+  },
+  {
+    "id": "sand-hours-philosophical-solitude",
+    "title": "ساعات الرمل",
+    "handle": "sand-hours-philosophical-solitude",
+    "description": "تأمل عميق في فكرة الفقد والذاكرة التي تذوب مع مرور العقود في صحراء العزلة.",
+    "genre": "drama",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuBNu-pSQUDjRuk8iyMwv1jsfnJPWjsP59qwYuGdPpi3ANdEwsfVAjhXS7gXYGwf2lJWjfo0gJxzVfmCEpOh3v8E0iySyrq3W18mZLD_ek6OAYoc8yu1RvzrEX9Ftwae4PHDcQw_2-NXq10tlnHFrAOhrdSTu04HBtFH6dxjeqT2_4G6DV8kdC_A_UtS9UP8HOJOxgekYG4jyoibUxP8Stemroa_SbmbkOqxqeSxXT8qevwZLZVZ6o2g"
+  },
+  {
+    "id": "heirs-of-the-sea",
+    "title": "ورثة البحر",
+    "handle": "heirs-of-the-sea",
+    "description": "صراع عائلي محتدم حول وصية تركت في قاع المحيط قبل قرن كامل تكشف أسرار النسب.",
+    "genre": "historical",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuDsTT22ro5e-3UL245geedZ5pPnel-pU4sDXBcMKbPnjgSpdnEm08YR4fGq5jilVcBewBhvX6Lv4eja00lI6BmOBenrN-uEyu4y_8lnrWTXxwcVMKP34e-dSrqUVdXR2ZPb1XPyZX4mckLgkKsrQBwbJqokISFzqzGcLNof3qpAK9JEJijwrRT3b8Q_LgltfigtrEdd1pmxEgiZLyahcqR8wzHMO2lh2UCMaNnH34SZLrouje1abFDD"
+  },
+  {
+    "id": "tree-of-names",
+    "title": "شجرة الأسماء",
+    "handle": "tree-of-names",
+    "description": "كلما نسي أهل القرية اسم راحل، نبتت ورقة جديدة في الشجرة المجاورة للسبيل تحمل حكايته الأولى.",
+    "genre": "classics",
+    "minutes": 5
+  },
+  {
+    "id": "dawn-cafe",
+    "title": "مقهى عند الفجر",
+    "handle": "dawn-cafe",
+    "description": "فنجان قهوة بارد بين يدين مرتجفتين وصوت مذياع قديم يبث ترانيم الصباح لشخص يودع محطته الأخيرة.",
+    "genre": "drama",
+    "minutes": 5
+  },
+  {
+    "id": "late-light",
+    "title": "الضوء الذي تأخر",
+    "handle": "late-light",
+    "description": "ظل يبحث عن الكبريت طوال الليل، وحين أشرقت الشمس اكتشف أنه كان يقف في ساحة مفتوحة بلا جدران.",
+    "genre": "classics",
+    "minutes": 5
+  },
+  {
+    "id": "between-two-letters",
+    "title": "مسافة بين رسالتين",
+    "handle": "between-two-letters",
+    "description": "ثمانية كيلومترات استغرقت ثلاثين سنة حتى قطعتها رسالة اعتذار كانت تنتظر في درج ساعي بريد متقاعد.",
+    "genre": "drama",
+    "minutes": 5
+  },
+  {
+    "id": "house-at-the-end",
+    "title": "بيت في آخر الطريق",
+    "handle": "house-at-the-end",
+    "description": "أسرار عائلة غادرت فجأة وتركت مكتبة تحتوي على سجلات بأسماء جميع سكان القرية.",
+    "genre": "mystery",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCfmpW-SveSlx2GHj1o5oB5xtPCnFZ663-8G8InLYDu0osJ7fEX31Qnnpu9t4dmpW7424UxSqPNaPqIUya36ijqZgkSKfWHWAsrKRZSwMQk484xLK-UWFQMwWblu_kZLOTUN7MFzvpBTR4DBs539HCq_KDLgdKIHwDgMlSBgKNskXhY5WI8feWUi3SHQ2J5gsX69_UjQI6CVtf1QGb3vpEEYJLlktyw5DH4YStLtnZ0CaytuX1wNawo"
+  },
+  {
+    "id": "passersby-notebook-daily-notes",
+    "title": "دفتر العابرين",
+    "handle": "passersby-notebook-daily-notes",
+    "description": "يوميات حقيقية لكاتب متجول جمع أحاديث عابرة مع غرباء في محطات القطار المهجورة.",
+    "genre": "classics",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCtMM6YbQY0DYJpG7oJsPvn5wAYErkhU5ipJq_pmNZULnRzMUTB6WJ05UfA_xoXTDll1tB3R1piuWd1SY9FUxUkD0eMjMMiwZ30lMAjRtbUTeQyee6dtVR9NJgCdiJXMtKqhvnLiktHFx9dvMFWlM3Y-aVkn_vHbkosiZrbruuuoSOA0__rsC7Ixni72rCpsIiC4VPPFPseILhAzluU5RPwqFozKwIRUrIUesVpf4dUovXeez0-YJdd"
+  },
+  {
+    "id": "seasons-of-copper",
+    "title": "مواسم النحاس",
+    "handle": "seasons-of-copper",
+    "description": "ملحمة تدور في القرن الثامن عشر بين حرفيي النحاس وصراعهم مع قوافل التجارة القادمة.",
+    "genre": "historical",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuCwoAMYf1YlxL5p6qzNoR2UBFMQZiByier95WZzb-iBCtz0mubahkfn89s5SSppW_dsVY-D9JK1qLF_Cz4eFgfLCdyu2EGXgFpSsy5Ub0jhoYgFMTrGhW8N_CNpzFx1M0T02-eC_JPABc9W3eIW_Tsa4EiPKTnbsx6yBSlVx6qRDES8bkBQoaWNFuyYFgqEesdogGwhgAO50hTaSezaX7iDuMW5GM3ZuBlsIVsxLOH0P3s1JKfJcu89"
+  },
+  {
+    "id": "returning-traveler",
+    "title": "حين عاد المسافر",
+    "handle": "returning-traveler",
+    "description": "عودة غير متوقعة بعد أربعين عاماً تكشف حقيقة الرسائل المتبادلة بين أخوين في قارتين.",
+    "genre": "adventure",
+    "minutes": 15,
+    "coverUrl": "https://lh3.googleusercontent.com/aida-public/AB6AXuA4Hi2HNjwhDKus9Bsuj0Sq3sbVY5GmJpbmZwWPxTEiVXVUrcmFJL6mn5eWqGTsblZVTnCOKyOxuVWJH8EQuEwamZjKDXvv2SdiQPa4ultkSemlmSFIl1fbEysxXJ6kmiWuT3NQWD9C_eZxITjuxCmjByxbiaIiAaSjiJB0BoJNAOC-gsDjeKqEwh302aLzzLIFSNmYeCEckKF2KhPhGeCWMfg6zXrBo2U4EI5PjWMQmdVPlt1smqYm"
+  }
+]
+for (const story of editorialStories) {
+  PUBLISHING_BOOKS.push({ ...PUBLISHING_BOOKS[0], ...story, coverUrl: story.coverUrl || PUBLISHING_BOOKS[0].coverUrl, ageGroup: "adults_18_plus", author: { name: "هيئة تحرير StoryVerse", bio: "نصوص المعاينة التحريرية في مكتبة StoryVerse.", avatar: "" }, paperbackPrice: 0, ebookPrice: 0, audiobookPrice: 0, paperbackVariantId: "", ebookVariantId: "", audiobookVariantId: "", defaultVariantId: "", hasAudioSample: false, sampleAudioUrl: "", sampleAudioDuration: "", audioChapters: [], sampleText: [story.description], editorialOnly: true })
+}
+
 export function getBookByHandle(handle: string): StoryBookData | undefined {
-  const decoded = decodeURIComponent(handle)
+  let decoded: string
+  try { decoded = decodeURIComponent(handle) } catch { return undefined }
   const match = PUBLISHING_BOOKS.find(
     (b) => b.handle === decoded || b.id === decoded || b.handle === handle || b.id === handle
   )
   if (match) return match
 
-  // Fallback by partial age group or default to first book
-  if (decoded.includes("little")) {
-    return PUBLISHING_BOOKS.find((b) => b.ageGroup === "kids_3_6") || PUBLISHING_BOOKS[0]
-  }
-  if (decoded.includes("kids")) {
-    return PUBLISHING_BOOKS.find((b) => b.ageGroup === "kids_7_12") || PUBLISHING_BOOKS[0]
-  }
-  if (decoded.includes("teens")) {
-    return PUBLISHING_BOOKS.find((b) => b.ageGroup === "teens_13_17") || PUBLISHING_BOOKS[0]
-  }
-  return PUBLISHING_BOOKS[0]
+  return undefined
 }
 
 export function getAllBooks(): StoryBookData[] {
   return PUBLISHING_BOOKS
 }
+
+const moonTemplate = PUBLISHING_BOOKS.find(book=>book.id==="book_little_02")!
+PUBLISHING_BOOKS.push({...moonTemplate,id:"book_little_04",handle:"book_little_04",title:"القَمَرُ يَقُولُ: تُصْبِحُونَ عَلَى خَيْرٍ",description:"حِكَايَةٌ هَادِئَةٌ عَنِ القَمَرِ الَّذِي يُطَمْئِنُ الصِّغَارَ قَبْلَ النَّوْمِ.",sampleText:["حِكَايَةٌ هَادِئَةٌ عَنِ القَمَرِ الَّذِي يُطَمْئِنُ الصِّغَارَ قَبْلَ النَّوْمِ."],editorialOnly:true})
+
+// Keep the featured reading content and artwork consistent with the supplied Stitch screens.
+const lighthouse=PUBLISHING_BOOKS.find(book=>book.id==="book_kids_01")!
+lighthouse.description=reference.k04_base_1440.paragraphs[0]
+lighthouse.coverUrl=reference.k04_base_1440.images[0].src
+lighthouse.sampleText=[reference.k05_base_1440_1.paragraphs[1],reference.k05_base_1440_1.paragraphs[2],reference.k05_base_1440_1.paragraphs[4]].map(text=>text.replace(/ lightbulb/g,""))
+
+PUBLISHING_BOOKS.find(book=>book.id==="book_little_04")!.coverUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuAXpGSHbDrS576f_ODqTGXHCiGFMjl7mCrXt2BJlHXzxFr1r0xGCYT0BkmOBB-9ncr9xdn3yTcr-HK47VAtGsELUvMZDGt5j-JnoVGkgRb5SpNSyxsFJzorWPGW9YFZuCET_KpXwfUNqYsM9RvgpgnlpJC7WgPTkOovdLgpRRG9EurV9Df1lLYA8vwEvM4Mi5gP_IT6-5YnpNt7_pls1f9lrtXdZwmclcJDHZPm4YKG634jHOZzYVef"

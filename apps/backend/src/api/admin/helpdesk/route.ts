@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
@@ -51,27 +52,38 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     validated = CreateTicketMessageSchema.parse(req.body)
   } catch (err: any) {
-    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.issues })
   }
 
-  const msgId = `msg_${Date.now()}`
+  const msgId = `msg_${randomUUID()}`
+  const client = await pool.connect()
   try {
-    await pool.query(
+    await client.query("BEGIN")
+    const ticket = await client.query("SELECT id FROM support_tickets WHERE id = $1 FOR UPDATE", [validated.ticket_id])
+    if (!ticket.rowCount) {
+      await client.query("ROLLBACK")
+      return res.status(404).json({ code: "NOT_FOUND", message: "Ticket not found" })
+    }
+    await client.query(
       `INSERT INTO ticket_messages (id, ticket_id, sender_type, sender_name, message)
        VALUES ($1, $2, 'agent', $3, $4)`,
       [msgId, validated.ticket_id, validated.sender_name, validated.message]
     )
 
     if (validated.new_status) {
-      await pool.query(
+      await client.query(
         `UPDATE support_tickets SET status = $1, updated_at = NOW() WHERE id = $2`,
         [validated.new_status, validated.ticket_id]
       )
     }
 
+    await client.query("COMMIT")
     return res.status(201).json({ success: true, message_id: msgId })
   } catch (error: any) {
+    await client.query("ROLLBACK")
     console.error("[Helpdesk POST Error]", error)
     return res.status(500).json({ code: "INTERNAL_ERROR", message: "Failed to post message." })
+  } finally {
+    client.release()
   }
 }

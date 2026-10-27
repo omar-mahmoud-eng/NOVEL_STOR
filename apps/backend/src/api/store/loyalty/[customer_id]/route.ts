@@ -3,11 +3,15 @@ import { getDbPool } from "../../../../utils/db"
 
 export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
   const { customer_id } = req.params
+  const actorId = (req as any).auth_context?.actor_id
+  if (!actorId) return res.status(401).json({ code: "UNAUTHORIZED", message: "Authentication required." })
+  if (actorId !== customer_id) return res.status(403).json({ code: "FORBIDDEN", message: "Access denied." })
+  res.setHeader("Cache-Control", "private, no-store")
   const pool = getDbPool()
 
   try {
     const accountRes = await pool.query(
-      `SELECT * FROM loyalty_accounts WHERE customer_id = $1 OR customer_email = $1 LIMIT 1`,
+      `SELECT * FROM loyalty_accounts WHERE customer_id = $1 LIMIT 1`,
       [customer_id]
     )
 
@@ -21,9 +25,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     if (!account) {
       account = {
         customer_id,
-        tier_level: "silver",
-        points_balance: 150,
-        lifetime_points: 150,
+        tier_level: "bronze",
+        points_balance: 0,
+        lifetime_points: 0,
         tier_expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
       }
     }

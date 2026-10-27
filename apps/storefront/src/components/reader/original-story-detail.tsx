@@ -1,0 +1,17 @@
+"use client"
+import Link from "next/link"
+import { BookOpen, Headphones, Bookmark, Check, Image as Picture, Map } from "lucide-react"
+import { useReadingState } from "@/context/reading-state-context"
+import type { StoryBookData } from "@/lib/books-data"
+
+export function OriginalStoryDetail({ book, locale }: { book: StoryBookData; locale: "ar" | "en" }) {
+  const { state, updateEntry } = useReadingState()
+  const entry = state.originals.entries[book.id] || {}, ar = locale === "ar"
+  return <div className="original-reading-page" data-story={book.id}><div className="original-reading-width space-y-8 py-10">
+    <nav className="flex flex-wrap gap-3 text-sm"><Link href={`/${locale}`}>{ar ? "الرئيسية" : "Home"}</Link><span>/</span><Link href={`/${locale}/books`}>{ar ? "الروايات" : "Stories"}</Link><span>/</span><span>{book.title}</span></nav>
+    <article className="original-panel grid md:grid-cols-[240px_1fr] gap-8"><img src={book.coverUrl} alt={book.title} className="rounded-xl w-full max-w-60 mx-auto shadow-2xl" /><div className="space-y-5"><span className="original-tag">Originals · 18+</span><h1 className="text-4xl font-serif font-bold leading-relaxed">{book.title}</h1><p>{book.author.name}</p><p className="leading-9 text-[#d1c5b5]">{book.description}</p><div className="flex flex-wrap gap-3">{book.product_id&&<Link className="original-button" href={`/${locale}/products/${book.product_id}`}>{ar?"النسخ المتاحة في المتجر":"Available store editions"}</Link>}<Link className="original-button original-primary" href={`/${locale}/reader/${book.handle}`}><BookOpen size={20} />{ar ? entry.page ? "تابع من موضعك" : "ابدأ القراءة" : "Read story"}</Link><Link className="original-button" href={`/${locale}/player/${book.handle}`}><Headphones size={20} />{ar ? "استمع مع النص" : "Read aloud"}</Link><button className="original-button" aria-pressed={!!entry.saved} onClick={() => updateEntry("originals", book.id, { saved: !entry.saved })}><Bookmark size={20} fill={entry.saved ? "currentColor" : "none"} />{ar ? entry.saved ? "في مكتبتي" : "حفظ في مكتبتي" : "Save to library"}</button></div><p className="text-xs text-[#9a8f81]">{ar ? "قراءة للنص التحريري المتاح · يحفظ موضعك على هذا الجهاز" : "Available editorial text · position saved on this device"}</p></div></article>
+    <section className="original-panel space-y-4"><h2 className="text-2xl font-serif font-bold">{ar ? "فهرس المقاطع وسجل التقدم" : "Sections and progress"}</h2>{book.sampleText.map((text, index) => <Link key={index} className="flex gap-4 items-center p-4 rounded-xl bg-[#10131c]" href={`/${locale}/reader/${book.handle}?page=${index}`}><span className="original-tag">{index + 1}</span><span className="flex-1 truncate">{text.slice(0, 90)}</span>{(entry.furthest ?? -1) >= index && <Check size={20} />}</Link>)}</section>
+    <div className="grid sm:grid-cols-2 gap-4"><Link className="original-panel flex gap-3 items-center" href={`/${locale}/illustrated?book=${encodeURIComponent(book.handle)}`}><Picture />{ar ? "الرواية المصورة" : "Illustrated reader"}</Link><Link className="original-panel flex gap-3 items-center" href={`/${locale}/atlas`}><Map />{ar ? "أطلس السرد والشخصيات" : "Story atlas"}</Link></div>
+    <section className="original-panel"><h2 className="text-xl font-serif font-bold mb-3">{ar ? "عن الكاتب" : "About the author"}</h2><p className="leading-8 text-[#d1c5b5]">{book.author.bio}</p></section>
+  </div></div>
+}

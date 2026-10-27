@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -16,14 +17,14 @@ const CampaignsPage = () => {
   const [loading, setLoading] = useState(true)
   const [name, setName] = useState("")
   const [type, setType] = useState("email")
-  const [audience, setAudience] = useState("All Registered Customers (KSA & UAE)")
+  const [audience, setAudience] = useState(()=>new URLSearchParams(window.location.search).get("audience")||"All Registered Customers (KSA & UAE)")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [msg, setMsg] = useState("")
 
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/marketing")
+      const res = await adminFetch("/admin/marketing")
       if (res.ok) {
         const json = await res.json()
         setCampaigns(json.campaigns || [])
@@ -44,14 +45,14 @@ const CampaignsPage = () => {
     if (!name.trim()) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/marketing", {
+      const res = await adminFetch("/admin/marketing", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, type, audience_group: audience }),
       })
       if (res.ok) {
         setName("")
-        setMsg("تم إنشاء وإطلاق الحملة بنجاح!")
+        setMsg("حُفظت مسودة الحملة. لم يتم إرسال رسائل؛ الإرسال الخارجي غير مفعّل.")
         setTimeout(() => setMsg(""), 4000)
         fetchData()
       }
@@ -67,7 +68,7 @@ const CampaignsPage = () => {
       <SubNav
         parentTitle="التسويق متعدد القنوات"
         currentTitle="استوديو حملات النشر والإعلانات | Campaigns Studio"
-        description="إدارة وإطلاق النشرات البريدية وحملات WhatsApp المباشرة لشرائح القراء."
+        description="إدارة تعريفات الحملات والجمهور المستهدف. الإرسال الخارجي غير مفعّل."
         icon={Send}
         tabs={marketingTabs}
         onRefresh={fetchData}
@@ -127,7 +128,7 @@ const CampaignsPage = () => {
         <Container className="p-6">
           <Heading level="h2" className="text-base font-bold text-ui-fg-base mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5 text-purple-600" />
-            إطلاق حملة تسويقية جديدة
+            إضافة مسودة حملة
           </Heading>
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
@@ -171,7 +172,7 @@ const CampaignsPage = () => {
               disabled={isSubmitting || !name.trim()}
             >
               <Send className="w-4 h-4 ml-1.5" />
-              {isSubmitting ? "جاري الإطلاق..." : "جدولة وإطلاق الحملة"}
+              {isSubmitting ? "جارٍ الحفظ…" : "حفظ مسودة الحملة"}
             </Button>
             {msg && (
               <div className="p-2.5 bg-green-50 border border-green-200 text-green-800 text-xs rounded-md flex items-center gap-1.5">

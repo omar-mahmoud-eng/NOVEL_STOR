@@ -1,7 +1,8 @@
+require("./scripts/project-env.cjs")
 const { Client } = require("pg")
 
 const client = new Client({
-  connectionString: "postgres://medusa_admin:SuperSecureDbPassword2026!@localhost:5432/medusa_db"
+  connectionString: process.env.DATABASE_URL
 })
 
 async function testConnection() {

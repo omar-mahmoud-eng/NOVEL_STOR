@@ -1,3 +1,4 @@
+import {adminFetch} from "../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -30,7 +31,7 @@ const WarehousePage = () => {
   const [loading, setLoading] = useState(true)
 
   // Quick Movement State
-  const [movementType, setMovementType] = useState("inbound_po")
+  const [movementType, setMovementType] = useState("purchase_order")
   const [sku, setSku] = useState("NOVEL-DESERT-HC")
   const [quantity, setQuantity] = useState<number>(50)
   const [fromLoc, setFromLoc] = useState("المورد: مطابع الشرق الأوسط")
@@ -43,7 +44,7 @@ const WarehousePage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/warehouse")
+      const res = await adminFetch("/admin/warehouse")
       if (res.ok) {
         const data = await res.json()
         setBins(data.bins || [])
@@ -66,7 +67,7 @@ const WarehousePage = () => {
     if (!sku || !quantity || !refNumber) return
     setIsSubmitting(true)
     try {
-      const res = await fetch("/admin/warehouse", {
+      const res = await adminFetch("/admin/warehouse", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -80,7 +81,7 @@ const WarehousePage = () => {
         }),
       })
       if (res.ok) {
-        setFeedbackMsg("تم تسجيل حركة المخزون بنجاح وتحديث الأرصدة!")
+        setFeedbackMsg("تم حفظ حركة المخزون في سجل التدقيق.")
         setTimeout(() => setFeedbackMsg(""), 4000)
         setRefNumber("")
         fetchData()
@@ -94,19 +95,19 @@ const WarehousePage = () => {
 
   const getMovementBadge = (type: string) => {
     switch (type) {
-      case "inbound_po":
+      case "purchase_order":
         return (
           <Badge color="green" className="flex items-center gap-1 font-semibold">
             <ArrowDownLeft className="w-3 h-3" /> استلام توريد (PO)
           </Badge>
         )
-      case "outbound_pick":
+      case "order_pick":
         return (
           <Badge color="orange" className="flex items-center gap-1 font-semibold">
             <ArrowUpRight className="w-3 h-3" /> صرف طلب عميل (Pick)
           </Badge>
         )
-      case "transfer":
+      case "inter_transfer":
         return (
           <Badge color="blue" className="flex items-center gap-1 font-semibold">
             <ArrowRightLeft className="w-3 h-3" /> مناقلة بين المستودعات
@@ -122,13 +123,14 @@ const WarehousePage = () => {
       <SubNav
         parentTitle="Warehouse & WMS"
         currentTitle="Fulfillment & Inventory Overview"
-        description="بديل مدمج أصيل لأنظمة إدارة المستودعات الخارجية لضبط الأرفف وخانات التخزين وتتبع المناقلات وحركة المخزون"
+        description="سجل الأرفف والمناقلات اليدوية؛ إدارة المخزون القابل للبيع متاحة من Inventory في ميدوسا"
         icon={Package}
         tabs={warehouseTabs}
         onRefresh={fetchData}
         isLoading={loading}
       />
 
+      <Text className="text-sm text-ui-fg-subtle">الحركات تحفظ سجل تدقيق فقط. لتعديل مخزون البيع افتح <a className="underline" href="/app/inventory">مخزون Medusa</a>.</Text>
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Container className="p-5 border-l-4 border-l-orange-600">
@@ -290,9 +292,9 @@ const WarehousePage = () => {
                 value={movementType}
                 onChange={(e) => setMovementType(e.target.value)}
               >
-                <option value="inbound_po">استلام توريد جديد (Inbound PO)</option>
-                <option value="transfer">مناقلة بين المستودعات (Transfer)</option>
-                <option value="outbound_pick">صرف وتجهيز طلب (Outbound Pick)</option>
+                <option value="purchase_order">استلام توريد جديد (Inbound PO)</option>
+                <option value="inter_transfer">مناقلة بين المستودعات (Transfer)</option>
+                <option value="order_pick">صرف وتجهيز طلب (Outbound Pick)</option>
               </select>
             </div>
             <div>

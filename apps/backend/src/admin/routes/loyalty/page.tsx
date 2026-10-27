@@ -1,3 +1,4 @@
+import {adminFetch} from "../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table, Input } from "@medusajs/ui"
@@ -20,7 +21,7 @@ const LoyaltyDashboardPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/loyalty")
+      const res = await adminFetch("/admin/loyalty")
       if (res.ok) {
         const json = await res.json()
         setData(json)
@@ -40,7 +41,7 @@ const LoyaltyDashboardPage = () => {
     e.preventDefault()
     if (!adjustCustomerId) return
     try {
-      const res = await fetch("/admin/loyalty", {
+      const res = await adminFetch("/admin/loyalty", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

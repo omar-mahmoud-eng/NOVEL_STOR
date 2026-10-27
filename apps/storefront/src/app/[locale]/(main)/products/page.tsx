@@ -15,81 +15,7 @@ import {
   ChevronRight,
 } from "lucide-react"
 
-// StoryVerse Deluxe Physical Collector Editions & Manuscripts
-export const COLLECTOR_EDITIONS = [
-  {
-    id: "deluxe_alhambra_01",
-    title: "صندوق المقتنيات الملكي: شفرة قصر الحمراء",
-    handle: "alhambra-royal-collector-box",
-    price: 34900, // 349 SAR
-    category: "box_sets",
-    editionType: "طبعة مذهبة مرقمة (٥٠٠ نسخة)",
-    description: "مجلد بجلد طبيعي فاخر بحواف مذهبة، يتضمن خريطة أندلسية يدوية منسوخة على ورق بردي عتيق وفلاشة نحاسية تحتوي على الأداء الصوتي الدرامي ثلاثي الأبعاد.",
-    thumbnail: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80",
-    inStock: true,
-    badges: ["طبعة ملكية محدودة", "شحن فاخر مجاني"],
-  },
-  {
-    id: "deluxe_andalus_02",
-    title: "صندوق المخطوطات الأندلسية: ثلاثية الأرشيف المفقود",
-    handle: "andalusian-archive-trilogy-box",
-    price: 48900, // 489 SAR
-    category: "trilogies",
-    editionType: "ثلاثية مجلدة مع صندوق خشب الصندل",
-    description: "الأجزاء الثلاثة كاملة في صندوق خشبي محفور يدوياً بالنقوش الهندسية الأندلسية، مع توقيع المؤلف د. غسان الكيلاني وختم دار المخطوطات الملكي.",
-    thumbnail: "https://images.unsplash.com/photo-1461360370896-922624d12aa1?w=800&q=80",
-    inStock: true,
-    badges: ["توقيع المؤلف الأصلي", "صندوق خشب صندل"],
-  },
-  {
-    id: "deluxe_baghdad_03",
-    title: "ديوان أطياف بغداد القديمة: طبعة بيت الحكمة",
-    handle: "baghdad-specters-leather-deluxe",
-    price: 28900, // 289 SAR
-    category: "classics",
-    editionType: "تجليد جلدي كلاسيكي مذهب",
-    description: "رواية تاريخية ملحمية مجلدة بجلد العجل البني الداكن مع شريط قراءة حريري وخاتم نحاسي منقوش بشعار بيت الحكمة التاريخي.",
-    thumbnail: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=800&q=80",
-    inStock: true,
-    badges: ["طبعة بيت الحكمة", "مجلد جلد طبيعي"],
-  },
-  {
-    id: "deluxe_ash_maps_04",
-    title: "أطلس خرائط الرماد الساحلي وبوصلة المرفأ",
-    handle: "coastal-ash-maps-collector-atlas",
-    price: 31900, // 319 SAR
-    category: "box_sets",
-    editionType: "مجلد استكشافي مع أدوات ملاحية",
-    description: "الرواية الكاملة مرفقة بخرائط ملاحية يدوية للشواطئ الغارقة، وبوصلة نحاسية أثرية مصغرة مستوحاة من أحداث الرواية.",
-    thumbnail: "https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=800&q=80",
-    inStock: true,
-    badges: ["ملحقات أثرية حقيقية", "أطلس ملون"],
-  },
-  {
-    id: "deluxe_little_05",
-    title: "خزانة براعم الصغار: حكايات النوم المصورة (١٠ مجلدات)",
-    handle: "little-bedtime-illustrated-box",
-    price: 25900, // 259 SAR
-    category: "kids_sets",
-    editionType: "صندوق قصص كرتوني مقوى وآمن",
-    description: "مجموعة من 10 قصص مصورة مطبوعة بأحبار نباتية غير سامة، ذات صفحات كرتونية مقواة ومقاومة للتمزق مع تشكيل كامل وتطبيق صوتي مرافق.",
-    thumbnail: "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&q=80",
-    inStock: true,
-    badges: ["أحبار نباتية آمنة", "١٠ مجلدات"],
-  },
-  {
-    id: "deluxe_explorers_06",
-    title: "موسوعة الناشئة الاستكشافية: عوالم الفضاء والبحار",
-    handle: "young-explorers-adventure-set",
-    price: 27900, // 279 SAR
-    category: "teens_sets",
-    editionType: "طبعة تفاعلية مزودة برسوم ثلاثية الأبعاد",
-    description: "سلسلة من 4 روايات علمية ومغامرات استكشافية حائزة على جوائز أدب الناشئة، مع نظارة ثلاثية الأبعاد وخرائط مجرات كاشفة.",
-    thumbnail: "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?w=800&q=80",
-    inStock: true,
-    badges: ["رسوم 3D", "أدب يافعين رفيع"],
-  },
-]
+import {storeProducts,catalogProduct} from "@/lib/store-products-server"
 
 export const metadata = {
   title: "المقتنيات المجلدة والمخطوطات الفاخرة والطبعات المحدودة | StoryVerse",
@@ -108,7 +34,10 @@ export default async function ProductsCatalogPage({
   const validLocale = isValidLocale(locale) ? (locale as Locale) : defaultLocale
   const isRtl = validLocale === "ar"
 
-  let filtered = [...COLLECTOR_EDITIONS]
+  const {products,currency}=await storeProducts()
+  const editions=products.map(product=>catalogProduct(product,currency))
+  const categoryValues=[...new Set(editions.map(product=>product.category))].filter(value=>value!=="uncategorized")
+  let filtered = [...editions]
 
   if (q) {
     const query = q.toLowerCase()
@@ -158,12 +87,12 @@ export default async function ProductsCatalogPage({
                 </span>
               </div>
               <h1 className="font-serif text-3xl sm:text-5xl font-black text-[#e0e2ef] tracking-tight">
-                {isRtl ? "أروقة المقتنيات المجلدة والمخطوطات الفاخرة" : "Deluxe Collector Editions & Manuscripts"}
+                {isRtl ? "المنتجات والإصدارات المتاحة" : "Store Products & Editions"}
               </h1>
               <p className="font-serif text-sm sm:text-base text-[#d1c5b5] mt-3 leading-relaxed">
                 {isRtl
-                  ? "تحف فنية مطبوعة على ورق قطني فاخر، مجلدة بجلد طبيعي ومحفوظة في صناديق خشبية تليق بأرقى المكتبات الخاصة."
-                  : "Heirloom physical editions bound in genuine leather, printed on archival acid-free paper with author signatures."}
+                  ? "المنتجات المنشورة وأسعار النسخ من المتجر مباشرة. التوفر وخيارات التوصيل حسب النسخة والطلب."
+                  : "Published products and variant prices from the store. Availability and delivery depend on the edition and order."}
               </p>
             </div>
 
@@ -171,11 +100,11 @@ export default async function ProductsCatalogPage({
             <div className="flex items-center gap-3 shrink-0">
               <div className="p-3 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/40 flex items-center gap-2 text-xs text-[#d1c5b5]">
                 <Truck className="w-4 h-4 text-[#e6c184]" />
-                <span>شحن ورقي مجلد سريع</span>
+                <span>التوصيل حسب خيارات الطلب</span>
               </div>
               <div className="p-3 rounded-2xl bg-[#1c1f29] border border-[#4e463a]/40 flex items-center gap-2 text-xs text-[#d1c5b5]">
                 <Award className="w-4 h-4 text-emerald-400" />
-                <span>شهادة توثيق أصلية</span>
+                <span>بيانات من المتجر</span>
               </div>
             </div>
           </div>
@@ -195,38 +124,9 @@ export default async function ProductsCatalogPage({
                   : "bg-[#1c1f29] text-[#cdc6b8] hover:bg-[#272a33]"
               }`}
             >
-              كافة المقتنيات ({COLLECTOR_EDITIONS.length})
+              كافة المقتنيات ({editions.length})
             </Link>
-            <Link
-              href={`/${validLocale}/products?category=box_sets`}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                category === "box_sets"
-                  ? "bg-[#e6c184] text-[#422c00] shadow-md"
-                  : "bg-[#1c1f29] text-[#cdc6b8] hover:bg-[#272a33]"
-              }`}
-            >
-              صناديق المقتنيات الملكية
-            </Link>
-            <Link
-              href={`/${validLocale}/products?category=trilogies`}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                category === "trilogies"
-                  ? "bg-[#e6c184] text-[#422c00] shadow-md"
-                  : "bg-[#1c1f29] text-[#cdc6b8] hover:bg-[#272a33]"
-              }`}
-            >
-              الثلاثيات المجلدة
-            </Link>
-            <Link
-              href={`/${validLocale}/products?category=kids_sets`}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                category === "kids_sets"
-                  ? "bg-[#e6c184] text-[#422c00] shadow-md"
-                  : "bg-[#1c1f29] text-[#cdc6b8] hover:bg-[#272a33]"
-              }`}
-            >
-              خزائن الصغار المقواة
-            </Link>
+            {categoryValues.map(value=><Link key={value} href={"/"+validLocale+"/products?category="+encodeURIComponent(value)} className={category===value?"px-4 py-2 rounded-xl text-xs font-bold bg-[#e6c184] text-[#422c00]":"px-4 py-2 rounded-xl text-xs font-bold bg-[#1c1f29] text-[#cdc6b8]"}>{value}</Link>)}
           </div>
 
           <div className="flex items-center gap-2 text-xs text-[#9a8f81]">
@@ -264,7 +164,7 @@ export default async function ProductsCatalogPage({
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#1c1f29] via-transparent to-transparent opacity-90" />
                   <div className="absolute top-3 right-3 flex flex-wrap gap-1">
-                    {item.badges.map((b, idx) => (
+                    {item.badges.map((b:string, idx:number) => (
                       <span
                         key={idx}
                         className="px-2.5 py-0.5 rounded-full bg-[#10131c]/80 backdrop-blur-md text-[#e6c184] text-[10px] font-bold border border-[#e6c184]/30"
@@ -279,7 +179,7 @@ export default async function ProductsCatalogPage({
                 <div className="p-6 space-y-3">
                   <div className="flex items-center justify-between text-xs text-[#9a8f81]">
                     <span className="text-[#e6c184] font-bold">{item.editionType}</span>
-                    <span className="text-emerald-400 font-mono">متوفر بالمستودع</span>
+                    <span className="text-emerald-400 font-mono">{item.inStock?"متاح حسب النسخة":"غير متاح حاليًا"}</span>
                   </div>
 
                   <h3 className="font-serif text-lg font-black text-[#e0e2ef] group-hover:text-[#e6c184] transition-colors leading-snug">
@@ -298,9 +198,9 @@ export default async function ProductsCatalogPage({
                   <span className="text-[10px] text-[#9a8f81] block">سعر الاقتناء:</span>
                   <div className="flex items-baseline gap-1">
                     <span className="font-serif text-2xl font-black text-[#e6c184]">
-                      {(item.price / 100).toFixed(0)}
+                      {item.hasPrice?new Intl.NumberFormat(validLocale,{style:"currency",currency:item.currencyCode}).format(item.price/100):isRtl?"السعر غير متاح":"Pricing unavailable"}
                     </span>
-                    <span className="text-xs font-bold text-[#cdc6b8]">ر.س</span>
+
                   </div>
                 </div>
 

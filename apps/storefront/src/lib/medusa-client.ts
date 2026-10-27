@@ -31,8 +31,7 @@ async function medusaFetch<T>({
   }
 
   const publishableApiKey =
-    process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY ||
-    "pk_1eb8a936a6deaad4c09bb179e4dd3a991f6f3a731af7db22edc65164a3ae87c7"
+    process.env.NEXT_PUBLIC_MEDUSA_PUBLISHABLE_KEY
   if (publishableApiKey) {
     headers["x-publishable-api-key"] = publishableApiKey
   }
@@ -48,7 +47,7 @@ async function medusaFetch<T>({
   }
 
   // Next.js caching strategy
-  if (method === "GET") {
+  if (method === "GET" && revalidate !== false && !token && !endpoint.startsWith("/store/carts")) {
     (fetchOptions as any).next = {
       revalidate,
       tags,
@@ -57,7 +56,8 @@ async function medusaFetch<T>({
     fetchOptions.cache = "no-store"
   }
 
-  const url = `${MEDUSA_BACKEND_URL}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`
+  const base = typeof window !== "undefined" ? "/api/medusa" : (process.env.MEDUSA_BACKEND_URL || MEDUSA_BACKEND_URL)
+  const url = `${base}${endpoint.startsWith("/") ? "" : "/"}${endpoint}`
 
   const response = await fetch(url, fetchOptions)
 
@@ -83,8 +83,8 @@ async function medusaFetch<T>({
   }
   try {
     return JSON.parse(text) as T
-  } catch (err) {
-    return {} as T
+  } catch {
+    throw new Error("Medusa returned invalid JSON")
   }
 }
 
@@ -94,24 +94,41 @@ async function medusaFetch<T>({
 
 export const medusaClient = {
   // Products
+  async getRegions() {
+    return medusaFetch<{ regions: any[] }>({ endpoint: "/store/regions", revalidate: 300 })
+  },
+
+  async getPricedProduct(handle: string, regionId?: string) {
+    if (!regionId) {
+      const { regions } = await this.getRegions()
+      regionId = regions.find((region) => region.currency_code === "sar")?.id || regions[0]?.id
+    }
+    if (!regionId) throw new Error("No store region is configured")
+    const query = new URLSearchParams({ handle, region_id: regionId, fields: "*variants.calculated_price,+variants.inventory_quantity" })
+    const data = await medusaFetch<{ products: any[] }>({ endpoint: `/store/products?${query}`, revalidate: false })
+    return data.products[0] || null
+  },
   async getProducts(params?: {
     limit?: number
     offset?: number
     category_id?: string
     collection_id?: string
     region_id?: string
+    fields?: string
   }) {
     const query = new URLSearchParams()
     if (params?.limit) query.append("limit", params.limit.toString())
     if (params?.offset) query.append("offset", params.offset.toString())
     if (params?.category_id) query.append("category_id", params.category_id)
+    if (params?.collection_id) query.append("collection_id", params.collection_id)
     if (params?.region_id) query.append("region_id", params.region_id)
+    if (params?.fields) query.append("fields", params.fields)
 
     const queryString = query.toString() ? `?${query.toString()}` : ""
     return medusaFetch<{ products: any[]; count: number }>({
       endpoint: `/store/products${queryString}`,
       tags: ["products"],
-      revalidate: 60,
+      revalidate: false,
     })
   },
 
@@ -179,8 +196,27 @@ export const medusaClient = {
   },
 
   // Checkout
+  async initiateManualPayment(cartId: string) {
+    const { payment_collection } = await medusaFetch<{ payment_collection: { id: string } }>({
+      endpoint: "/store/payment-collections", method: "POST", body: { cart_id: cartId },
+    })
+    return medusaFetch({ endpoint: `/store/payment-collections/${payment_collection.id}/payment-sessions`, method: "POST", body: { provider_id: "pp_system_default" } })
+  },
+
+  async updateCart(cartId: string, data: { email: string; shipping_address: any; billing_address?: any }) {
+    return medusaFetch<{ cart: any }>({ endpoint: `/store/carts/${cartId}`, method: "POST", body: data })
+  },
+
+  async getShippingOptions(cartId: string) {
+    return medusaFetch<{ shipping_options: any[] }>({ endpoint: `/store/shipping-options?cart_id=${encodeURIComponent(cartId)}`, revalidate: false })
+  },
+
+  async addShippingMethod(cartId: string, optionId: string) {
+    return medusaFetch<{ cart: any }>({ endpoint: `/store/carts/${cartId}/shipping-methods`, method: "POST", body: { option_id: optionId } })
+  },
+
   async completeCart(cartId: string) {
-    return medusaFetch<{ type: string; data: any }>({
+    return medusaFetch<{ type: string; order?: any; cart?: any; error?: { message?: string } }>({
       endpoint: `/store/carts/${cartId}/complete`,
       method: "POST",
     })

@@ -1,5 +1,6 @@
 import { defineMiddlewares } from "@medusajs/medusa"
 import type { MedusaRequest, MedusaResponse, MedusaNextFunction } from "@medusajs/framework/http"
+import { authenticate } from "@medusajs/framework/http"
 import { z, ZodError } from "zod"
 
 /**
@@ -16,7 +17,7 @@ class SlidingWindowRateLimiter {
     this.maxHits = maxHits
 
     // Periodic cleanup of stale IP records every 5 minutes
-    setInterval(() => this.cleanup(), 300000)
+    setInterval(() => this.cleanup(), 300000).unref()
   }
 
   public check(ip: string): { allowed: boolean; remaining: number; retryAfterSec: number } {
@@ -58,6 +59,10 @@ class SlidingWindowRateLimiter {
 const authRateLimiter = new SlidingWindowRateLimiter(60000, 15) // 15 req/min for auth
 const checkoutRateLimiter = new SlidingWindowRateLimiter(60000, 20) // 20 req/min for checkout
 const storeGeneralRateLimiter = new SlidingWindowRateLimiter(60000, 150) // 150 req/min for public store API to prevent DoS
+// Reading links are prefetched by the storefront and offline downloads can
+// fetch several chapters at once. Keep their read-only allowance separate
+// from checkout, account, library-license and other store operations.
+const readingContentRateLimiter = new SlidingWindowRateLimiter(60000, 600)
 
 /**
  * Production Security Headers Middleware
@@ -68,6 +73,7 @@ export const securityHeadersMiddleware = (
   res: MedusaResponse,
   next: MedusaNextFunction
 ) => {
+  if (process.env.TRUST_GATEWAY_HEADERS === "true") _req.app.set("trust proxy", 1)
   res.setHeader("X-DNS-Prefetch-Control", "off")
   res.setHeader("X-Frame-Options", "DENY")
   res.setHeader("X-Content-Type-Options", "nosniff")
@@ -89,7 +95,7 @@ export const authRateLimitMiddleware = (
   res: MedusaResponse,
   next: MedusaNextFunction
 ) => {
-  const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || "127.0.0.1"
+  const clientIp = req.ip || req.socket?.remoteAddress || "unknown"
   const result = authRateLimiter.check(clientIp)
 
   res.setHeader("X-RateLimit-Limit", "15")
@@ -115,7 +121,7 @@ export const checkoutRateLimitMiddleware = (
   res: MedusaResponse,
   next: MedusaNextFunction
 ) => {
-  const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || "127.0.0.1"
+  const clientIp = req.ip || req.socket?.remoteAddress || "unknown"
   const result = checkoutRateLimiter.check(clientIp)
 
   res.setHeader("X-RateLimit-Limit", "20")
@@ -141,10 +147,11 @@ export const storeGeneralRateLimitMiddleware = (
   res: MedusaResponse,
   next: MedusaNextFunction
 ) => {
-  const clientIp = (req.headers["x-forwarded-for"] as string)?.split(",")[0]?.trim() || req.ip || "127.0.0.1"
-  const result = storeGeneralRateLimiter.check(clientIp)
+  const clientIp = req.ip || req.socket?.remoteAddress || "unknown"
+  const readingRequest=req.method==="GET"&&/^\/store\/reading-stories(?:\/[^/?]+)?\/?$/.test(req.originalUrl.split("?")[0])
+  const result = (readingRequest?readingContentRateLimiter:storeGeneralRateLimiter).check(clientIp)
 
-  res.setHeader("X-RateLimit-Limit", "150")
+  res.setHeader("X-RateLimit-Limit", readingRequest?"600":"150")
   res.setHeader("X-RateLimit-Remaining", result.remaining.toString())
 
   if (!result.allowed) {
@@ -172,7 +179,7 @@ export function validateRequestBody(schema: z.ZodSchema) {
         return res.status(400).json({
           code: "INVALID_REQUEST_BODY",
           message: "Request validation failed against strict schema constraints",
-          errors: error.errors.map((err) => ({
+          errors: error.issues.map((err) => ({
             field: err.path.join("."),
             issue: err.message,
           })),
@@ -188,6 +195,30 @@ export function validateRequestBody(schema: z.ZodSchema) {
 
 export default defineMiddlewares({
   routes: [
+    {matcher:"/store/support*",middlewares:[authenticate("customer",["session","bearer"])]},
+    {matcher:"/admin/story-media/upload",bodyParser:false,middlewares:[securityHeadersMiddleware]},
+    {matcher:"/admin/reading-stories*",bodyParser:{sizeLimit:"3mb"},middlewares:[securityHeadersMiddleware]},
+    {
+      matcher: /^\/store\/library\/?$/,
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
+      matcher: "/store/library/stream/*",
+      middlewares: [authenticate("customer", ["session", "bearer"], { allowUnauthenticated: true })],
+    },
+    {
+      matcher: "/store/loyalty/*",
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
+      matcher: "/store/tracking/*",
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
+      matcher: "/storefront/webhooks/payment",
+      bodyParser: { preserveRawBody: true, sizeLimit: "256kb" },
+      middlewares: [securityHeadersMiddleware],
+    },
     {
       matcher: "/store/*",
       middlewares: [securityHeadersMiddleware, storeGeneralRateLimitMiddleware],

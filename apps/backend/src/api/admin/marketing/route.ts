@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
@@ -47,10 +48,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     validated = CreateCampaignSchema.parse(req.body)
   } catch (err: any) {
-    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.issues })
   }
 
-  const id = `camp_${Date.now()}`
+  const id = `camp_${randomUUID()}`
   try {
     const insertRes = await pool.query(
       `INSERT INTO marketing_campaigns (id, name, type, status, audience_group, scheduled_at)

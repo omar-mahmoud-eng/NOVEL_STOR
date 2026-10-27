@@ -1,7 +1,11 @@
 "use client"
 
 import React, { useState } from "react"
-import Link from "next/link"
+import { useFamilySetting as useLocalSetting } from "@/hooks/use-family-setting"
+import { useCustomerAuth } from "@/context/customer-auth-context"
+import { useReadingState } from "@/context/reading-state-context"
+import { useRouter } from "next/navigation"
+import Link from "@/components/common/realm-link"
 
 type FamilyHubViewProps = {
   locale: "ar" | "en"
@@ -9,15 +13,22 @@ type FamilyHubViewProps = {
 
 export function FamilyHubView({ locale }: FamilyHubViewProps) {
   const isRtl = locale === "ar"
-  const [privacyAck, setPrivacyAck] = useState(true)
+  const router = useRouter()
+  const {customer}=useCustomerAuth()
+  const {state}=useReadingState()
+  const [profiles]=useLocalSetting<Array<{id:string;name:string;realm:"little"|"kids"|"teens"}>>("storyverse.family.profiles",[])
+  const [privacyAck, setPrivacyAck] = useLocalSetting("storyverse.family.privacy", false)
   const [activeTab, setActiveTab] = useState<"overview" | "profiles" | "controls">("overview")
-  const [screenTimeLimit, setScreenTimeLimit] = useState(45) // minutes
-  const [quietHoursActive, setQuietHoursActive] = useState(true)
+  const [screenTimeLimit, setScreenTimeLimit] = useLocalSetting("storyverse.family.timeLimit", 45)
+  const [quietHoursActive, setQuietHoursActive] = useLocalSetting("storyverse.family.quiet", true)
   const [saveToast, setSaveToast] = useState(false)
 
   const handleSaveTemp = () => {
+    localStorage.setItem(`storyverse.family.privacy${customer?`.`+customer.id:""}`, JSON.stringify(privacyAck))
+    localStorage.setItem(`storyverse.family.timeLimit${customer?`.`+customer.id:""}`, JSON.stringify(screenTimeLimit))
+    localStorage.setItem(`storyverse.family.quiet${customer?`.`+customer.id:""}`, JSON.stringify(quietHoursActive))
     setSaveToast(true)
-    setTimeout(() => setSaveToast(false), 3000)
+    router.push(`/${locale}/platforms`)
   }
 
   return (
@@ -105,7 +116,7 @@ export function FamilyHubView({ locale }: FamilyHubViewProps) {
           <div className="flex-1 flex flex-col gap-3 z-10 text-right">
             <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-800 px-3.5 py-1.5 rounded-full w-fit text-xs font-bold border border-teal-200">
               <span className="material-symbols-outlined text-[16px]">verified_user</span>
-              <span>{isRtl ? "ميثاق سلامة الطفل الرقمية المعتمد" : "Certified Child Digital Safety Pledge"}</span>
+              <span>{isRtl ? "تفضيلات قراءة الأسرة" : "Family reading preferences"}</span>
             </div>
             <h1 className="text-2xl sm:text-4xl font-black text-slate-900 tracking-tight leading-tight">
               {isRtl
@@ -160,6 +171,7 @@ export function FamilyHubView({ locale }: FamilyHubViewProps) {
           </button>
         </div>
 
+        <Link href={`/${locale}/family-hub/profiles`} className="text-sm font-bold underline text-teal-800">{isRtl ? "إدارة ملفات الأسرة" : "Manage family profiles"}</Link>
         {activeTab === "overview" ? (
           <>
             {/* Two-column Comparison & Commitment Grid (Stitch F01) */}
@@ -311,32 +323,7 @@ export function FamilyHubView({ locale }: FamilyHubViewProps) {
           /* Live Controls Tab: Active Family Profiles & Limiters */
           <div className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                {
-                  id: "parent",
-                  name: "د. طارق السعيد",
-                  role: "المشرف الأبوي الأساسي",
-                  ageTag: "18+ كبار",
-                  avatar: "👨‍💼",
-                  status: "نشط الآن",
-                },
-                {
-                  id: "child_1",
-                  name: "مروان طارق",
-                  role: "كوكب الاستكشاف",
-                  ageTag: "٨ سنوات (Kids)",
-                  avatar: "🧒",
-                  status: "٣٥ دقيقة قراءة اليوم",
-                },
-                {
-                  id: "child_2",
-                  name: "ليان طارق",
-                  role: "واحة البراعم",
-                  ageTag: "٥ سنوات (Little)",
-                  avatar: "👧",
-                  status: "حكاية قبل النوم مكتملة",
-                },
-              ].map((member) => (
+              {profiles.map(profile=>({id:profile.id,name:profile.name,role:profile.realm,ageTag:profile.realm==="little"?"3–6":profile.realm==="kids"?"7–12":"13–17",avatar:profile.realm==="little"?"🧸":"📚",status:`${Object.values(state[profile.realm].entries).filter(entry=>entry.completed).length} نصوص مكتملة في هذه المنصة`})).map((member) => (
                 <div
                   key={member.id}
                   className="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col justify-between gap-4 text-right"
@@ -360,18 +347,18 @@ export function FamilyHubView({ locale }: FamilyHubViewProps) {
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-sm text-right space-y-6">
               <div>
                 <h3 className="text-lg font-bold text-slate-900">
-                  {isRtl ? "مؤقت وقت السكون والاستراحة اليومية" : "Quiet Time & Daily Reading Limiter"}
+                  {isRtl ? "مؤقت وقت السكون والاستراحة اليومية" : "Quiet time and reading reminder"}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">
                   {isRtl
-                    ? "عند بلوغ الحد المحدد، تتوقف الشاشات التفاعلية وتتحول المنصة إلى وضع السكون الليلي لحماية نوم الأطفال."
-                    : "When the limit is reached, interactive reading transitions smoothly into gentle bedtime mode."}
+                    ? "يظهر تذكير بأخذ استراحة بعد الوقت المحدد في منصات الصغار على هذا الجهاز. التذكير لا يقفل الجهاز ولا يمنع المتابعة."
+                    : "A reminder appears after the selected reading time on this device. It does not lock the device or prevent reading."}
                 </p>
               </div>
 
               <div className="flex flex-col gap-2 max-w-md">
                 <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-600">{isRtl ? "مدة القراءة اليومية المسموحة:" : "Allowed Daily Reading:"}</span>
+                  <span className="text-slate-600">{isRtl ? "التذكير بعد:" : "Allowed Daily Reading:"}</span>
                   <span className="text-teal-800 text-sm font-mono">{screenTimeLimit} دقيقة</span>
                 </div>
                 <input
@@ -394,10 +381,10 @@ export function FamilyHubView({ locale }: FamilyHubViewProps) {
               <div className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <div className="flex flex-col text-right">
                   <span className="text-xs sm:text-sm font-bold text-slate-900">
-                    {isRtl ? "تفعيل وضع السكون الليلي التلقائي (بعد الساعة ٨ مساءً)" : "Auto Night Sleep Mode (After 8 PM)"}
+                    {isRtl ? "إظهار تذكير وقت الهدوء (بعد الساعة ٨ مساءً)" : "Quiet time reminder (After 8 PM)"}
                   </span>
                   <span className="text-xs text-slate-500">
-                    {isRtl ? "إخفاء الروايات ذات الإثارة العالية واستبدالها بحكايات الاسترخاء" : "Replaces high-energy quests with calming lullabies"}
+                    {isRtl ? "رسالة هادئة في منصات الصغار تقترح القراءة والاستراحة" : "A gentle reminder in the child reading realms"}
                   </span>
                 </div>
                 <button

@@ -1,3 +1,4 @@
+import {adminFetch} from "../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button, Table } from "@medusajs/ui"
@@ -31,7 +32,7 @@ const MarketingDashboardPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/marketing")
+      const res = await adminFetch("/admin/marketing")
       if (res.ok) {
         const json = await res.json()
         setData(json)

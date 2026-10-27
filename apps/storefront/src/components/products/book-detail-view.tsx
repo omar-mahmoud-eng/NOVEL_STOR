@@ -1,8 +1,9 @@
 "use client"
 
-import React, { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
+import React, { useState, useEffect } from "react"
+import { medusaClient } from "@/lib/medusa-client"
+import Image from "@/components/ui/media-image"
+import Link from "@/components/common/realm-link"
 import { useRouter } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 import { useAudio } from "@/context/audio-context"
@@ -39,7 +40,28 @@ type BookDetailViewProps = {
 
 type BookFormat = "paperback" | "ebook" | "audiobook"
 
-export function BookDetailView({ book, locale }: BookDetailViewProps) {
+export function BookDetailView({ book: editorialBook, locale }: BookDetailViewProps) {
+  const [book, setBook] = useState(editorialBook)
+  const [commerceReady, setCommerceReady] = useState(false)
+  const [purchaseError, setPurchaseError] = useState<string | null>(null)
+  useEffect(() => {
+    let cancelled = false
+    setCommerceReady(false)
+    medusaClient.getPricedProduct(editorialBook.handle).then((product) => {
+      if (cancelled) return
+      if (!product) throw new Error("Book unavailable")
+      const find = (format: string) => product.variants?.find((variant: any) => `${variant.sku} ${variant.title}`.toLowerCase().includes(format))
+      const paperback = find("paperback"), ebook = find("ebook") || find("e-book"), audio = find("audiobook")
+      if (![paperback, ebook, audio].every((variant) => variant?.id && Number.isFinite(variant.calculated_price?.calculated_amount))) throw new Error("Pricing unavailable")
+      setBook({ ...editorialBook, paperbackVariantId: paperback.id, ebookVariantId: ebook.id, audiobookVariantId: audio.id,
+        paperbackPrice: paperback.calculated_price.calculated_amount * 100,
+        ebookPrice: ebook.calculated_price.calculated_amount * 100,
+        audiobookPrice: audio.calculated_price.calculated_amount * 100 })
+      setCommerceReady(true)
+      setPurchaseError(null)
+    }).catch(() => { if (!cancelled) setPurchaseError(locale === "ar" ? "هذا الإصدار غير متاح للشراء حاليًا." : "This edition is currently unavailable for purchase.") })
+    return () => { cancelled = true }
+  }, [editorialBook, locale])
   const router = useRouter()
   const { addItem, isLoading: cartLoading } = useCart()
   const { playTrack } = useAudio()
@@ -111,7 +133,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
   const activeOption = formatOptions.find((f) => f.id === selectedFormat)!
 
   // Bundle calculations (e.g. E-book + Audiobook bundle with 50% discount on Audiobook)
-  const bundleAudioDiscount = Math.round(book.audiobookPrice * 0.5)
+  const bundleAudioDiscount = book.audiobookPrice
   const bundleTotalPrice = book.ebookPrice + bundleAudioDiscount
   const bundleSavings = book.audiobookPrice - bundleAudioDiscount
 
@@ -127,17 +149,25 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
   }
 
   const handleAddToCart = async () => {
+    if (!commerceReady) return
+    setPurchaseError(null)
     setIsAdding(true)
     try {
       await addItem(activeOption.variantId, 1)
       setJustAdded(true)
       setTimeout(() => setJustAdded(false), 2000)
+      return true
+    } catch (error: any) {
+      setPurchaseError(error.message || (locale === "ar" ? "تعذر الإضافة للسلة." : "Unable to add to cart."))
+      return false
     } finally {
       setIsAdding(false)
     }
   }
 
   const handleBuyBundle = async () => {
+    if (!commerceReady) return
+    setPurchaseError(null)
     setIsAdding(true)
     try {
       // Add E-book and Audiobook variants together
@@ -146,6 +176,8 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
       setBundleAdded(true)
       setTimeout(() => setBundleAdded(false), 2000)
       router.push(`/${locale}/checkout`)
+    } catch (error: any) {
+      setPurchaseError(error.message || (locale === "ar" ? "تعذر إضافة الباقة." : "Unable to add bundle."))
     } finally {
       setIsAdding(false)
     }
@@ -153,6 +185,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
 
   return (
     <div className="container mx-auto px-4 py-12 max-w-7xl">
+      {purchaseError && <p role="alert" className="mb-4 rounded-xl bg-destructive/10 p-4 text-destructive">{purchaseError}</p>}
       {/* Breadcrumbs */}
       <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-8">
         <Link href={`/${locale}`} className="hover:text-primary transition-colors">
@@ -326,7 +359,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <Button
                 onClick={handleAddToCart}
-                disabled={isAdding}
+                disabled={isAdding || !commerceReady}
                 className="flex-1 rounded-2xl h-14 text-base font-black gap-2 stitch-gold-gradient text-slate-950 hover:opacity-95 shadow-xl transition-all"
               >
                 {isAdding ? (
@@ -351,8 +384,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
               <Button
                 variant="outline"
                 onClick={async () => {
-                  await handleAddToCart()
-                  router.push(`/${locale}/checkout`)
+                  if (await handleAddToCart()) router.push(`/${locale}/checkout`)
                 }}
                 className="rounded-2xl h-14 px-6 text-base font-bold border-amber-500/40 text-amber-600 hover:bg-amber-500/10"
               >
@@ -367,8 +399,8 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
               <Gift className="w-5 h-5 text-primary" />
               <span className="font-black text-sm text-foreground">
                 {locale === "ar"
-                  ? "باقة القارئ والمستمع الشاملة (خصم 50% على النسخة الصوتية)"
-                  : "Double Format Bundle (Save 50% on Audiobook)"}
+                  ? "الكتاب الإلكتروني والكتاب الصوتي معًا"
+                  : "E-Book and Audiobook"}
               </span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
@@ -377,7 +409,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
                     bundleTotalPrice
                   )} فقط بدلاً من ${formatCurrency(
                     book.ebookPrice + book.audiobookPrice
-                  )}، ووفّر ${formatCurrency(bundleSavings)} فوراً!`
+                  )}. السعر النهائي يظهر في السلة.`
                 : `Get the E-Book + Full Audiobook bundle for only ${formatCurrency(
                     bundleTotalPrice
                   )} instead of ${formatCurrency(
@@ -386,7 +418,7 @@ export function BookDetailView({ book, locale }: BookDetailViewProps) {
             </p>
             <Button
               onClick={handleBuyBundle}
-              disabled={isAdding}
+              disabled={isAdding || !commerceReady}
               variant="default"
               size="sm"
               className="rounded-xl text-xs font-bold gap-2 bg-foreground text-background hover:bg-foreground/90"

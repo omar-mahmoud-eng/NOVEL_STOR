@@ -16,7 +16,7 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
         verified_purchase,
         created_at
       FROM product_reviews 
-      WHERE (product_id = $1 OR product_id IS NULL) AND status = 'approved'
+      WHERE product_id = $1 AND status = 'approved'
       ORDER BY created_at DESC 
       LIMIT 20`,
       [product_id]
@@ -25,9 +25,9 @@ export const GET = async (req: MedusaRequest, res: MedusaResponse) => {
     const statsRes = await pool.query(
       `SELECT 
         COUNT(*) as total_reviews,
-        COALESCE(AVG(rating), 5.0) as average_rating
+        COALESCE(AVG(rating), 0) as average_rating
       FROM product_reviews 
-      WHERE (product_id = $1 OR product_id IS NULL) AND status = 'approved'`,
+      WHERE product_id = $1 AND status = 'approved'`,
       [product_id]
     )
 

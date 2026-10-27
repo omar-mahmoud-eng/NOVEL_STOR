@@ -1,3 +1,4 @@
+import {adminFetch} from "../../../lib/admin-fetch"
 import React, { useState, useEffect } from "react"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text, Badge, Button } from "@medusajs/ui"
@@ -17,7 +18,7 @@ const ReviewsSocialProofPage = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
-      const res = await fetch("/admin/reviews")
+      const res = await adminFetch("/admin/reviews")
       if (res.ok) {
         const json = await res.json()
         setReviews(json.reviews?.filter((r: any) => r.status === "approved") || [])
@@ -38,7 +39,7 @@ const ReviewsSocialProofPage = () => {
       <SubNav
         parentTitle="تقييمات وآراء العملاء"
         currentTitle="معرض التقييمات الموثقة والإثبات الاجتماعي | UGC Social Proof"
-        description="استعراض وتثبيت المراجعات الأكثر فائدة لتعزيز ثقة القراء ومعدلات التحويل."
+        description="استعراض المراجعات المعتمدة وحالة توثيق الشراء."
         icon={Sparkles}
         tabs={reviewTabs}
         onRefresh={fetchData}
@@ -54,7 +55,7 @@ const ReviewsSocialProofPage = () => {
                 <span className="text-xs text-ui-fg-subtle mr-1">({rev.rating}.0)</span>
               </div>
               <Badge color="green" className="text-[10px]">
-                <CheckCircle2 className="w-3 h-3 ml-1" /> مشتري موثق
+                <CheckCircle2 className="w-3 h-3 ml-1" /> {rev.verified_purchase?"مشتري موثق":"مراجعة منشورة"}
               </Badge>
             </div>
             <div>

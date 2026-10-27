@@ -1,0 +1,27 @@
+"use client"
+import { useCatalogBooks } from "@/context/catalog-context"
+import { useEffect, useState } from "react"
+import Link from "next/link"
+import { BookOpen, Headphones, Bookmark, Search, X } from "lucide-react"
+import { PUBLISHING_BOOKS } from "@/lib/books-data"
+import { useReadingState } from "@/context/reading-state-context"
+import { searchText } from "@/lib/search-text"
+import {bookGenre} from "@/lib/book-genre"
+export {bookGenre} from "@/lib/book-genre"
+
+export const GENRES = [{ id: "all", ar: "كل الأنواع", en: "All genres" }, { id: "mystery", ar: "غموض", en: "Mystery" }, { id: "historical", ar: "تاريخي", en: "Historical" }, { id: "scifi", ar: "خيال علمي", en: "Sci-fi" }, { id: "classics", ar: "أدب وتأمل", en: "Literature" }, { id: "adventure", ar: "مغامرات", en: "Adventure" }, { id: "drama", ar: "اجتماعي", en: "Drama" }]
+export function OriginalCatalog({ locale, query = "", genre = "all", short = false }: { locale: "ar" | "en"; query?: string; genre?: string; short?: boolean }) {
+  const PUBLISHING_BOOKS=useCatalogBooks()
+  const ar = locale === "ar", { state, updateEntry } = useReadingState()
+  const [search, setSearch] = useState(query), [selectedGenre, setGenre] = useState(genre), [sort, setSort] = useState("title"), [format, setFormat] = useState("all")
+  useEffect(() => setSearch(query), [query])
+  useEffect(() => setGenre(genre), [genre])
+  const adultBooks = PUBLISHING_BOOKS.filter((book) => book.ageGroup === "adults_18_plus")
+  const books = adultBooks.filter((book) => (!short || (book.minutes ?? 15) <= 5) && (selectedGenre === "all" || bookGenre(book) === selectedGenre) && searchText(`${book.title} ${book.author.name} ${book.description}`).includes(searchText(search)))
+    .sort((a, b) => sort === "short" ? (a.minutes ?? 15) - (b.minutes ?? 15) : a.title.localeCompare(b.title, "ar"))
+  return <div className="original-reading-page"><div className="original-reading-width py-10 space-y-7"><span className="original-tag">Originals · 18+</span><h1 className="text-3xl sm:text-4xl font-serif font-bold leading-relaxed">{ar ? short ? "حكاية في خمس دقائق" : "اكتشف حكايتك القادمة" : short ? "A story in five minutes" : "Find your next story"}</h1>
+    <div className="original-panel flex flex-wrap gap-4"><label className="flex-1 min-w-0 relative"><span className="sr-only">{ar ? "ابحث في الروايات" : "Search stories"}</span><input value={search} onChange={(event) => setSearch(event.target.value)} className="original-input" placeholder={ar ? "ابحث باسم الرواية أو الكاتب…" : "Search stories or authors…"} /></label><label className="flex items-center gap-2 text-sm">{ar ? "الترتيب" : "Sort"}<select className="original-select" value={sort} onChange={(event) => setSort(event.target.value)}><option value="title">{ar ? "العنوان" : "Title"}</option><option value="short">{ar ? "الأقصر أولًا" : "Shortest first"}</option></select></label><label className="flex items-center gap-2 text-sm">{ar ? "الصيغة" : "Format"}<select className="original-select" value={format} onChange={(event) => setFormat(event.target.value)}><option value="all">{ar ? "نص وصوت" : "Text and voice"}</option><option value="text">{ar ? "قراءة" : "Read"}</option><option value="audio">{ar ? "استماع للنص" : "Read aloud"}</option></select></label></div>
+    <div className="flex flex-wrap gap-2" aria-label={ar ? "أنواع الروايات" : "Story genres"}>{GENRES.map((item) => <button className="original-button" key={item.id} aria-pressed={selectedGenre === item.id} onClick={() => setGenre(item.id)}>{ar ? item.ar : item.en}</button>)}</div><p role="status" className="text-sm text-[#b1a99e]">{books.length} {ar ? "عملًا في مكتبة الكبار" : "stories in Originals"}</p>
+    {books.length ? <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">{books.map((book) => { const saved = state.originals.entries[book.id]?.saved; return <article key={book.id} className="original-panel !p-4 flex flex-col gap-4"><Link href={`/${locale}/books/${book.handle}`}><img src={book.coverUrl} alt={book.title} className="w-full h-56 object-cover rounded-xl" loading="lazy" /></Link><span className="text-xs text-[#b1a99e]">{GENRES.find((item) => item.id === bookGenre(book))?.ar} · {book.minutes ?? 15} {ar ? "دقيقة" : "min"}</span><h2 className="text-xl font-serif font-bold"><Link href={`/${locale}/books/${book.handle}`}>{book.title}</Link></h2><p className="text-sm text-[#b1a99e] leading-7 line-clamp-3 flex-1">{book.description}</p><div className="flex flex-wrap gap-2">{format !== "audio" && <Link className="original-button original-primary" href={`/${locale}/reader/${book.handle}`}><BookOpen size={17} />{ar ? "اقرأ" : "Read"}</Link>}{format !== "text" && <Link className="original-button" href={`/${locale}/player/${book.handle}`}><Headphones size={17} />{ar ? "استمع" : "Listen"}</Link>}<button className="original-button" aria-label={`${ar ? "حفظ" : "Save"} ${book.title}`} aria-pressed={!!saved} onClick={() => updateEntry("originals", book.id, { saved: !saved })}><Bookmark size={17} fill={saved ? "currentColor" : "none"} /></button></div></article> })}</div> : <div className="original-panel text-center space-y-4"><Search className="mx-auto" /><h2>{ar ? "لا توجد نتائج مطابقة" : "No matching stories"}</h2><button className="original-button" onClick={() => { setSearch(""); setGenre("all") }}><X size={18} />{ar ? "مسح البحث والفلاتر" : "Clear search and filters"}</button></div>}
+  </div></div>
+}

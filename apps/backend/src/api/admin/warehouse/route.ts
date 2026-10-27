@@ -1,11 +1,13 @@
+import { randomUUID } from "node:crypto"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { z } from "zod"
 import { getDbPool } from "../../../utils/db"
 
 const CreateStockMovementSchema = z.object({
-  movement_type: z.enum(["inbound", "outbound", "transfer", "adjustment", "damaged"]),
+  movement_type: z.enum(["purchase_order", "order_pick", "inter_transfer", "inventory_adjustment", "damaged_write_off", "inbound", "inbound_po", "outbound", "outbound_pick", "outbound_fulfillment", "transfer", "adjustment", "damaged"])
+    .transform(type => ({inbound:"purchase_order",inbound_po:"purchase_order",outbound:"order_pick",outbound_pick:"order_pick",outbound_fulfillment:"order_pick",transfer:"inter_transfer",adjustment:"inventory_adjustment",damaged:"damaged_write_off"} as Record<string,string>)[type] || type),
   sku: z.string().min(1, "SKU is required").max(100),
-  quantity: z.number().int(),
+  quantity: z.number().int().min(-1000000).max(1000000).refine((quantity) => quantity !== 0, "Movement quantity cannot be zero"),
   from_location: z.string().max(100).optional().default("-"),
   to_location: z.string().max(100).optional().default("-"),
   reference_number: z.string().min(1, "Reference number is required").max(100),
@@ -48,10 +50,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   try {
     validated = CreateStockMovementSchema.parse(req.body)
   } catch (err: any) {
-    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.errors })
+    return res.status(400).json({ code: "VALIDATION_ERROR", errors: err.issues })
   }
 
-  const id = `mov_${Date.now()}`
+  const id = `mov_${randomUUID()}`
   try {
     const insertRes = await pool.query(
       `INSERT INTO stock_movements (id, movement_type, sku, quantity, from_location, to_location, reference_number, reason)

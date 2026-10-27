@@ -388,9 +388,10 @@ export default async function seedDemoData({ container }: ExecArgs) {
       },
     ])
 
-    const paperbackVar = product.variants[0]
-    const ebookVar = product.variants[1]
-    const audioVar = product.variants[2]
+    const paperbackVar = product.variants.find((variant: any) => variant.sku === `${story.handle.toUpperCase()}-PAPERBACK`)
+    const ebookVar = product.variants.find((variant: any) => variant.sku === `${story.handle.toUpperCase()}-EBOOK`)
+    const audioVar = product.variants.find((variant: any) => variant.sku === `${story.handle.toUpperCase()}-AUDIOBOOK`)
+    if (!paperbackVar || !ebookVar || !audioVar) throw new Error("Seeded variant is missing")
 
     // 2. Link Product to Sales Channel
     await link.create({
@@ -401,17 +402,17 @@ export default async function seedDemoData({ container }: ExecArgs) {
     // 3. Price Sets for each format variant
     const [paperbackPriceSet] = await pricingModule.createPriceSets([
       {
-        prices: [{ currency_code: "sar", amount: story.paperbackPrice }],
+        prices: [{ currency_code: "sar", amount: story.paperbackPrice / 100 }],
       },
     ])
     const [ebookPriceSet] = await pricingModule.createPriceSets([
       {
-        prices: [{ currency_code: "sar", amount: story.ebookPrice }],
+        prices: [{ currency_code: "sar", amount: story.ebookPrice / 100 }],
       },
     ])
     const [audioPriceSet] = await pricingModule.createPriceSets([
       {
-        prices: [{ currency_code: "sar", amount: story.audiobookPrice }],
+        prices: [{ currency_code: "sar", amount: story.audiobookPrice / 100 }],
       },
     ])
 

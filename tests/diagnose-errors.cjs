@@ -1,4 +1,5 @@
 const { chromium } = require('playwright');
+require('../scripts/project-env.cjs');
 
 (async () => {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
@@ -19,7 +20,7 @@ const { chromium } = require('playwright');
   console.log('Visiting Admin Login...');
   await page.goto('http://localhost:9000/app', { waitUntil: 'networkidle' });
   await page.fill('input[type="email"]', 'admin@enterprise-ecommerce.com');
-  await page.fill('input[type="password"]', 'AdminP@ssw0rd2026!');
+  await page.fill('input[type="password"]', process.env.TEST_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD);
   await page.click('button[type="submit"]');
   await page.waitForTimeout(3000);
 

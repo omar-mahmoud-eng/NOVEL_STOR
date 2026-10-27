@@ -2,12 +2,14 @@
 
 import React, { useState } from "react"
 import Link from "next/link"
-import Image from "next/image"
+import Image from "@/components/ui/media-image"
 import { useParams } from "next/navigation"
 import { useCart } from "@/context/cart-context"
+import { medusaClient } from "@/lib/medusa-client"
+import { AddressSchema } from "@enterprise/schemas"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { formatCurrency } from "@/lib/utils"
+import { formatMedusaCurrency as formatCurrency } from "@/lib/utils"
 import { getDictionary, isValidLocale, defaultLocale, Locale } from "@/lib/i18n"
 import {
   ShieldCheck,
@@ -30,17 +32,17 @@ export default function CheckoutPage() {
   const dict = getDictionary(locale)
   const isRtl = locale === "ar"
 
-  const { cart, isLoading: isCartLoading } = useCart()
+  const { cart, isLoading: isCartLoading, resetCart } = useCart()
 
   // Form State
   const [formData, setFormData] = useState({
-    firstName: "طارق",
-    lastName: "المنصور",
-    email: "tariq.almansoor@example.com",
-    phone: "+966501234567",
-    address: "طريق الملك فهد، حي الصحافة",
-    city: "الرياض",
-    postalCode: "13321",
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    city: "",
+    postalCode: "",
     countryCode: "sa",
     paymentMethod: "card", // card | apple_pay | cod
   })
@@ -48,12 +50,15 @@ export default function CheckoutPage() {
   const [step, setStep] = useState<"details" | "processing" | "success">("details")
   const [confirmedOrderId, setConfirmedOrderId] = useState<string>("")
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [checkoutError, setCheckoutError] = useState<string | null>(null)
+  const [confirmedTotal, setConfirmedTotal] = useState<number | null>(null)
+  const [confirmedCurrency, setConfirmedCurrency] = useState<string | null>(null)
 
   const items = cart?.items || []
-  const subtotal = cart?.subtotal || 89900
-  const taxTotal = cart?.tax_total || Math.round(subtotal * 0.15)
-  const total = cart?.total || subtotal + taxTotal
-  const currency = cart?.currency_code || "SAR"
+  const subtotal = cart?.subtotal ?? 0
+  const taxTotal = cart?.tax_total ?? 0
+  const total = confirmedTotal ?? cart?.total ?? 0
+  const currency = confirmedCurrency || cart?.currency_code || "SAR"
 
   const handleInputChange = (field: string, val: string) => {
     setFormData((prev) => ({ ...prev, [field]: val }))
@@ -61,19 +66,32 @@ export default function CheckoutPage() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (isSubmitting) return
+    setCheckoutError(null)
     setIsSubmitting(true)
     setStep("processing")
 
     try {
-      // In production: invokes Medusa completion endpoint:
-      // const res = await medusaClient.completeCart(cart.id)
-      // Generates verifiable mock order ID for seamless UX
-      const generatedOrderId = `ORD-${Date.now().toString(36).toUpperCase()}`
-
-      // Simulate transactional inventory lock & workflow execution
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      setConfirmedOrderId(generatedOrderId)
+      if (!cart?.id || !items.length) throw new Error(locale === "ar" ? "السلة فارغة أو غير متاحة." : "Your cart is empty or unavailable.")
+      if (formData.paymentMethod !== "cod" || process.env.NEXT_PUBLIC_MANUAL_PAYMENT_ENABLED !== "true") {
+        throw new Error(locale === "ar" ? "الدفع الإلكتروني غير مهيأ حاليًا. لم يتم تحصيل مبلغ أو إنشاء طلب. يلزم إعداد مزود الدفع، أو تفعيل الدفع عند الاستلام من الإدارة." : "Payment is not configured. No payment or order has been created. Configure a payment provider or enable cash on delivery.")
+      }
+      const address = AddressSchema.parse({ first_name: formData.firstName, last_name: formData.lastName,
+        phone: formData.phone, address_1: formData.address, city: formData.city,
+        postal_code: formData.postalCode, country_code: formData.countryCode })
+      const { cart: updated } = await medusaClient.updateCart(cart.id, { email: formData.email, shipping_address: address, billing_address: address })
+      if (updated.items?.some((item: any) => item.requires_shipping !== false) && !updated.shipping_methods?.length) {
+        const { shipping_options } = await medusaClient.getShippingOptions(cart.id)
+        if (!shipping_options?.length) throw new Error(locale === "ar" ? "لا توجد طريقة شحن متاحة لهذا العنوان." : "No shipping method is available for this address.")
+        await medusaClient.addShippingMethod(cart.id, shipping_options[0].id)
+      }
+      await medusaClient.initiateManualPayment(cart.id)
+      const result = await medusaClient.completeCart(cart.id)
+      if (result.type !== "order" || !result.order?.id) throw new Error(result.error?.message || (locale === "ar" ? "تعذر إتمام الطلب." : "Unable to complete order."))
+      setConfirmedOrderId(result.order.id)
+      setConfirmedTotal(result.order.total)
+      setConfirmedCurrency(result.order.currency_code)
+      resetCart()
       setStep("success")
       if (typeof window !== "undefined") {
         localStorage.removeItem("medusa_cart_id")
@@ -81,6 +99,7 @@ export default function CheckoutPage() {
     } catch (error) {
       console.error("[Checkout] Order processing failed:", error)
       setStep("details")
+      setCheckoutError((error as any)?.message || (locale === "ar" ? "تعذر إتمام الطلب. راجع البيانات وحاول مجددًا." : "Unable to complete order. Check your details and try again."))
     } finally {
       setIsSubmitting(false)
     }
@@ -100,8 +119,8 @@ export default function CheckoutPage() {
             </h1>
             <p className="text-xs text-muted-foreground">
               {locale === "ar"
-                ? "تم حجز المخزون وتأكيد الدفع واحتساب الضريبة بنجاح عبر خوادم ميدوسا v2."
-                : "Inventory locked, payment authenticated, and VAT calculated authoritatively."}
+                ? "تم إنشاء الطلب. يتم السداد عند الاستلام."
+                : "Your order has been placed. Payment is due on delivery."}
             </p>
           </div>
 
@@ -122,7 +141,7 @@ export default function CheckoutPage() {
 
           <div className="flex items-center gap-2 p-3 rounded-xl bg-primary/5 text-primary text-xs font-medium text-start">
             <FileText className="w-4 h-4 shrink-0" />
-            <span>{dict.checkout.invoice_sent}</span>
+            <span>{locale === "ar" ? "احتفظ برقم الطلب لمتابعته مع خدمة العملاء." : "Keep your order reference to contact customer support."}</span>
           </div>
 
           <Button asChild className="w-full h-11 rounded-xl text-base font-semibold">
@@ -361,10 +380,11 @@ export default function CheckoutPage() {
               </div>
 
               {/* Submit CTA */}
+              {checkoutError && <p role="alert" className="rounded-xl bg-destructive/10 p-4 text-sm text-destructive">{checkoutError}</p>}
               <Button
                 type="submit"
                 size="lg"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isCartLoading || !items.length}
                 className="stitch-gold-gradient text-white border-0 w-full h-14 rounded-2xl text-lg font-black gap-2 shadow-xl hover:shadow-2xl transition-all"
               >
                 {isSubmitting ? (
@@ -443,7 +463,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between text-muted-foreground">
                   <span>{dict.cart.estimated_shipping}</span>
-                  <span className="text-emerald-600 font-bold">{dict.cart.free_shipping}</span>
+                  <span className="font-bold">{locale === "ar" ? "يُحسب حسب العنوان" : "Calculated for your address"}</span>
                 </div>
                 <div className="flex justify-between text-base font-black text-foreground pt-3 border-t border-border/80">
                   <span>{dict.cart.total}</span>

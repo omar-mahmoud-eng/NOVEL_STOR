@@ -1,6 +1,7 @@
 "use client"
 
 import React, { createContext, useContext, useState, useEffect } from "react"
+import { useCustomerAuth } from "./customer-auth-context"
 
 type KidsModeContextType = {
   isKidsMode: boolean
@@ -11,6 +12,7 @@ type KidsModeContextType = {
 const KidsModeContext = createContext<KidsModeContextType | undefined>(undefined)
 
 export function KidsModeProvider({ children }: { children: React.ReactNode }) {
+  const { customer, activeAgeGroup } = useCustomerAuth()
   const [isKidsMode, setIsKidsMode] = useState<boolean>(false)
 
   useEffect(() => {
@@ -21,6 +23,14 @@ export function KidsModeProvider({ children }: { children: React.ReactNode }) {
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (customer) {
+      const enabled = activeAgeGroup === "kids_3_6" || activeAgeGroup === "kids_7_12"
+      setIsKidsMode(enabled)
+      localStorage.setItem("publishing_safe_kids_mode", String(enabled))
+    }
+  }, [customer?.id, activeAgeGroup])
 
   const toggleKidsMode = () => {
     setIsKidsMode((prev) => {

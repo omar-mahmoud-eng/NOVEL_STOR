@@ -1,35 +1,33 @@
 "use client"
+import {PublishedShelf} from "@/components/realms/published-shelf"
+import { useCatalogBooks } from "@/context/catalog-context"
 
 import React, { useState } from "react"
-import Link from "next/link"
-import { useAudio } from "@/context/audio-context"
+import Link from "@/components/common/realm-link"
+import { PUBLISHING_BOOKS } from "@/lib/books-data"
+import { useRouter } from "next/navigation"
+import { useReadingState } from "@/context/reading-state-context"
+
 
 type TeensRealmViewProps = {
   locale: "ar" | "en"
 }
 
 export function TeensRealmView({ locale }: TeensRealmViewProps) {
+  const PUBLISHING_BOOKS = useCatalogBooks()
+  const publishedBooks = useCatalogBooks()
   const isRtl = locale === "ar"
-  const { playTrack, currentTrack, isPlaying, togglePlayPause } = useAudio()
-  const [inLibrary, setInLibrary] = useState(false)
+  const router = useRouter()
+  const {state,updateEntry} = useReadingState()
+  const featured=PUBLISHING_BOOKS.find(book=>book.id==="book_teens_01")!
+  const progress=state.teens.entries.book_teens_01?Math.round(((state.teens.entries.book_teens_01.furthest||0)+1)/(featured?.sampleText.length || 1)*100):0
+  const completed=Object.values(state.teens.entries).filter(entry=>entry.completed).length
+  const reading=Object.values(state.teens.entries).filter(entry=>entry.page!==undefined).length
+  const inLibrary = !!state.teens.entries.book_teens_01?.saved
+  const setInLibrary = (saved:boolean) => updateEntry("teens","book_teens_01",{saved})
+  const handlePlayTeensIntro = () => router.push(`/${locale}/realms/teens/player/book_teens_01`)
 
-  const handlePlayTeensIntro = () => {
-    if (currentTrack?.id === "teens_glass_orbit" && isPlaying) {
-      togglePlayPause()
-      return
-    }
-
-    playTrack({
-      id: "teens_glass_orbit",
-      title: isRtl ? "«مدار الزجاج» — المقدمة الصوتية" : "Glass Orbit — Audio Prologue",
-      author: isRtl ? "د. سليم العمري" : "Dr. Salim Al-Omari",
-      narrator: isRtl ? "تسجيل فصيح ونقي" : "Studio Audio",
-      coverUrl:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCCzWZmdAsxHu_XMCuHGb1A6eHkLTKNxXnW5NJrlt7AlqDemw-shiYKS-852XpBtT_50ElkJcb94LBGe8FLWecnWyh-nIjaLjmxLeTh7hW0bVxGNUVMMVhjq8B2DWSa0sMUPEZWS7UXlqSRroV7H46MCGZWH4P4x_mw8QBPGy50Si2edj6ma8ZexdNO1lRp_TLqJv02kDdibOZaiMDBb8SUYmhGVFzDm0tO7Kd12E1pPByyOVvXflPe",
-      audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3",
-    })
-  }
-
+  if (!publishedBooks.some(book=>book.id==="book_teens_01")) return <PublishedShelf realm="teens" locale={locale}/>
   return (
     <div className="w-full min-h-screen bg-[#FAF8FF] text-[#101542] py-6 sm:py-10 relative overflow-hidden font-sans">
       {/* Cosmic Indigo & Lavender background ambient glows */}
@@ -48,7 +46,7 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
             </span>
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-900 font-semibold border border-indigo-100 mr-2">
               <span className="material-symbols-outlined text-[14px] text-indigo-600">lock</span>
-              <span>{isRtl ? "المطالعة الخاصة لليان • ملف محمي" : "Layan's Private Reader • Protected"}</span>
+              <span>{isRtl ? "مطالعتك الخاصة على هذا الجهاز" : "Your private reading on this device"}</span>
             </span>
           </div>
 
@@ -86,11 +84,11 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
                 </div>
                 <h2 className="text-base sm:text-lg font-bold text-slate-900 truncate mt-0.5">
                   {isRtl
-                    ? "«مدار الزجاج» — الفصل الثاني (الإحداثيات المفقودة)"
-                    : "“Glass Orbit” — Chapter 2: The Missing Coordinates"}
+                    ? "مدار الزجاج — النص المتاح للقراءة"
+                    : "Glass Orbit — available reading text"}
                 </h2>
                 <p className="text-xs text-slate-500">
-                  {isRtl ? "تقدم ٢٥٪ • صفحة ٨ من ٣٢ صفحة" : "25% progress • Page 8 of 32"}
+                  {isRtl ? `تقدم ${progress}% في النص المتاح` : `${progress}% of available text`}
                 </p>
               </div>
             </div>
@@ -99,9 +97,9 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
             <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end shrink-0">
               <div className="flex items-center gap-2 w-32 sm:w-40">
                 <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
-                  <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: "25%" }} />
+                  <div className="bg-indigo-600 h-full rounded-full transition-all duration-500" style={{ width: `${progress}%` }} />
                 </div>
-                <span className="text-xs font-mono font-bold text-slate-600">25%</span>
+                <span className="text-xs font-mono font-bold text-slate-600">{progress}%</span>
               </div>
               <Link
                 href={`/${locale}/reader/book_teens_01`}
@@ -148,7 +146,7 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
                 <div className="flex flex-wrap items-center gap-y-2 gap-x-4 py-1 text-slate-600 text-xs">
                   <span className="inline-flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px] text-indigo-600">menu_book</span>
-                    <span>{isRtl ? "٨ فصول (مكتملة)" : "8 Chapters (Complete)"}</span>
+                    <span>{isRtl ? `${featured.sampleText.length} مقاطع متاحة` : `${featured.sampleText.length} sections available`}</span>
                   </span>
                   <span className="text-slate-300">•</span>
                   <span className="inline-flex items-center gap-1">
@@ -227,7 +225,7 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
                   className="inline-flex items-center justify-center gap-1.5 h-12 px-4 rounded-xl hover:bg-indigo-50 text-indigo-700 font-bold text-xs transition-colors"
                 >
                   <span className="material-symbols-outlined text-[20px]">
-                    {currentTrack?.id === "teens_glass_orbit" && isPlaying ? "pause_circle" : "play_circle"}
+                    {false ? "pause_circle" : "play_circle"}
                   </span>
                   <span>{isRtl ? "استماع للمقدمة الصوتية" : "Audio Intro"}</span>
                 </button>
@@ -538,10 +536,10 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
             <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
               {isRtl ? (
                 <>
-                  أتممت قراءة <strong className="text-indigo-900 font-bold">١٤٢ صفحة</strong> عبر ٣ مؤلفات. معدل التركيز والتعمق اللغوي يسجل تصاعداً ثابتاً في بيئة خالية من المقاطعات والمنبهات الخارجية.
+                  بدأت <strong className="text-indigo-900 font-bold">{reading} أعمال</strong>، وأتممت {completed} نصوص في هذه المنصة على هذا الجهاز.
                 </>
               ) : (
-                "You have completed 142 pages across 3 literary works. Your focus and linguistic depth demonstrate steady progress in a distraction-free sanctuary."
+                `You started ${reading} stories and completed ${completed} texts in this realm on this device.`
               )}
             </p>
           </div>
@@ -565,15 +563,15 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                     fill="none"
                     stroke="currentColor"
-                    strokeDasharray="78, 100"
+                    strokeDasharray={`${progress}, 100`}
                     strokeLinecap="round"
                     strokeWidth="3.5"
                   />
                 </svg>
-                <span className="absolute text-lg font-bold text-slate-900 font-mono">78%</span>
+                <span className="absolute text-lg font-bold text-slate-900 font-mono">{progress}%</span>
               </div>
               <span className="text-xs font-semibold text-slate-500">
-                {isRtl ? "الهدف الشهري" : "Monthly Goal"}
+                {isRtl ? "تقدم القراءة" : "Reading progress"}
               </span>
             </div>
 
@@ -616,6 +614,7 @@ export function TeensRealmView({ locale }: TeensRealmViewProps) {
           </div>
         </section>
       </div>
+      <PublishedShelf realm="teens" locale={locale}/>
     </div>
   )
 }

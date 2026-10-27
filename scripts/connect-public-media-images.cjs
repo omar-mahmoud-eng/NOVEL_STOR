@@ -1,0 +1,2 @@
+const fs=require('node:fs'),path=require('node:path'),base=path.resolve(__dirname,'../apps/storefront/src');
+function walk(directory){for(const entry of fs.readdirSync(directory,{withFileTypes:true})){const file=path.join(directory,entry.name);if(entry.isDirectory())walk(file);else if(file.endsWith('.tsx')&&!file.endsWith('media-image.tsx')){const original=fs.readFileSync(file,'utf8'),next=original.replaceAll('import Image from "next/image"','import Image from "@/components/ui/media-image"');if(next!==original)fs.writeFileSync(file,next)}}}walk(base);
